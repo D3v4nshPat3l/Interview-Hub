@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-label="Interview-Hub terminal war room">
+
+  <defs>
+    <linearGradient id="redGlow" x1="0" x2="1">
+      <stop offset="0%" stop-color="#ff1a1a"/>
+      <stop offset="50%" stop-color="#b30000"/>
+      <stop offset="100%" stop-color="#ff3333"/>
+    </linearGradient>
+    <linearGradient id="darkPanel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0d10"/>
+      <stop offset="100%" stop-color="#050505"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="1.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#191d22" stroke-width="1"/>
+    </pattern>
+    <pattern id="microGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+      <path d="M10 0H0V10" fill="none" stroke="#111418" stroke-width="0.7"/>
+    </pattern>
+    <style>
+      .bg { fill:#050505; }
+      .grid { fill:url(#grid); opacity:.65; }
+      .micro { fill:url(#microGrid); opacity:.5; }
+      .red { fill:#e50914; }
+      .redStroke { stroke:#e50914; }
+      .white { fill:#f2f2f2; }
+      .muted { fill:#a7adb5; }
+      .dim { fill:#575e66; }
+      .panel { fill:url(#darkPanel); stroke:#3a3f46; stroke-width:2; }
+      .panelRed { fill:#070707; stroke:#e50914; stroke-width:2; }
+      .thin { stroke-width:1; }
+      .mid { stroke-width:2; }
+      .thick { stroke-width:4; }
+      .mono { font-family:'Courier New', monospace; }
+      .sans { font-family:Arial, Helvetica, sans-serif; }
+      .title { font-family:Arial Black, Impact, sans-serif; font-weight:900; letter-spacing:2px; }
+      .subtitle { font-family:'Courier New', monospace; letter-spacing:5px; }
+      .small { font-size:18px; }
+      .tiny { font-size:13px; }
+      .label { font-size:22px; letter-spacing:2px; }
+      .noFill { fill:none; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1600" height="900"/>
+  <rect class="grid" width="1600" height="900"/>
+  <rect class="micro" width="1600" height="900"/>
+
+  <!-- outer HUD frame -->
+  <path d="M30 30H360M430 30H760M840 30H1170M1240 30H1570L1585 45V180M1585 720V855L1570 870H1240M1170 870H840M760 870H430M360 870H30L15 855V720M15 180V45Z"
+        fill="none" stroke="#e50914" stroke-width="2" opacity=".9"/>
+  <path d="M70 72H250M1350 72H1530M70 828H330M1270 828H1530" fill="none" stroke="#e50914" stroke-width="3" opacity=".7"/>
+
+  <!-- title -->
+  <text x="800" y="170" text-anchor="middle" class="title white" font-size="88">INTERVIEW-<tspan fill="#e50914">HUB</tspan></text>
+  <text x="800" y="230" text-anchor="middle" class="subtitle white" font-size="31">TRAIN. HUNT. <tspan fill="#e50914">DEFEND.</tspan></text>
+  <path d="M560 245H1040L1075 210M1040 175H560L525 210Z" fill="none" stroke="#e50914" stroke-width="2" opacity=".8"/>
+
+  <!-- central map lines -->
+  <g opacity=".55">
+    <path d="M220 385 C420 260, 620 360, 800 310 C1000 250, 1180 370, 1390 290" fill="none" stroke="#e50914" stroke-width="2"/>
+    <path d="M300 520 C490 360, 700 500, 900 400 C1050 325, 1190 450, 1370 390" fill="none" stroke="#e50914" stroke-width="1.5"/>
+    <path d="M180 455 L420 370 L650 410 L850 315 L1110 390 L1410 330" fill="none" stroke="#5a0b0b" stroke-width="2"/>
+    <circle cx="800" cy="315" r="54" fill="none" stroke="#e50914" stroke-width="2"/>
+    <circle cx="800" cy="315" r="20" fill="none" stroke="#e50914" stroke-width="2"/>
+    <line x1="800" y1="245" x2="800" y2="385" stroke="#e50914" stroke-width="2"/>
+    <line x1="730" y1="315" x2="870" y2="315" stroke="#e50914" stroke-width="2"/>
+  </g>
+
+  <!-- left terminal -->
+  <path class="panel" d="M35 75H350L365 90V355L350 370H35Z"/>
+  <text x="55" y="110" class="mono red" font-size="17">TERMINAL _</text>
+  <text x="55" y="150" class="mono white" font-size="15">root@interview-hub:~# whoami</text>
+  <text x="55" y="178" class="mono muted" font-size="15">cyber_analyst</text>
+  <text x="55" y="223" class="mono white" font-size="15">root@interview-hub:~# mission --active</text>
+  <text x="55" y="251" class="mono red" font-size="15">MISSION: PREPARE. HUNT. DEFEND.</text>
+  <text x="55" y="294" class="mono white" font-size="15">[+] Recon      : ENABLED</text>
+  <text x="55" y="320" class="mono white" font-size="15">[+] Network    : MONITORING</text>
+  <text x="55" y="346" class="mono white" font-size="15">root@interview-hub:~# _</text>
+
+  <!-- right threat panel -->
+  <path class="panel" d="M1260 75H1545L1570 100V405L1545 430H1260Z"/>
+  <text x="1295" y="118" class="mono red" font-size="18">THREAT LEVEL</text>
+  <text x="1295" y="175" class="title red" font-size="42">CRITICAL</text>
+  <g transform="translate(1295,198)">
+    <rect width="23" height="20" fill="#e50914"/><rect x="30" width="23" height="20" fill="#e50914"/><rect x="60" width="23" height="20" fill="#e50914"/>
+    <rect x="90" width="23" height="20" fill="#e50914"/><rect x="120" width="23" height="20" fill="#e50914"/><rect x="150" width="23" height="20" fill="#e50914"/>
+    <rect x="180" width="23" height="20" fill="#e50914"/><rect x="210" width="23" height="20" fill="#333"/>
+  </g>
+  <g opacity=".75">
+    <ellipse cx="1410" cy="282" rx="115" ry="42" fill="none" stroke="#e50914"/>
+    <path d="M1305 285 C1350 240, 1450 240, 1512 282 C1465 323, 1360 321, 1305 285Z" fill="#231010" stroke="#6f0a0a"/>
+    <circle cx="1365" cy="272" r="5" class="red"/><circle cx="1445" cy="286" r="5" class="red"/><circle cx="1480" cy="262" r="4" class="red"/>
+  </g>
+  <text x="1295" y="360" class="mono white" font-size="16">▶ BRUTE_FORCE    HIGH</text>
+  <text x="1295" y="388" class="mono white" font-size="16">▶ DATA_EXFIL     <tspan fill="#e50914">CRITICAL</tspan></text>
+
+  <!-- packet trace -->
+  <path class="panel" d="M35 440H390V650H35Z"/>
+  <text x="55" y="475" class="mono red" font-size="18">PACKET TRACE</text>
+  <text x="55" y="510" class="mono muted" font-size="13">TIME     SRC          DST          PROTO  INFO</text>
+  <text x="55" y="540" class="mono white" font-size="14">10:21:10 10.0.0.5     192.168.1.10 TCP    SYN</text>
+  <text x="55" y="568" class="mono white" font-size="14">10:21:11 192.168.1.10 10.0.0.5     TCP    SYN,ACK</text>
+  <text x="55" y="596" class="mono red" font-size="14">10:21:12 10.0.0.5     192.168.1.10 HTTP   GET /</text>
+  <text x="55" y="624" class="mono white" font-size="14">10:21:12 192.168.1.10 10.0.0.5     HTTP   200 OK</text>
+
+  <!-- right code panel -->
+  <path class="panel" d="M1210 475H1565V735H1210Z"/>
+  <text x="1235" y="510" class="mono red" font-size="18">EXPLOIT ANALYZER</text>
+  <text x="1235" y="555" class="mono white" font-size="15"><tspan fill="#e50914">def</tspan> enumerate(target):</text>
+  <text x="1260" y="583" class="mono muted" font-size="15">services = scan(target)</text>
+  <text x="1260" y="611" class="mono muted" font-size="15">vulns = []</text>
+  <text x="1260" y="639" class="mono white" font-size="15"><tspan fill="#e50914">for</tspan> svc <tspan fill="#e50914">in</tspan> services:</text>
+  <text x="1288" y="667" class="mono white" font-size="15"><tspan fill="#e50914">if</tspan> is_vulnerable(svc):</text>
+  <text x="1315" y="695" class="mono muted" font-size="15">vulns.append(svc)</text>
+  <text x="1235" y="725" class="mono dim" font-size="14"># Stay sharp. Stay ready.</text>
+
+  <!-- central workstation -->
+  <g transform="translate(0,0)">
+    <rect x="555" y="455" width="500" height="215" rx="14" fill="#080808" stroke="#e50914" stroke-width="3"/>
+    <rect x="585" y="485" width="440" height="145" fill="#0b0d10" stroke="#3a3f46"/>
+    <path d="M610 540H780M610 565H720M610 590H820M860 520L990 610" stroke="#e50914" stroke-width="2" opacity=".8"/>
+    <circle cx="930" cy="565" r="55" fill="none" stroke="#e50914" stroke-width="2"/>
+    <circle cx="930" cy="565" r="22" fill="none" stroke="#e50914" stroke-width="2"/>
+    <rect x="430" y="500" width="115" height="140" rx="10" fill="#080808" stroke="#333"/>
+    <rect x="1070" y="500" width="115" height="140" rx="10" fill="#080808" stroke="#333"/>
+    <path d="M470 545H520M470 580H535M1090 545H1160M1090 580H1140" stroke="#e50914" stroke-width="2"/>
+    <!-- person silhouette -->
+    <path d="M720 785 C700 705,705 625,755 590 C795 562,850 562,890 590 C940 625,945 705,925 785Z" fill="#08090a" stroke="#2a2d31" stroke-width="3"/>
+    <circle cx="805" cy="570" r="68" fill="#08090a" stroke="#2a2d31" stroke-width="3"/>
+    <path d="M720 650 C745 690,865 690,895 650 L915 810H700Z" fill="#0a0a0b" stroke="#222"/>
+    <text x="805" y="705" text-anchor="middle" class="mono dim" font-size="19">FOCUS</text>
+    <text x="805" y="735" text-anchor="middle" class="mono dim" font-size="19">ADAPT</text>
+    <text x="805" y="765" text-anchor="middle" class="mono dim" font-size="19">OVERCOME</text>
+    <text x="805" y="810" text-anchor="middle" class="mono red" font-size="28">▣</text>
+  </g>
+
+  <!-- bottom nav -->
+  <path d="M90 825H340L390 780H620L675 825H925L980 780H1215L1265 825H1510" fill="none" stroke="#e50914" stroke-width="2"/>
+  <text x="160" y="825" class="mono muted" font-size="24">⌖ RECON</text>
+  <text x="455" y="825" class="mono muted" font-size="24">⌕ ANALYZE</text>
+  <text x="765" y="825" class="mono muted" font-size="24">⌁ EXPLOIT</text>
+  <text x="1085" y="825" class="mono muted" font-size="24">↗ ESCALATE</text>
+  <text x="1370" y="825" class="mono muted" font-size="24">⬡ DEFEND</text>
+</svg>

@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="420" viewBox="0 0 1600 420" role="img" aria-label="Cyber Interview Ripper banner">
+
+  <defs>
+    <linearGradient id="redGlow" x1="0" x2="1">
+      <stop offset="0%" stop-color="#ff1a1a"/>
+      <stop offset="50%" stop-color="#b30000"/>
+      <stop offset="100%" stop-color="#ff3333"/>
+    </linearGradient>
+    <linearGradient id="darkPanel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0d10"/>
+      <stop offset="100%" stop-color="#050505"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="1.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#191d22" stroke-width="1"/>
+    </pattern>
+    <pattern id="microGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+      <path d="M10 0H0V10" fill="none" stroke="#111418" stroke-width="0.7"/>
+    </pattern>
+    <style>
+      .bg { fill:#050505; }
+      .grid { fill:url(#grid); opacity:.65; }
+      .micro { fill:url(#microGrid); opacity:.5; }
+      .red { fill:#e50914; }
+      .redStroke { stroke:#e50914; }
+      .white { fill:#f2f2f2; }
+      .muted { fill:#a7adb5; }
+      .dim { fill:#575e66; }
+      .panel { fill:url(#darkPanel); stroke:#3a3f46; stroke-width:2; }
+      .panelRed { fill:#070707; stroke:#e50914; stroke-width:2; }
+      .thin { stroke-width:1; }
+      .mid { stroke-width:2; }
+      .thick { stroke-width:4; }
+      .mono { font-family:'Courier New', monospace; }
+      .sans { font-family:Arial, Helvetica, sans-serif; }
+      .title { font-family:Arial Black, Impact, sans-serif; font-weight:900; letter-spacing:2px; }
+      .subtitle { font-family:'Courier New', monospace; letter-spacing:5px; }
+      .small { font-size:18px; }
+      .tiny { font-size:13px; }
+      .label { font-size:22px; letter-spacing:2px; }
+      .noFill { fill:none; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1600" height="420"/>
+  <rect class="grid" width="1600" height="420"/>
+  <path d="M30 30H1570L1588 48V372L1570 390H30L12 372V48Z" fill="none" stroke="#e50914" stroke-width="3"/>
+  <path d="M70 72H310M1290 72H1530M70 348H360M1240 348H1530" fill="none" stroke="#e50914" stroke-width="3" opacity=".8"/>
+  <circle cx="800" cy="74" r="28" fill="none" stroke="#e50914" stroke-width="3"/>
+  <circle cx="800" cy="74" r="8" class="red"/>
+  <line x1="800" y1="32" x2="800" y2="116" stroke="#e50914" stroke-width="2"/>
+  <line x1="758" y1="74" x2="842" y2="74" stroke="#e50914" stroke-width="2"/>
+
+  <text x="800" y="185" text-anchor="middle" class="title white" font-size="94">CYBER INTERVIEW <tspan fill="#e50914">RIPPER</tspan></text>
+  <text x="800" y="250" text-anchor="middle" class="subtitle white" font-size="28">STRUCTURED. PRACTICAL. RELENTLESS.</text>
+  <path d="M465 285H1135L1170 320H430Z" fill="#090909" stroke="#e50914" stroke-width="2"/>
+  <text x="800" y="330" text-anchor="middle" class="mono white" font-size="24">NETWORKING • LINUX • WEB • SOC • RED TEAM • CLOUD • DFIR • GRC</text>
+
+  <g opacity=".6">
+    <path d="M140 250 C360 120,580 260,800 185 C1020 110,1235 250,1460 155" fill="none" stroke="#e50914" stroke-width="2"/>
+    <path d="M180 315 C420 230,620 330,790 250 C980 165,1230 330,1425 245" fill="none" stroke="#5a0b0b" stroke-width="2"/>
+    <circle cx="250" cy="205" r="6" class="red"/><circle cx="585" cy="260" r="6" class="red"/><circle cx="970" cy="190" r="6" class="red"/><circle cx="1300" cy="245" r="6" class="red"/>
+  </g>
+</svg>

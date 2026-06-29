@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-label="Road to cyber dominance roadmap">
+
+  <defs>
+    <linearGradient id="redGlow" x1="0" x2="1">
+      <stop offset="0%" stop-color="#ff1a1a"/>
+      <stop offset="50%" stop-color="#b30000"/>
+      <stop offset="100%" stop-color="#ff3333"/>
+    </linearGradient>
+    <linearGradient id="darkPanel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0d10"/>
+      <stop offset="100%" stop-color="#050505"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="1.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#191d22" stroke-width="1"/>
+    </pattern>
+    <pattern id="microGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+      <path d="M10 0H0V10" fill="none" stroke="#111418" stroke-width="0.7"/>
+    </pattern>
+    <style>
+      .bg { fill:#050505; }
+      .grid { fill:url(#grid); opacity:.65; }
+      .micro { fill:url(#microGrid); opacity:.5; }
+      .red { fill:#e50914; }
+      .redStroke { stroke:#e50914; }
+      .white { fill:#f2f2f2; }
+      .muted { fill:#a7adb5; }
+      .dim { fill:#575e66; }
+      .panel { fill:url(#darkPanel); stroke:#3a3f46; stroke-width:2; }
+      .panelRed { fill:#070707; stroke:#e50914; stroke-width:2; }
+      .thin { stroke-width:1; }
+      .mid { stroke-width:2; }
+      .thick { stroke-width:4; }
+      .mono { font-family:'Courier New', monospace; }
+      .sans { font-family:Arial, Helvetica, sans-serif; }
+      .title { font-family:Arial Black, Impact, sans-serif; font-weight:900; letter-spacing:2px; }
+      .subtitle { font-family:'Courier New', monospace; letter-spacing:5px; }
+      .small { font-size:18px; }
+      .tiny { font-size:13px; }
+      .label { font-size:22px; letter-spacing:2px; }
+      .noFill { fill:none; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1600" height="900"/>
+  <rect class="grid" width="1600" height="900"/>
+  <path d="M30 30H1570L1585 45V855L1570 870H30L15 855V45Z" fill="none" stroke="#e50914" stroke-width="2"/>
+  <path d="M130 210 C390 100,620 170,800 130 C1020 80,1210 175,1465 120" fill="none" stroke="#3a0a0a" stroke-width="2"/>
+  <text x="800" y="112" text-anchor="middle" class="title white" font-size="52">ROAD TO</text>
+  <text x="800" y="200" text-anchor="middle" class="title white" font-size="88">CYBER <tspan fill="#e50914">DOMINANCE</tspan></text>
+  <text x="800" y="255" text-anchor="middle" class="subtitle white" font-size="24">LEARN DEEPLY. EXPLAIN CLEARLY. PRACTICE <tspan fill="#e50914">BRUTALLY.</tspan></text>
+
+  <!-- connective arrows -->
+  <g filter="url(#softGlow)">
+    <path d="M300 505H400" stroke="#e50914" stroke-width="6"/><path d="M400 505L375 485V525Z" fill="#e50914"/>
+    <path d="M585 505H685" stroke="#e50914" stroke-width="6"/><path d="M685 505L660 485V525Z" fill="#e50914"/>
+    <path d="M870 505H970" stroke="#e50914" stroke-width="6"/><path d="M970 505L945 485V525Z" fill="#e50914"/>
+    <path d="M1155 505H1255" stroke="#e50914" stroke-width="6"/><path d="M1255 505L1230 485V525Z" fill="#e50914"/>
+  </g>
+
+  <!-- stage card template repeated -->
+  <g transform="translate(80,310)">
+    <path class="panelRed" d="M25 45H230L260 75V395L230 425H25L0 395V75Z"/>
+    <polygon points="100,0 150,0 175,25 150,50 100,50 75,25" fill="#151515" stroke="#e50914" stroke-width="3"/>
+    <text x="125" y="35" text-anchor="middle" class="title white" font-size="34">1</text>
+    <text x="130" y="105" text-anchor="middle" class="mono white" font-size="24">FOUNDATIONS</text>
+    <path d="M85 145H175L205 180V245L175 280H85L55 245V180Z" fill="#090909" stroke="#e50914" stroke-width="2"/>
+    <path d="M85 230H175M85 210H175M85 190H175M95 170V250M120 170V250M145 170V250M170 170V250" stroke="#f2f2f2" stroke-width="3"/>
+    <rect x="30" y="300" width="200" height="36" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="324" class="mono white" font-size="18">NETWORKING</text>
+    <rect x="30" y="345" width="200" height="36" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="369" class="mono white" font-size="18">LINUX</text>
+    <rect x="30" y="390" width="200" height="36" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="414" class="mono white" font-size="18">WINDOWS</text>
+  </g>
+
+  <g transform="translate(365,310)">
+    <path class="panelRed" d="M25 45H230L260 75V395L230 425H25L0 395V75Z"/>
+    <polygon points="100,0 150,0 175,25 150,50 100,50 75,25" fill="#151515" stroke="#e50914" stroke-width="3"/>
+    <text x="125" y="35" text-anchor="middle" class="title white" font-size="34">2</text>
+    <text x="130" y="95" text-anchor="middle" class="mono white" font-size="22">SECURITY</text>
+    <text x="130" y="125" text-anchor="middle" class="mono white" font-size="22">FUNDAMENTALS</text>
+    <path d="M130 150L200 185V245C200 270 165 292 130 305C95 292 60 270 60 245V185Z" fill="#090909" stroke="#f2f2f2" stroke-width="3"/>
+    <rect x="112" y="210" width="38" height="42" rx="4" fill="#e50914"/><path d="M105 212C105 185 155 185 155 212" fill="none" stroke="#e50914" stroke-width="9"/>
+    <rect x="30" y="330" width="200" height="36" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="354" class="mono white" font-size="18">IAM</text>
+    <rect x="30" y="375" width="200" height="36" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="399" class="mono white" font-size="18">LOGS</text>
+    <rect x="30" y="420" width="200" height="36" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="444" class="mono white" font-size="18">RISK</text>
+  </g>
+
+  <g transform="translate(650,310)">
+    <path class="panelRed" d="M25 45H230L260 75V395L230 425H25L0 395V75Z"/>
+    <polygon points="100,0 150,0 175,25 150,50 100,50 75,25" fill="#151515" stroke="#e50914" stroke-width="3"/>
+    <text x="125" y="35" text-anchor="middle" class="title white" font-size="34">3</text>
+    <text x="130" y="95" text-anchor="middle" class="mono white" font-size="22">SOC /</text>
+    <text x="130" y="125" text-anchor="middle" class="mono white" font-size="22">BLUE TEAM</text>
+    <rect x="62" y="165" width="130" height="80" rx="6" fill="#090909" stroke="#f2f2f2" stroke-width="3"/>
+    <path d="M80 225V195M105 225V185M130 225V205M155 225V175" stroke="#e50914" stroke-width="5"/>
+    <circle cx="178" cy="215" r="32" fill="none" stroke="#e50914" stroke-width="4"/><line x1="202" y1="238" x2="228" y2="264" stroke="#e50914" stroke-width="6"/>
+    <rect x="30" y="330" width="200" height="36" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="354" class="mono white" font-size="18">SIEM</text>
+    <rect x="30" y="375" width="200" height="36" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="399" class="mono white" font-size="18">IR</text>
+    <rect x="30" y="420" width="200" height="36" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="444" class="mono white" font-size="18">THREAT HUNTING</text>
+  </g>
+
+  <g transform="translate(935,310)">
+    <path class="panelRed" d="M25 45H230L260 75V395L230 425H25L0 395V75Z"/>
+    <polygon points="100,0 150,0 175,25 150,50 100,50 75,25" fill="#151515" stroke="#e50914" stroke-width="3"/>
+    <text x="125" y="35" text-anchor="middle" class="title white" font-size="34">4</text>
+    <text x="130" y="95" text-anchor="middle" class="mono white" font-size="22">RED TEAM /</text>
+    <text x="130" y="125" text-anchor="middle" class="mono white" font-size="22">PENTEST</text>
+    <path d="M130 155C90 170 72 220 72 280H188C188 220 170 170 130 155Z" fill="#090909" stroke="#f2f2f2" stroke-width="3"/>
+    <path d="M90 250C115 220 145 220 170 250" fill="#0b0b0b"/>
+    <circle cx="112" cy="237" r="6" fill="#e50914"/><circle cx="148" cy="237" r="6" fill="#e50914"/>
+    <rect x="30" y="330" width="200" height="36" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="354" class="mono white" font-size="18">WEB</text>
+    <rect x="30" y="375" width="200" height="36" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="399" class="mono white" font-size="18">AD</text>
+    <rect x="30" y="420" width="200" height="36" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="444" class="mono white" font-size="18">PRIVESC</text>
+  </g>
+
+  <g transform="translate(1220,310)">
+    <path class="panelRed" d="M25 45H230L260 75V395L230 425H25L0 395V75Z"/>
+    <polygon points="100,0 150,0 175,25 150,50 100,50 75,25" fill="#151515" stroke="#e50914" stroke-width="3"/>
+    <text x="125" y="35" text-anchor="middle" class="title white" font-size="34">5</text>
+    <text x="130" y="95" text-anchor="middle" class="mono white" font-size="22">CLOUD /</text>
+    <text x="130" y="125" text-anchor="middle" class="mono white" font-size="22">ADVANCED</text>
+    <path d="M80 235C55 235 45 215 58 195C65 185 78 180 92 184C102 158 138 151 157 174C179 170 205 187 205 213C205 230 192 242 175 242H80Z" fill="#090909" stroke="#f2f2f2" stroke-width="3"/>
+    <path d="M132 180L110 225H137L122 270L165 210H138Z" fill="#e50914"/>
+    <rect x="30" y="315" width="200" height="34" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="338" class="mono white" font-size="17">AWS</text>
+    <rect x="30" y="357" width="200" height="34" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="380" class="mono white" font-size="17">AZURE</text>
+    <rect x="30" y="399" width="200" height="34" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="422" class="mono white" font-size="17">DFIR</text>
+    <rect x="30" y="441" width="200" height="34" rx="6" fill="#0e0e0e" stroke="#3a3f46"/><text x="70" y="464" class="mono white" font-size="17">MALWARE</text>
+  </g>
+
+  <!-- bottom rules -->
+  <path class="panel" d="M70 790H1530L1560 820L1530 850H70L40 820Z"/>
+  <text x="190" y="826" class="mono white" font-size="20">▰ LEARN DEEPLY</text>
+  <text x="555" y="826" class="mono white" font-size="20">▱ EXPLAIN CLEARLY</text>
+  <text x="935" y="826" class="mono white" font-size="20">◎ PRACTICE BRUTALLY</text>
+  <text x="1285" y="826" class="mono white" font-size="20">↗ NEVER STOP</text>
+</svg>

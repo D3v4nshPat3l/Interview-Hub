@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-label="Brutal interview mindset">
+
+  <defs>
+    <linearGradient id="redGlow" x1="0" x2="1">
+      <stop offset="0%" stop-color="#ff1a1a"/>
+      <stop offset="50%" stop-color="#b30000"/>
+      <stop offset="100%" stop-color="#ff3333"/>
+    </linearGradient>
+    <linearGradient id="darkPanel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0d10"/>
+      <stop offset="100%" stop-color="#050505"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="1.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#191d22" stroke-width="1"/>
+    </pattern>
+    <pattern id="microGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+      <path d="M10 0H0V10" fill="none" stroke="#111418" stroke-width="0.7"/>
+    </pattern>
+    <style>
+      .bg { fill:#050505; }
+      .grid { fill:url(#grid); opacity:.65; }
+      .micro { fill:url(#microGrid); opacity:.5; }
+      .red { fill:#e50914; }
+      .redStroke { stroke:#e50914; }
+      .white { fill:#f2f2f2; }
+      .muted { fill:#a7adb5; }
+      .dim { fill:#575e66; }
+      .panel { fill:url(#darkPanel); stroke:#3a3f46; stroke-width:2; }
+      .panelRed { fill:#070707; stroke:#e50914; stroke-width:2; }
+      .thin { stroke-width:1; }
+      .mid { stroke-width:2; }
+      .thick { stroke-width:4; }
+      .mono { font-family:'Courier New', monospace; }
+      .sans { font-family:Arial, Helvetica, sans-serif; }
+      .title { font-family:Arial Black, Impact, sans-serif; font-weight:900; letter-spacing:2px; }
+      .subtitle { font-family:'Courier New', monospace; letter-spacing:5px; }
+      .small { font-size:18px; }
+      .tiny { font-size:13px; }
+      .label { font-size:22px; letter-spacing:2px; }
+      .noFill { fill:none; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1600" height="900"/>
+  <rect class="grid" width="1600" height="900"/>
+  <path d="M30 30H1570L1585 45V855L1570 870H30L15 855V45Z" fill="none" stroke="#e50914" stroke-width="2"/>
+  <path d="M60 65H270M1330 65H1540M60 835H350M1250 835H1540" stroke="#e50914" stroke-width="3" fill="none"/>
+
+  <!-- title -->
+  <text x="800" y="155" text-anchor="middle" class="title red" font-size="108">BRUTAL</text>
+  <text x="800" y="265" text-anchor="middle" class="title white" font-size="105">INTERVIEW</text>
+  <text x="800" y="375" text-anchor="middle" class="title red" font-size="105">MINDSET</text>
+
+  <!-- terminal prompt -->
+  <path class="panel" d="M70 75H390L420 105V190H70Z"/>
+  <text x="95" y="115" class="mono white" font-size="16">root@interview-hub:~# mindset --activate</text>
+  <text x="95" y="150" class="mono red" font-size="16">STATUS: LOCKED_IN</text>
+  <text x="95" y="178" class="mono white" font-size="16">root@interview-hub:~# _</text>
+
+  <!-- side shield -->
+  <g transform="translate(95,300)">
+    <path d="M150 0L300 70V240C300 330 215 385 150 420C85 385 0 330 0 240V70Z" fill="#090909" stroke="#e50914" stroke-width="4"/>
+    <path d="M150 45L250 95V230C250 295 195 335 150 360C105 335 50 295 50 230V95Z" fill="none" stroke="#5a0b0b" stroke-width="2"/>
+    <circle cx="150" cy="200" r="75" fill="none" stroke="#e50914" stroke-width="3"/>
+    <circle cx="150" cy="200" r="38" fill="none" stroke="#e50914" stroke-width="2"/>
+    <circle cx="150" cy="200" r="8" class="red"/>
+    <line x1="150" y1="100" x2="150" y2="300" stroke="#e50914" stroke-width="3"/>
+    <line x1="50" y1="200" x2="250" y2="200" stroke="#e50914" stroke-width="3"/>
+  </g>
+
+  <!-- focus panel -->
+  <path class="panel" d="M1260 105H1530V205H1260Z"/>
+  <text x="1290" y="145" class="mono white" font-size="24">FOCUS</text>
+  <g transform="translate(1290,165)">
+    <rect width="20" height="22" fill="#e50914"/><rect x="28" width="20" height="22" fill="#e50914"/><rect x="56" width="20" height="22" fill="#e50914"/>
+    <rect x="84" width="20" height="22" fill="#e50914"/><rect x="112" width="20" height="22" fill="#e50914"/><rect x="140" width="20" height="22" fill="#e50914"/>
+    <rect x="168" width="20" height="22" fill="#333"/><rect x="196" width="20" height="22" fill="#222"/>
+  </g>
+
+  <path class="panel" d="M1260 255H1530V375H1260Z"/>
+  <text x="1290" y="295" class="mono white" font-size="20">MODE</text>
+  <text x="1290" y="330" class="mono red" font-size="19">INTERVIEW WAR-ROOM</text>
+  <text x="1290" y="360" class="mono white" font-size="17">▶ TRAIN. HUNT. DEFEND.</text>
+
+  <path class="panel" d="M1260 430H1530V580H1260Z"/>
+  <text x="1290" y="468" class="mono white" font-size="20">SYSTEM CHECK</text>
+  <text x="1290" y="505" class="mono white" font-size="17">✓ MINDSET       <tspan fill="#e50914">100%</tspan></text>
+  <text x="1290" y="535" class="mono white" font-size="17">✓ PREPARATION   <tspan fill="#e50914">100%</tspan></text>
+  <text x="1290" y="565" class="mono white" font-size="17">✓ EXECUTION     <tspan fill="#e50914">100%</tspan></text>
+
+  <!-- rules list -->
+  <g transform="translate(445,415)">
+    <path d="M0 0H690L730 35L690 70H0L-30 35Z" fill="#090909" stroke="#e50914" stroke-width="2"/>
+    <text x="25" y="45" class="title red" font-size="32">01</text><text x="115" y="45" class="mono white" font-size="34">UNDERSTAND, DON'T MEMORIZE.</text>
+    <path d="M0 85H690L730 120L690 155H0L-30 120Z" fill="#090909" stroke="#e50914" stroke-width="2"/>
+    <text x="25" y="130" class="title red" font-size="32">02</text><text x="115" y="130" class="mono white" font-size="34">SPEAK WITH CLARITY.</text>
+    <path d="M0 170H690L730 205L690 240H0L-30 205Z" fill="#090909" stroke="#e50914" stroke-width="2"/>
+    <text x="25" y="215" class="title red" font-size="32">03</text><text x="115" y="215" class="mono white" font-size="34">KNOW THE COMMAND.</text>
+    <path d="M0 255H690L730 290L690 325H0L-30 290Z" fill="#090909" stroke="#e50914" stroke-width="2"/>
+    <text x="25" y="300" class="title red" font-size="32">04</text><text x="115" y="300" class="mono white" font-size="34">EXPECT FOLLOW-UPS.</text>
+    <path d="M0 340H690L730 375L690 410H0L-30 375Z" fill="#090909" stroke="#e50914" stroke-width="2"/>
+    <text x="25" y="385" class="title red" font-size="32">05</text><text x="115" y="385" class="mono white" font-size="34">REVISE RELENTLESSLY.</text>
+    <path d="M0 425H690L730 460L690 495H0L-30 460Z" fill="#090909" stroke="#e50914" stroke-width="2"/>
+    <text x="25" y="470" class="title red" font-size="32">06</text><text x="115" y="470" class="mono white" font-size="34">STAY CONSISTENT.</text>
+  </g>
+
+  <!-- radar -->
+  <g transform="translate(1380,720)">
+    <circle r="100" fill="none" stroke="#e50914" stroke-width="2"/>
+    <circle r="70" fill="none" stroke="#e50914" stroke-width="1.5"/>
+    <circle r="40" fill="none" stroke="#e50914" stroke-width="1.5"/>
+    <line x1="-110" y1="0" x2="110" y2="0" stroke="#e50914" stroke-width="2"/>
+    <line x1="0" y1="-110" x2="0" y2="110" stroke="#e50914" stroke-width="2"/>
+    <circle cx="34" cy="-43" r="5" class="red"/><circle cx="-28" cy="55" r="4" class="red"/>
+  </g>
+
+  <!-- footer -->
+  <path d="M350 825H1250L1290 790H310Z" fill="#090909" stroke="#e50914" stroke-width="2"/>
+  <text x="800" y="817" text-anchor="middle" class="subtitle red" font-size="36">PRESSURE BUILDS PRECISION.</text>
+</svg>
