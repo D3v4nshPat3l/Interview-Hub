@@ -193,8 +193,8 @@ Interview-Hub
 
 | Category | Status | Target |
 |---|---:|---:|
-| Networking | In Progress | 300+ Questions |
-| Linux | Planned | 300+ Questions |
+| Networking | Available | 300+ Questions |
+| Linux | Available | 300+ Questions |
 | Windows | Planned | 300+ Questions |
 | Active Directory | Planned | 400+ Questions |
 | Web Security | Planned | 500+ Questions |
@@ -205,7 +205,7 @@ Interview-Hub
 | Splunk | Planned | 150+ Questions |
 | Microsoft Sentinel | Planned | 150+ Questions |
 | Incident Response | Planned | 300+ Questions |
-| Digital Forensics | Planned | 300+ Questions |
+| Digital Forensics | Available | 300+ Questions |
 | Threat Hunting | Planned | 250+ Questions |
 | Cloud Security | Planned | 400+ Questions |
 | AWS | Planned | 250+ Questions |
