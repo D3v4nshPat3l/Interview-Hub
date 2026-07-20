@@ -600,3 +600,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Kerberos preauthentication requires the client to prove knowledge of its key before the KDC issues a TGT, commonly by encrypting timestamp data. It prevents unauthenticated retrieval of material that can be tested offline for many accounts. Accounts configured with “Do not require Kerberos preauthentication” are vulnerable to AS-REP roasting because an attacker can request an AS response without first proving knowledge of the password. Exceptions should be rare, documented, monitored, and remediated. Event 4768 and related KDC events help investigate TGT requests.
 
+## 86. What is the difference between Kerberos and NTLM?
+
+**Level:** Beginner
+
+**Answer:** Kerberos is the preferred domain authentication protocol. It uses a KDC and tickets, supports mutual authentication, works with SPNs, and can support delegation. NTLM uses a challenge-response process and does not provide the same server-identity assurance. NTLM commonly appears when Kerberos prerequisites are not met, such as use of an IP address, missing or duplicate SPNs, workgroup access, legacy applications, or certain local-account scenarios. “Kerberos is secure and NTLM is insecure” is too simplistic; both require hardening, but NTLM has greater relay, downgrade, and credential-abuse exposure and should be audited and reduced.
+
+## 87. What is NTLM challenge-response authentication?
+
+**Level:** Intermediate
+
+**Answer:** In NTLM, the server sends a challenge and the client produces a response derived from the account secret and session data. The server or a domain controller validates the response without the plaintext password traversing the network. For domain accounts, the target may use Netlogon to ask a DC to validate the exchange. Captured Net-NTLM responses are not the same as the NT hash stored in AD, but they may be relayed or attacked offline under certain conditions. Protections include reducing NTLM, requiring signing or channel binding, Extended Protection, SMB signing, strong passwords, and eliminating coercion paths.
+
+## 88. Under what conditions does Windows fall back to NTLM?
+
+**Level:** Intermediate
+
+**Answer:** Fallback can occur when the client cannot identify a valid SPN, connects by IP address, accesses a system outside a Kerberos trust path, uses a local account, encounters a legacy protocol or application, or fails Kerberos negotiation. The Negotiate security package normally attempts Kerberos and then NTLM when appropriate. Fallback should be treated as a diagnostic signal rather than accepted blindly. Use service logs, `klist`, packet capture, SPN checks, and NTLM auditing to determine why Kerberos was not selected. Disabling NTLM before correcting dependencies can produce widespread outages.
+
+## 89. What is `KRB_AP_ERR_MODIFIED`?
+
+**Level:** Advanced
+
+**Answer:** This Kerberos error usually means the service receiving a ticket cannot decrypt it with the key it possesses. Common causes are a duplicate SPN on another account, an SPN registered on the wrong account, a service-account password mismatch, a stale machine account, load-balanced servers using inconsistent identities, or traffic reaching an unexpected host. Identify the requested SPN, the account that owns it, the account actually running the service, and whether all service instances share the intended key. Do not reset random passwords before collecting this information because that can hide the root cause.
+
+## 90. How do you troubleshoot duplicate SPNs?
+
+**Level:** Intermediate
+
+**Answer:** Determine the exact SPN requested by the client and search the forest with `setspn -Q <SPN>` or use `setspn -X` for duplicate detection. Confirm which identity runs the service, whether a computer account already has a host-based SPN, and whether DNS aliases or old service accounts introduced duplicates. Remove only the incorrect registration and add the correct one with `setspn -S`. Then purge or renew tickets and test from a clean session. In a cluster or farm, use a shared managed service account or properly designed service identity rather than registering the same SPN on unrelated accounts.
+
