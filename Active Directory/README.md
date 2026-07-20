@@ -283,3 +283,39 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** AdminSDHolder is a protected object in the System container whose security descriptor is used as a template for certain protected administrative accounts and groups. The SDProp process periodically applies protected ACL behavior, helping prevent delegated OU administrators from controlling highly privileged identities. Protected objects commonly have inheritance disabled and the `adminCount` attribute set. A user removed from a protected group may retain `adminCount=1` and a protected ACL until cleaned up, creating confusing delegation behavior. Security teams should monitor changes to the AdminSDHolder DACL because a malicious ACE can become a persistent forest-wide privilege mechanism for protected accounts.
 
+## 36. What is `SIDHistory`, and when is it used?
+
+**Level:** Advanced
+
+**Answer:** `SIDHistory` stores one or more previous SIDs on a migrated security principal so the new account can continue accessing resources whose ACLs still reference the old SID. It is commonly used during staged domain migrations. Because Windows includes valid SID history values in authorization decisions, unauthorized modification can provide powerful access. Migration tools and trusts must be configured carefully, privileged SID filtering must be understood, and the attribute should be audited. After resource ACLs have been translated and the rollback period has ended, unnecessary SID history should be removed through an approved process. Treat unexpected SID history on privileged or ordinary accounts as a security investigation lead.
+
+## 37. What is an accidental-deletion protection setting?
+
+**Level:** Beginner
+
+**Answer:** Protection from accidental deletion adds deny ACEs that prevent deletion of the object and, where appropriate, deletion of the child from its parent. It is useful for OUs and critical objects because bulk or mistaken deletions are a common operational failure. It is not a backup and does not stop an administrator who deliberately removes the protection or has sufficient control. Combine it with least privilege, change control, Recycle Bin, tested system-state backups, and monitoring of directory-service changes. During automation, scripts should handle this protection explicitly rather than disabling it across a broad scope.
+
+## 38. What is a contact object compared with a user object?
+
+**Level:** Beginner
+
+**Answer:** A contact represents a person or external recipient in the directory but is not a security principal and cannot sign in. It can hold names, email addresses, telephone numbers, and organizational data. A user object can be security-enabled, authenticate, receive group membership, and be assigned permissions. Mail-enabled users and contacts introduce messaging-specific distinctions, but the core AD point is that the existence of an addressable directory entry does not mean it has credentials or a SID. This distinction matters in provisioning, address-list design, and synchronization rules.
+
+## 39. What is the default Computers container, and why do organizations redirect new computer accounts?
+
+**Level:** Intermediate
+
+**Answer:** By default, many newly joined computer accounts are created in `CN=Computers`, which is a container rather than an OU. Traditional GPO links cannot be attached directly to that container, and delegation options are less flexible. Organizations often use `redircmp` or controlled join processes so new computer objects land in a staging OU where baseline policy, inventory, naming checks, and delegated workflows apply. A staging OU should not become a permanent dumping ground; automation should validate and move devices to their managed OUs after enrollment. The same principle applies to the default Users container with `redirusr`, although changes require planning for existing workflows.
+
+## 40. What is the machine-account quota?
+
+**Level:** Advanced
+
+**Answer:** The `ms-DS-MachineAccountQuota` domain attribute controls how many computer accounts an ordinary authenticated user may create in the domain through supported join behavior. Historically, the default is often 10. This can surprise administrators who assume only privileged staff can create machine accounts. In security-sensitive environments, organizations commonly set the quota to zero and delegate computer creation or join rights through controlled OUs and provisioning systems. Changing the quota does not remove previously created computers or fix excessive rights on existing objects. Monitor who creates computer accounts, their attributes, and subsequent delegation or SPN changes.
+
+---
+
+# Domain Controllers, Database, Global Catalog, and FSMO
+
+*Core DC services, directory storage, special roles, and operational placement.*
+
