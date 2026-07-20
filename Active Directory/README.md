@@ -1251,3 +1251,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Password spraying tests one or a small number of likely passwords across many accounts, often slowly enough to avoid per-account lockout thresholds. Traditional brute force tests many passwords against one account. Spraying frequently targets remote access, cloud sign-in, Kerberos, LDAP, SMB, or web authentication and may use valid usernames obtained from public or directory sources. Defenses include phishing-resistant MFA where supported, banned-password protection, strong password policy, elimination of shared and stale accounts, smart lockout, network restrictions, and detection based on one source or infrastructure pattern touching many accounts. Investigators should aggregate failures by source, password pattern where available, protocol, time window, and targeted population. Do not automatically lock every account during response; indiscriminate action can cause a second denial-of-service incident.
 
+## 191. How can Group Policy be abused by an attacker?
+
+**Level:** Advanced
+
+**Answer:** Anyone who can create, edit, link, or take ownership of a GPO, or modify its files in SYSVOL, may be able to execute scripts, change security settings, deploy scheduled tasks or software, weaken defenses, or grant local privilege on affected systems. The impact depends on the link location, security filtering, WMI filters, inheritance, and whether computer or user settings are controlled. Defenders should review GPO and OU ACLs, separate GPO creation from linking, protect SYSVOL, monitor directory and file changes, maintain version-controlled backups, and restrict privileged GPO management to hardened workstations. During response, compare the Group Policy Container and Template versions, inspect changed settings and files, identify affected scope, collect endpoint execution evidence, restore a known-good policy, and remove the underlying delegated right.
+
+## 192. How are AD ACLs abused for privilege escalation?
+
+**Level:** Advanced
+
+**Answer:** An attacker may not need group membership if an ACL grants control over a user, group, computer, GPO, OU, domain object, certificate template, or other principal. Rights such as GenericAll, GenericWrite, WriteDACL, WriteOwner, password reset, group membership modification, SPN modification, delegation configuration, or replication rights can form privilege paths. Effective access may come through nested groups and inheritance, making it easy to miss in GUI reviews. Defenders should inventory sensitive-object ACLs, compare them with an approved baseline, remove orphaned SIDs and broad inherited rights, and monitor ownership and DACL changes. In an incident, identify the exact ACE, who added it, when it replicated, what actions it enabled, and whether the attacker used those capabilities before removing the ACE.
+
+## 193. What is AdminSDHolder-based persistence?
+
+**Level:** Advanced
+
+**Answer:** AdminSDHolder is a protected directory object whose security descriptor is periodically applied by the Security Descriptor Propagator to accounts and groups considered protected. An attacker with sufficient rights can add a malicious ACE to AdminSDHolder and have that permission propagated to many privileged objects. Another common issue is that accounts formerly in protected groups may retain `adminCount=1` and disabled inheritance, causing delegated administration to fail and leaving unexpected permissions. Monitor AdminSDHolder's DACL and owner, privileged-group changes, `adminCount`, and inheritance state. Remediation requires removing unauthorized rights from AdminSDHolder, correcting affected objects, and investigating the actor and originating DC through audit and replication metadata. Do not blindly clear `adminCount` on active protected accounts.
+
+## 194. What is SIDHistory, and how can it be abused?
+
+**Level:** Advanced
+
+**Answer:** `sIDHistory` stores previous security identifiers so migrated users or groups can continue accessing resources that still reference old SIDs. It is useful during controlled migrations but can also grant hidden access if a privileged SID is inserted or retained. Within a forest, trust and authorization behavior can make malicious SID history especially dangerous. Limit who can perform migrations and write the attribute, enable appropriate trust protections such as SID filtering where applicable, monitor changes, and remove historical SIDs after resource ACLs are remediated. During investigation, compare values with migration records, identify the originating DC and administrative actor, review token group membership and resource access, and check whether trust settings were weakened. A SIDHistory value is not malicious by itself; undocumented privileged values are the concern.
+
+## 195. How can AD CS become a domain-compromise path?
+
+**Level:** Advanced
+
+**Answer:** Certificates can authenticate as users or computers, so a CA or template that permits a low-privileged requester to obtain a certificate representing a privileged identity can bypass password controls. Paths can arise through subject-name control, authentication-capable templates, enrollment-agent permissions, writable templates, CA management rights, relayable enrollment endpoints, weak mappings, or stolen CA keys. Treat AD CS as Tier 0, maintain an inventory of CAs and issued templates, review template and CA ACLs, require strong request identity and approval where appropriate, secure web and RPC enrollment, patch mapping vulnerabilities, and monitor issuance. Incident response may require revocation, disabling templates, CA configuration rollback, account and certificate investigation, trust-store changes, or full CA key replacement depending on what was compromised.
+
