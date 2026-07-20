@@ -630,3 +630,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Determine the exact SPN requested by the client and search the forest with `setspn -Q <SPN>` or use `setspn -X` for duplicate detection. Confirm which identity runs the service, whether a computer account already has a host-based SPN, and whether DNS aliases or old service accounts introduced duplicates. Remove only the incorrect registration and add the correct one with `setspn -S`. Then purge or renew tickets and test from a clean session. In a cluster or farm, use a shared managed service account or properly designed service identity rather than registering the same SPN on unrelated accounts.
 
+## 91. What is Kerberoasting?
+
+**Level:** Advanced
+
+**Answer:** Kerberoasting abuses the legitimate ability of an authenticated principal to request service tickets for SPNs. Part of the ticket is protected with the service account's key, so an attacker can attempt offline password guessing. Risk is highest for user-based service accounts with weak, old, human-managed passwords and RC4 compatibility. Defenses include gMSA or dMSA adoption, long random passwords, AES support, least privilege, removal of unnecessary SPNs, separate service identities, and monitoring unusual volumes or patterns of service-ticket requests such as event 4769. A successful roast does not itself grant more privilege than the cracked service account possesses, so account rights determine impact.
+
+## 92. What is AS-REP roasting?
+
+**Level:** Advanced
+
+**Answer:** AS-REP roasting targets accounts that do not require Kerberos preauthentication. An attacker can request an authentication response for such an account without valid credentials and then attempt offline password guessing against encrypted response material. Detect accounts with the relevant `userAccountControl` flag, remove the exception unless a documented legacy requirement exists, set strong random passwords, and monitor unusual TGT requests. The main preventative control is to require preauthentication.
+
+## 93. What is Pass-the-Hash?
+
+**Level:** Advanced
+
+**Answer:** Pass-the-Hash is the use of an NT password hash as authentication material without first recovering the plaintext password. It is associated mainly with NTLM-based authentication and administrative protocols. The attack demonstrates why password hashes must be protected as credential equivalents. Defenses include Windows LAPS for unique local administrator passwords, Credential Guard where compatible, restricting admin logon, reducing NTLM, disabling or limiting remote administrative protocols, using secure administrative hosts, segmenting Tier 0, and monitoring anomalous authentication. A password reset invalidates future use of the old hash but may not remove established sessions or other credentials.
+
+## 94. What is Pass-the-Ticket?
+
+**Level:** Advanced
+
+**Answer:** Pass-the-Ticket uses a stolen Kerberos TGT or service ticket in another logon context. The attacker does not need the plaintext password while the ticket is valid. Ticket theft can occur from compromised endpoints, memory, caches, or improperly protected files on Windows or Linux. Mitigations include preventing credential exposure on low-trust hosts, using privileged-access tiers, Credential Guard, short and appropriate ticket lifetimes for sensitive identities, Protected Users where compatible, endpoint detection, and rapid containment. Investigators correlate ticket use, source devices, logon sessions, KDC events, and endpoint telemetry.
+
+## 95. What is a Golden Ticket?
+
+**Level:** Advanced
+
+**Answer:** A Golden Ticket is a forged TGT created using key material for the domain's `krbtgt` account. It can contain manipulated identity and authorization data and may provide durable domain-level persistence. Its existence normally implies severe compromise of domain secrets or a domain controller. Response requires more than resetting one user: contain privileged access, investigate the compromise path, reset `krbtgt` twice with adequate replication and planning, rotate other exposed credentials, review trusts and certificates, and consider forest recovery when integrity cannot be established. Detection combines ticket anomalies, encryption behavior, impossible identity data, endpoint evidence, and identity-threat analytics.
+
