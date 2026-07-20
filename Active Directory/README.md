@@ -68,3 +68,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 *Core definitions, boundaries, hierarchy, and design language.*
 
+## 1. What is Active Directory Domain Services?
+
+**Level:** Beginner
+
+**Answer:** Active Directory Domain Services, or AD DS, is the Windows Server directory service used to store and manage information about identities and resources in a domain. Its directory contains objects such as users, computers, groups, managed service accounts, organizational units, Group Policy containers, and configuration data. AD DS provides centralized authentication, authorization support, policy distribution, directory search, and replication between domain controllers. It uses several protocols rather than one protocol: DNS locates services, Kerberos is the preferred domain authentication protocol, LDAP exposes directory operations, SMB provides access to SYSVOL and NETLOGON, and RPC is used for many management and replication functions. A strong interview answer distinguishes the product from the broader term “Active Directory,” which can also refer to technologies such as AD CS, AD FS, and AD LDS.
+
+## 2. What business problems does AD DS solve?
+
+**Level:** Beginner
+
+**Answer:** AD DS provides a common identity and policy plane for a Windows enterprise. Instead of creating separate accounts and permissions on every server, administrators create identities centrally, place them in groups, and grant those groups access to resources. Users can authenticate once and access authorized services without maintaining an unrelated password for each system. Administrators can deploy security settings, certificates, scripts, software, drive mappings, and operating-system configuration through Group Policy. AD DS also supports delegated administration, allowing a help-desk team to reset passwords in a specific OU without making its members Domain Admins. Operationally, it improves consistency, scalability, auditing, and recovery. The security tradeoff is concentration of trust: compromise of highly privileged AD identities or domain controllers can affect most systems that depend on the directory.
+
+## 3. What is an Active Directory object?
+
+**Level:** Beginner
+
+**Answer:** An AD object is an instance of a class defined by the directory schema. A user, computer, group, OU, site, subnet, GPO container, and service account are all examples. Each object has attributes that describe it, such as `sAMAccountName`, `userPrincipalName`, `objectGUID`, `objectSid`, `member`, or `dNSHostName`. Objects are identified and located through names such as a distinguished name, but security references normally use immutable or relatively stable identifiers such as a SID or GUID. Some objects are security principals and can be assigned permissions; others are containers or configuration objects. In an interview, avoid saying that every object is a file or that every object can authenticate. The schema determines what attributes an object may have, while access control determines who may read or modify them.
+
+## 4. What is the difference between authentication and authorization in AD?
+
+**Level:** Beginner
+
+**Answer:** Authentication establishes the identity of a user, computer, or service. In an AD domain, this commonly occurs through Kerberos and may fall back to NTLM in specific circumstances. Authorization determines what the authenticated security principal is permitted to do. Windows builds an access token containing the principal's SID, relevant group SIDs, privileges, integrity information, and other claims. When the principal accesses an object such as a file, registry key, service, or AD object, the system compares that token with the object's security descriptor and access control entries. Successful authentication therefore does not imply access. A user may prove identity correctly but still be denied because the required permission is absent, an explicit deny applies, a policy restriction exists, or the resource is unavailable.
+
+## 5. What is an AD domain?
+
+**Level:** Beginner
+
+**Answer:** An AD domain is a logical partition of a forest with its own domain naming context, DNS name, domain SID, security policies, domain-level groups, and domain controllers. All writable domain controllers in the domain hold a writable replica of that domain partition. A domain is an administrative and replication boundary for much directory data, but it is not the strongest security isolation boundary inside a forest. Enterprise Admins, forest-wide configuration, schema control, trusts, and several escalation paths mean that domains in the same forest should be treated as part of one security boundary. Domains are usually created because of namespace, replication, legal, administrative autonomy, or historical requirements - not merely because the organization has multiple departments.
+
