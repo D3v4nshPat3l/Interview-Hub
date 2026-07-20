@@ -1346,3 +1346,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** The computer's local machine-account password no longer matches the value in AD, or the client cannot contact a suitable DC and reports a misleading trust error. First verify DNS, time, network access, duplicate computer names, restored snapshots, and the secure channel with `Test-ComputerSecureChannel -Verbose` or `nltest /sc_verify:<domain>`. If connectivity is sound, repair the secure channel with an authorized method such as `Test-ComputerSecureChannel -Repair` or `Reset-ComputerMachinePassword`, using credentials that may reset the computer account. Rejoining the domain is a fallback, not the first step, because it can alter local profiles and application state. Investigate repeated failures for imaging, snapshot rollback, cloning, or duplicate-account processes.
 
+## 206. A server cannot join the domain. Which checks do you perform before blaming permissions?
+
+**Level:** Intermediate Scenario
+
+**Answer:** Verify the server uses only internal AD-aware DNS servers and can resolve the domain's SRV records, such as `_ldap._tcp.dc._msdcs.<forest-root>`. Confirm forward and reverse resolution, time synchronization, reachability to required ports, and that the intended domain name is correct. Use `nltest /dsgetdc:<domain>`, `Test-NetConnection`, `nslookup`, and the join log in `%windir%\debug\NetSetup.log`. Check for an existing computer object with restrictive ACLs, quota or delegated join rights, duplicate names, unsupported encryption or SMB settings, and firewall inspection. Validate the joining credential only after infrastructure checks. The error code and NetSetup log usually identify whether the failure is discovery, authentication, account creation, secure-channel establishment, or policy.
+
+## 207. Users at one branch experience very slow logons. How do you isolate the cause?
+
+**Level:** Advanced Scenario
+
+**Answer:** Measure where time is spent rather than treating “logon” as one action. Confirm the branch subnet is mapped to the correct AD site and which DC and Global Catalog clients use. Review DNS response, WAN latency and loss, time, DC Locator, replication, and authentication events. Compare a clean user and workstation with an affected one. Use Group Policy operational logs and `gpresult` to identify slow scripts, software installation, folder redirection, drive mappings, WMI filters, or synchronous processing. Check profile size, roaming-profile or FSLogix dependencies, certificate enrollment, printer discovery, and unavailable UNC paths. Validate branch DC health with `dcdiag` and `repadmin`. A new local DC will not fix a slow logon caused by a dead script path or oversized profile.
+
+## 208. A legacy application says “LDAP bind failed” after security hardening. How do you troubleshoot without weakening the whole domain?
+
+**Level:** Advanced Scenario
+
+**Answer:** Capture the application host, bind type, target hostname, port, TLS behavior, service account, and exact error. Check Directory Service events for unsigned or rejected binds and confirm whether the change involved LDAP signing, channel binding, TLS versions, certificate trust, or NTLM restrictions. Test from the application host with a supported LDAP client and inspect the certificate chain and name. Upgrade or reconfigure the application to use SASL signing or LDAPS/StartTLS with proper certificate validation. If a temporary exception is unavoidable, scope it to the specific system or service with an owner, compensating controls, monitoring, and expiry date. Do not globally disable LDAP signing or channel binding to restore one undocumented application.
+
+## 209. A Windows service fails after its account password was rotated. What should the administrator examine?
+
+**Level:** Intermediate Scenario
+
+**Answer:** Determine where the account is used before changing it again. Inventory services, scheduled tasks, IIS application pools, database connections, scripts, SPNs, and dependent servers. Check service-control and application logs for logon failure, account lockout, or access denied. Confirm the new credential was updated in every managed location, the account is not expired or disabled, and it still has “log on as a service” and resource permissions. Review SPNs for duplicate or missing registrations if Kerberos is involved. Restore service using a controlled credential rollback only when justified, then migrate suitable workloads to a gMSA or dMSA. The post-incident action is dependency documentation and automated rotation testing, not making the password nonexpiring.
+
+## 210. A user was added to a file-access group but still receives Access Denied. What do you check?
+
+**Level:** Intermediate Scenario
+
+**Answer:** Confirm the change replicated to the user's authenticating DC and that the user has obtained a new access token; existing sessions do not automatically gain new group SIDs. Have the user sign out and sign in, or purge only the relevant Kerberos tickets when appropriate. Verify nested group scope and the AGDLP or AGUDLP design, then evaluate both share and NTFS permissions, explicit denies, ownership, dynamic access controls, and the exact path. Use `whoami /groups`, `klist`, effective-access tools, and access logs. If a universal group changed, check Global Catalog availability and replication. Do not keep nesting the user into additional privileged groups until access happens; identify the missing or denied authorization edge.
+
