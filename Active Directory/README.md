@@ -1566,3 +1566,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 *Questions 241-260 evaluate containment, evidence, credential rotation, and restoration of trust.*
 
+## 241. Defender for Identity alerts on suspected DCSync from a member server. What do you do first?
+
+**Level:** Expert Scenario
+
+**Answer:** Treat it as a potential domain compromise. Validate the source host, account, time, and requested directory objects, then isolate the member server in a way that preserves investigative access. Disable or restrict the suspected principal where operationally safe and identify all accounts with replication rights. Collect endpoint memory and logs, network telemetry, DC security events such as relevant `4662` activity, directory changes, and authentication history. Determine whether secrets were actually replicated and whether the attacker established persistence. Rotation scope may include privileged accounts, service accounts, computer accounts, trust secrets, and `krbtgt`, but sequence rotation after containment and replication-health validation. Remove unauthorized replication rights and investigate how they were obtained. Do not close the alert merely because a backup or identity product sometimes uses replication; prove the source is authorized and expected.
+
+## 242. You suspect a Golden Ticket was used. What evidence and recovery actions matter most?
+
+**Level:** Expert Scenario
+
+**Answer:** Build a timeline from Kerberos events, logons, endpoint telemetry, service access, privileged actions, and account state. Look for tickets or sessions inconsistent with normal issuance, disabled or nonexistent users appearing in access, unusual group claims, abnormal lifetimes, and authentication from systems without a plausible TGT request. Absence of a matching event does not conclusively prove forgery because logging and collection may be incomplete. Assume the `krbtgt` secret and potentially DC data were exposed. Contain attacker access, remove persistence, secure Tier 0, and validate replication. Reset `krbtgt` twice with enough time for each new secret to replicate and for service impact to be assessed. Rotate other exposed credentials and review trusts and RODCs. Preserve evidence before broad resets erase volatile indicators.
+
+## 243. Monitoring shows a sudden spike in service-ticket requests for many SPNs. How do you assess possible Kerberoasting?
+
+**Level:** Advanced Scenario
+
+**Answer:** Identify the requesting user, source host, number and type of SPNs, encryption types, time pattern, and whether the access matches a scanner, management platform, or application startup. Correlate event `4769` with process and network telemetry on the requester. Prioritize service accounts with old or weak passwords, RC4 use, high privilege, broad logon rights, or interactive sessions. Isolate a suspicious source, reset or migrate exposed service accounts through tested procedures, and inspect their access history for subsequent use. Improve controls by deploying gMSAs or dMSAs, removing stale SPNs, enforcing strong credentials, and reducing account privilege. A high ticket count is a behavioral signal, not proof; some inventory and middleware systems legitimately contact many services.
+
+## 244. You detect failed authentication against hundreds of accounts from a VPN gateway. What is your response?
+
+**Level:** Advanced Scenario
+
+**Answer:** Confirm whether the gateway is the true source or an authentication proxy hiding external client addresses. Aggregate targeted accounts, timestamps, protocols, user agents, geolocation, and any successful logons following failures. Block or rate-limit the hostile source at the appropriate edge, enforce MFA, and notify identity and network teams. Identify compromised accounts through success events, impossible travel, new device registration, mailbox or cloud activity, and endpoint evidence. Reset credentials and revoke sessions for confirmed or high-risk accounts, not indiscriminately for every target. Preserve gateway and identity-provider logs. Review password policy, banned-password controls, stale accounts, and external exposure. If on-premises Kerberos or LDAP is involved, also inspect DC events and account lockout impact.
+
+## 245. An unknown account was added to Domain Admins. What is the containment and investigation plan?
+
+**Level:** Expert Scenario
+
+**Answer:** Remove or disable the unauthorized principal after capturing the change details, unless doing so would destroy a controlled investigation. Isolate the source administrative host and account, collect event logs such as `4728` or related group-change events, process telemetry, PowerShell logs, and directory replication metadata to identify the originating DC and time. Determine whether the new member logged on to DCs, accessed backups or CAs, changed GPOs or ACLs, created accounts, or extracted secrets. Assume credentials used on lower-tier systems may be exposed. Rotate affected privileged credentials, remove persistence, review AdminSDHolder and delegated rights, and validate Tier 0 integrity. The incident is not resolved by deleting the group member; the attacker may have already created alternate control paths.
+
