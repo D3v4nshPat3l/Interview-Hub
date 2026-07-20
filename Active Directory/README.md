@@ -941,3 +941,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** A transitive trust can extend authentication relationships through connected trusted domains according to trust type and forest rules. Parent-child and tree-root trusts within a forest are two-way and transitive. External trusts are normally nontransitive. Forest trusts are transitive between the forest root namespaces within configured constraints, but they do not merge the forests into one security boundary. Selective authentication, SID filtering, name suffix routing, and resource ACLs still shape access. Never infer effective access from a diagram alone; validate direction, transitivity, and authorization.
 
+## 141. What is a forest trust?
+
+**Level:** Advanced
+
+**Answer:** A forest trust connects two AD forests and can be one-way or two-way. It supports Kerberos authentication across forest boundaries and name-suffix routing for forest namespaces. It is created between forest root domains and can be configured with forest-wide or selective authentication. The forests retain separate schemas, configurations, administrators, and recovery boundaries. DNS resolution, time, network paths, SID filtering, and application requirements must be planned. A two-way trust expands reachable attack paths and should be reviewed like an external security integration.
+
+## 142. What is selective authentication?
+
+**Level:** Advanced
+
+**Answer:** Selective authentication requires administrators in the trusting forest or domain to explicitly grant “Allowed to authenticate” on the target computers or services to principals from the trusted side. Without it, forest-wide authentication permits trusted users to attempt authentication to broadly reachable resources, although ACLs still control access. Selective authentication reduces exposure but increases administrative complexity. Design resource groups, automate grants, monitor failures, and test service accounts and management tools before enforcement.
+
+## 143. What is SID filtering on a trust?
+
+**Level:** Advanced
+
+**Answer:** SID filtering removes or rejects SIDs in cross-trust authorization data that should not be accepted from the other side, reducing SIDHistory-based privilege abuse. Behavior depends on trust type and configuration. Disabling filtering can be required in narrow migration scenarios but creates significant risk and should be temporary, documented, monitored, and reversed. Do not confuse SID filtering with ordinary resource ACL filtering; it validates authorization data crossing the trust.
+
+## 144. What is a shortcut trust?
+
+**Level:** Intermediate
+
+**Answer:** A shortcut trust is an explicitly created transitive trust between domains in the same forest to shorten the authentication path when users frequently access resources across a deep domain hierarchy. It can improve performance in complex legacy forests. It does not create a new security boundary or replace correct DNS and site design. Modern simpler forests rarely require it, and the operational benefit should be measured before adding trust complexity.
+
+## 145. How are password changes replicated?
+
+**Level:** Advanced
+
+**Answer:** Password changes are written to the DC handling the request and receive urgent replication behavior to improve convergence. The PDC Emulator is involved in special password-validation behavior: when another DC rejects a password, it may consult the PDC before final failure, and password changes are sent promptly toward the PDC. This reduces failures immediately after a change but does not eliminate all site or connectivity effects. Troubleshoot which DC processed the change, replication status, PDC availability, and cached credentials rather than assuming global instant consistency.
+
