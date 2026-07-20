@@ -249,3 +249,107 @@ For a strong spoken interview answer, use four layers:
 
 ---
 
+# Identity, Authentication, Authorization, and Permissions
+
+## 51. What is the difference between identification, authentication, and authorization?
+
+**Answer:** Identification is the claim of an identity, such as a username or certificate subject. Authentication verifies that claim using evidence such as a password, smart card, FIDO2 key, biometric gesture, or cryptographic proof. Authorization determines what the authenticated security principal is allowed to do. Windows then performs access checks using tokens, privileges, groups, integrity levels, and object security descriptors. These stages should not be confused: a successful logon proves that an authentication mechanism accepted evidence for an account, not that a particular human was physically present, and authorization can still deny access after authentication succeeds.
+
+## 52. What is a security principal?
+
+**Answer:** A security principal is an entity that can be authenticated or assigned permissions, such as a user, computer, service account, managed identity, or security group. Windows identifies principals with security identifiers rather than relying only on display names. A renamed account usually retains the same SID, while a deleted and recreated account with the same name receives a different SID. This distinction matters in permissions and forensics because an ACL can contain an unresolved SID after the original principal is gone. Analysts should resolve SIDs using trustworthy domain or local account data and avoid treating an account name alone as a stable identity.
+
+## 53. What is a SID?
+
+**Answer:** A Security Identifier is a variable-length value that uniquely identifies a Windows security principal within the issuing authority's scope. Tokens and ACLs use SIDs for access decisions. Well-known SIDs represent built-in identities and groups, while local and domain principals include an authority portion and a relative identifier. The RID is not meaningful without the rest of the SID. When an account is deleted, its SID is not reused for a new principal, which is why permissions can show orphaned entries. In investigations, SIDs provide more durable correlation than names, but they still identify accounts or groups, not necessarily the human who used them.
+
+## 54. What is the Security Accounts Manager?
+
+**Answer:** The Security Accounts Manager, or SAM, stores local account information on a Windows system. Its data is represented in the protected `SAM` Registry hive and is used with other security components during local authentication. On a domain controller, domain account data is held in Active Directory rather than the local SAM model used by member systems. Attackers may target SAM-related material for offline credential attacks, so acquisition and access should be tightly controlled. Credential hashes are not plaintext passwords, and possession of a hash can still be dangerous because it may support cracking or pass-the-hash techniques depending on the environment.
+
+## 55. What is the difference between a local account, domain account, Microsoft account, and Entra ID account?
+
+**Answer:** A local account is managed by one Windows device. A domain account is managed by Active Directory Domain Services and can authenticate across domain resources. A Microsoft account is a consumer cloud identity used with Microsoft services and Windows features. A Microsoft Entra ID account is an organizational cloud identity used for work or school access and device management. The sign-in user experience can look similar while credential storage, authentication protocols, policy, recovery, and logging differ. Analysts should determine the actual identity provider and device join state before interpreting logons or troubleshooting access.
+
+## 56. What is an access token?
+
+**Answer:** An access token is the kernel-managed representation of a logon security context. It includes the user SID, group memberships, privileges, integrity level, token type, restrictions, and other claims or attributes. A process normally has a primary token, while a thread can use an impersonation token. Access checks compare token information to an object's security descriptor and mandatory integrity policy. Tokens are created after authentication but can be filtered, restricted, duplicated, or impersonated. Investigators should inspect token properties rather than inferring privilege solely from the account name.
+
+## 57. What are Windows privileges?
+
+**Answer:** Privileges are token rights that authorize system-wide operations not expressed as ordinary object permissions. Examples include debugging processes, backing up files while bypassing normal read checks, restoring files, loading drivers, changing system time, or impersonating clients. A privilege can be present but disabled until a process enables it. Some privileges are extremely powerful and can lead to full compromise. Least-privilege reviews should examine actual user-right assignments and service accounts, not only membership in Administrators. A security event showing a privileged logon is context for investigation, not proof that every privilege was exercised.
+
+## 58. What is the difference between a right, privilege, and permission?
+
+**Answer:** In Windows terminology, user rights include logon rights and privileges assigned through security policy. A privilege allows a system-level operation such as backup or debug. A permission is an access right on a securable object, such as read data on a file or start access on a service. Administrators often use the terms loosely, but precise language improves troubleshooting. A user may have permission to modify a file without holding a special privilege, or may use `SeBackupPrivilege` to read files despite ordinary DACL denial when a backup-aware application requests backup semantics.
+
+## 59. What is a security descriptor?
+
+**Answer:** A security descriptor is the data structure that defines ownership, discretionary access control, auditing, and mandatory integrity information for a securable object. It can contain an owner SID, group SID, DACL, SACL, and control flags. Security descriptors apply to files, Registry keys, processes, services, named pipes, and many other objects. A null DACL, an empty DACL, and a missing DACL have different meanings and should not be confused. Investigators and administrators should preserve the original descriptor when collecting evidence because copying content alone can lose permissions, inheritance, ownership, and audit configuration.
+
+## 60. What is a DACL?
+
+**Answer:** A Discretionary Access Control List contains access control entries that allow or deny specified rights to SIDs. Windows evaluates relevant entries during access checks, considering the requested access, token groups, deny and allow entries, inheritance, and object type. Explicit deny entries can override matching allows, but effective access can become complex because of group memberships and inherited entries. A null DACL generally grants broad access, while an empty DACL grants no access. In security reviews, writable paths used by privileged services or scheduled tasks are especially important because they can create escalation opportunities.
+
+## 61. What is a SACL?
+
+**Answer:** A System Access Control List specifies which access attempts should generate audit events and can also contain mandatory integrity labels. Auditing only occurs if the relevant system audit policy is enabled; configuring a SACL alone may produce no events. Excessive auditing can overwhelm logs, while insufficient auditing leaves gaps. A good design targets high-value objects, sensitive changes, and important failure conditions, then forwards and protects the resulting logs. SACL evidence indicates configured audit intent, not guaranteed historical completeness, because logs may roll over, collection may fail, or policy may have changed.
+
+## 62. What is ACL inheritance?
+
+**Answer:** Inheritance allows child objects to receive access control entries from parent containers. Entries can be marked to apply to files, subfolders, or both, and a child can preserve or disable inherited entries. Inheritance simplifies administration but can create broad unintended access when a high-level folder grants excessive permissions. Moving or copying an object can also affect inheritance differently depending on volume and operation. Troubleshooting should inspect explicit versus inherited entries and effective access. Forensic reporting should record the descriptor at the relevant time because later inheritance changes can alter current permissions without proving what permissions existed earlier.
+
+## 63. What is ownership in Windows security?
+
+**Answer:** The owner of a securable object has special authority to change its DACL, even if ordinary permissions would otherwise deny access. Ownership is therefore security-relevant and should not be treated as descriptive metadata only. Administrators and certain privileged principals can take ownership, after which they can grant themselves access. Changing ownership can be legitimate during recovery or migration, but unexpected ownership changes on system files, services, Registry keys, or sensitive data warrant investigation. Audit policy and object SACLs may be needed to capture those changes prospectively.
+
+## 64. What is mandatory integrity control?
+
+**Answer:** Mandatory Integrity Control assigns integrity levels to tokens and objects, such as low, medium, high, and system. Before the normal DACL check, Windows applies a mandatory policy that can block lower-integrity subjects from writing to higher-integrity objects. Standard desktop applications commonly run at medium integrity, elevated administrative processes at high, and certain sandboxed content at low or app-container levels. Integrity levels are defense in depth, not a replacement for identity permissions. A medium-integrity process can still damage data the user is authorized to modify, and an attacker who obtains elevation can cross the boundary.
+
+## 65. What is User Account Control?
+
+**Answer:** User Account Control reduces routine use of full administrative privileges. An administrator normally receives a filtered token for standard work and can request elevation, while a standard user may be prompted for administrative credentials. Elevation consent occurs on a protected desktop depending on policy. UAC helps limit accidental changes and some malware behavior, but it is not a complete security boundary against an attacker already executing as the same administrator. Organizations should combine UAC with standard-user operation, application control, credential protection, patching, and privileged-access management.
+
+## 66. What are split tokens?
+
+**Answer:** When an administrator signs in with UAC enabled, Windows can create both a full administrative token and a filtered token. The user shell normally runs with the filtered token; approved elevation launches a process with the full token. This is called a split-token model. It explains why membership in Administrators does not mean every process has high integrity or all administrative SIDs enabled. Analysts should examine token elevation type and integrity level for the specific process. Disabling UAC changes this model and usually weakens security and compatibility assumptions.
+
+## 67. What is the secure attention sequence?
+
+**Answer:** The secure attention sequence, commonly `Ctrl+Alt+Delete`, is handled by Windows in a way ordinary user-mode applications cannot normally intercept. It provides a trusted path to security functions such as sign-in, password change, lock, and Task Manager. Its value is that malware cannot simply draw an identical window and receive the key sequence through normal input hooks. It is not a guarantee that the whole system is uncompromised; kernel or credential-provider compromise can still matter. Organizations may require the sequence before logon as a phishing-resistance measure on managed devices.
+
+## 68. How does Windows password authentication work at a high level?
+
+**Answer:** Windows does not normally store a user's reusable plaintext password for comparison. Local and domain authentication use protocol-specific cryptographic values and challenge-response or ticket mechanisms. Local accounts are associated with SAM-held password-derived data, while domain authentication is typically handled by domain controllers using Kerberos or, where necessary, NTLM. During interactive sign-in, Windows authentication packages validate credentials and LSASS creates a logon session and token. Exact behavior depends on account type, credential provider, cached logon state, network availability, and policy. Password hashes remain sensitive because they can support offline cracking or authentication abuse.
+
+## 69. What is Kerberos?
+
+**Answer:** Kerberos is a ticket-based network authentication protocol used primarily in Active Directory domains. A client obtains a Ticket Granting Ticket from the Key Distribution Center and later requests service tickets for specific services. This supports mutual authentication and avoids sending the password to every service. Kerberos depends heavily on time synchronization, service principal names, DNS, account keys, and domain-controller availability. Common security risks include stolen tickets, delegation abuse, weak service-account passwords, and excessive ticket lifetimes. A ticket shows authentication for a principal and service context, but it does not by itself prove which human initiated the activity.
+
+## 70. What is NTLM?
+
+**Answer:** NTLM is a challenge-response authentication family retained for compatibility when Kerberos or newer methods cannot be used. It relies on password-derived secret material and does not provide the same ticket-based design or mutual-authentication properties as Kerberos. NTLM is vulnerable to relay in improperly protected protocols and to pass-the-hash abuse when credential material is stolen. Organizations should reduce and monitor NTLM use, enable protections such as SMB signing where appropriate, and address applications that prevent migration. Analysts should inspect authentication package, source, destination, account, and protocol context rather than assuming every NTLM event is malicious.
+
+## 71. What is pass-the-hash?
+
+**Answer:** Pass-the-hash is an attack in which an adversary uses a stolen NTLM password hash or equivalent credential material to authenticate without knowing the plaintext password. It exploits the fact that some authentication flows treat possession of the hash-derived secret as sufficient. Defenses include Credential Guard, protecting administrative credentials, restricting lateral movement, using local administrator password management, reducing NTLM, tiering administration, and detecting unusual logons. Changing the password invalidates the old hash, but incident response must also identify how the hash was obtained and where it was used.
+
+## 72. What is pass-the-ticket?
+
+**Answer:** Pass-the-ticket uses stolen Kerberos tickets to access services as the ticket's principal. A service ticket may provide access to one service, while a stolen TGT can be used to request additional service tickets until it expires or is invalidated. Defenses include Credential Guard, privileged-account hygiene, short exposure of admin sessions, endpoint protection, and detection of anomalous ticket use. Resetting a user password may not immediately invalidate every existing ticket in all cases, so responders should follow domain-specific containment procedures. Ticket evidence must be correlated with endpoint, domain-controller, and service logs.
+
+## 73. What is Credential Guard?
+
+**Answer:** Credential Guard uses VBS to isolate selected credential material from the normal operating system, protecting NTLM hashes, Kerberos TGTs, and some domain credentials from many memory-scraping attacks. Even malware with administrative rights in the normal kernel has a harder time extracting isolated secrets. It does not protect every credential type, local SAM data, or credentials entered into unsafe applications, and it does not stop an attacker from abusing a currently authenticated session. Compatibility requirements must be assessed, especially for legacy authentication and delegation. Microsoft enables it by default on some modern eligible domain-joined systems, but administrators should verify actual state.
+
+## 74. What is LSA protection?
+
+**Answer:** LSA protection configures LSASS as a protected process light so that only appropriately signed and trusted code can load into or access it using sensitive rights. This helps resist credential theft and unauthorized authentication-package injection. It is separate from Credential Guard, although the controls complement each other. Compatibility issues can occur with legacy security or authentication plug-ins, so audit and staged deployment are useful. Investigators should check configured and running state, related event logs, and any blocked plug-ins. A process-protection setting does not make credentials invulnerable to phishing, token theft, or compromised endpoints.
+
+## 75. What is Windows Hello for Business?
+
+**Answer:** Windows Hello for Business replaces reusable password sign-in with asymmetric key-based authentication protected by the device, often using the TPM. The user unlocks the key with a gesture such as a PIN or biometric. The PIN is device-bound and is not simply a shorter domain password transmitted to servers. Depending on deployment, certificate trust, key trust, or cloud Kerberos trust can be used. This reduces phishing and password-replay risk, but device enrollment, recovery, attestation, and identity governance remain important. Biometric data and PINs should be understood as local unlock factors for protected credentials, not direct network passwords.
+
+---
+
