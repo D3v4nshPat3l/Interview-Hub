@@ -785,3 +785,39 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** `gpresult` reports Resultant Set of Policy information for a user or computer. `gpresult /r` provides a summary, while `gpresult /h report.html` creates a detailed report showing applied and denied GPOs, filtering reasons, winning settings, group membership, and processing data. Run it in the affected security context and with elevation for computer details. A report from an administrator's session may not represent the user's session. Pair it with the GroupPolicy Operational event log and GPMC modeling when diagnosing remote or future-state behavior.
 
+## 116. What is RSoP?
+
+**Level:** Intermediate
+
+**Answer:** Resultant Set of Policy is the calculated outcome of all applicable policy inputs. Logging mode reports what applied to a specific user and computer. Planning mode models what would apply under hypothetical OU, group, site, or loopback conditions, subject to data availability. RSoP helps explain precedence but does not prove that every client-side extension executed successfully or that a script completed. Operational logs and application-specific evidence are still required.
+
+## 117. Why might a GPO be listed as denied?
+
+**Level:** Intermediate
+
+**Answer:** Common reasons include security filtering, a false WMI filter, disabled user or computer configuration, an unlinked or disabled link, object location outside scope, loopback behavior, inaccessible SYSVOL files, or replication mismatch. `gpresult` normally states the denial reason. Also check whether the target's group token includes a newly added group, because membership changes often require sign-out or restart. Do not solve every denial by granting Authenticated Users Apply Group Policy; that can broaden scope beyond the design.
+
+## 118. What are Group Policy Preferences?
+
+**Level:** Intermediate
+
+**Answer:** Group Policy Preferences configure settings such as drive mappings, printers, scheduled tasks, files, folders, services, and registry values. Unlike enforced policy settings, many preferences tattoo the system and may remain after the GPO no longer applies unless removal behavior is configured. Item-level targeting provides granular conditions. Preferences are powerful and should be treated as code: peer review changes, minimize credential exposure, validate action modes such as Create, Replace, Update, and Delete, and monitor privileged task or group changes. Legacy Group Policy Preference password storage using `cpassword` is insecure and should be removed.
+
+## 119. What was the Group Policy Preferences `cpassword` issue?
+
+**Level:** Advanced
+
+**Answer:** Older Group Policy Preferences could store encrypted passwords in XML files in SYSVOL using a publicly disclosed static key. Any authenticated domain user who could read SYSVOL could recover those passwords. Microsoft removed the UI ability to create new password-bearing preferences, but legacy XML may remain in historical or active policy paths. Search SYSVOL for `cpassword`, identify affected accounts, remove the configuration, rotate credentials, and investigate where the account was used. This is a classic example of why readable configuration data should never contain reusable privileged secrets.
+
+## 120. What is a safe GPO change process?
+
+**Level:** Advanced
+
+**Answer:** Define the objective and affected population, clone or back up the GPO, review current links and ACLs, test in a representative lab or pilot OU, use change control and peer review, and establish success and rollback criteria. Separate user and computer settings when useful, disable unused halves, avoid editing broad production GPOs for one exception, and record owners and purpose. After deployment, confirm AD and SYSVOL replication, collect `gpresult` from pilot systems, monitor events and business outcomes, then expand gradually. Security-sensitive GPOs should be protected from unauthorized modification and monitored for change.
+
+---
+
+# Replication, Sites, Trusts, Backup, and Recovery
+
+*Directory convergence, topology, conflict handling, forest relationships, and resilient operations.*
+
