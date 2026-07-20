@@ -1846,3 +1846,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Immediately isolate it from production replication until tombstone lifetime, backup state, OS support, and database history are known. An excessively stale DC can contain objects whose deletions have been garbage-collected elsewhere, creating lingering objects or replication quarantine. Do not extend tombstone lifetime retroactively or force replication. Preserve any unique evidence, verify FSMO and service dependencies, then normally perform metadata cleanup and rebuild the DC from current media. Remove stale DNS and connection objects and inspect whether clients authenticated to it before isolation. The correct threshold is the forest's configured and historical tombstone lifetime, not a universal number remembered from an interview guide.
 
+## 286. Your only AD backup is older than tombstone lifetime. Is it usable?
+
+**Level:** Expert Scenario
+
+**Answer:** It is not a normal supported restore source for reconnecting to existing replicas because its directory state may be older than retained deletion and replication metadata. In a total forest-loss scenario, the backup may still have evidentiary or last-resort value under vendor-assisted forest recovery, but the risk and supportability must be explicitly assessed. Do not restore it next to live DCs. Build an isolated recovery environment, preserve copies, validate backup integrity and system state, identify changes since backup, and engage Microsoft support when appropriate. The strategic finding is that backup governance failed: maintain multiple recent, isolated backups and test restoration within supported age limits.
+
+## 287. The PDC Emulator role holder is confirmed compromised. Do you transfer or seize the role?
+
+**Level:** Expert Scenario
+
+**Answer:** Isolate the compromised DC first. If it remains trustworthy enough to communicate, that does not make a normal transfer desirable; transfer requires interaction with the current owner and may preserve attacker influence. In a confirmed compromise, seize the role on a clean, healthy DC after validating replication and ensuring the compromised holder will not return to production. Reconfigure the authoritative time source, verify password and lockout operations, and remove the old DC through incident recovery. Assess all secrets and services exposed on it, including DNS, Kerberos, service credentials, backups, and administrative sessions. Role seizure restores ownership but does not remediate the compromise.
+
+## 288. When and how should the `krbtgt` account be rotated?
+
+**Level:** Expert Scenario
+
+**Answer:** Rotate it after suspected domain-ticket forgery, DC credential theft, or as part of a controlled hygiene program with tested procedures. Because Kerberos validates tickets with the current and previous `krbtgt` secrets, two resets are required to invalidate tickets based on both older values. Before each reset, ensure every writable DC is healthy and replicating, identify offline DCs and RODCs, assess long-running services and trusts, and establish monitoring. Perform the first reset, allow convergence and observe impact, then perform the second after the defined safe interval. Do not perform rapid back-to-back resets during active attacker control or replication failure. Preserve evidence and remove the means by which the secret was obtained first.
+
+## 289. A schema extension for an enterprise application failed midway. How do you respond?
+
+**Level:** Expert Scenario
+
+**Answer:** Stop repeated execution and collect installer logs, schema-master events, replication status, and the exact objects or attributes created. AD schema updates are generally additive and cannot be casually deleted or rolled back. Determine whether the extension is idempotent and supported for rerun, whether the schema version marker changed, and whether all DCs received the partial changes. Verify Schema Master availability, permissions, time, DNS, and replication. Engage the vendor and Microsoft support for corrective LDIF where necessary. Restore from backup only within a full forest recovery decision; a single-DC restore will not erase replicated schema changes. Test future extensions in an isolated forest that matches production schema and applications.
+
+## 290. A trusted merger partner's forest is compromised. How do you contain cross-forest risk?
+
+**Level:** Expert Scenario
+
+**Answer:** Activate the trust emergency procedure. Determine trust direction, authentication scope, selective-authentication configuration, SID filtering, network reachability, and which partner principals have local or application privilege. Disable or quarantine the trust if business impact permits, block relevant network paths, disable mapped partner groups, and revoke active sessions. Review authentication and resource-access logs for partner identities, privileged actions, SIDHistory anomalies, and service-account use. Rotate trust passwords and resource credentials after containment as appropriate. Coordinate evidence and communications with the partner but independently validate your environment. Reenable only after explicit assurance, new trust secrets, reviewed access, and monitoring. A two-way forest trust is a security dependency, not merely a convenience link.
+
