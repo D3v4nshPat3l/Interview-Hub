@@ -1316,3 +1316,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 *Questions 201-220 test methodical administration and support under realistic operational pressure.*
 
+## 201. A newly created user cannot sign in, but existing users can. How do you troubleshoot it?
+
+**Level:** Intermediate Scenario
+
+**Answer:** Confirm the exact username format, domain, workstation, error text, and whether the user can sign in against a specific DC. Check that the account is enabled, has a valid UPN and `sAMAccountName`, is within logon hours, is not expired, and is not subject to workstation restrictions. Verify the password was set correctly and whether “must change password” conflicts with the logon method. Use `Get-ADUser -Properties *`, inspect security events on the authenticating DC, and identify that DC with `nltest /dsgetdc:<domain>` or the client log. If the user was created recently, check replication with `repadmin /replsummary` and `repadmin /showrepl`. Also verify DNS and time. Avoid repeatedly resetting the password before determining whether the client is contacting a DC that has received the object.
+
+## 202. A user changed a password at headquarters, but the old password still works at a branch. What do you check?
+
+**Level:** Intermediate Scenario
+
+**Answer:** Identify which DC processed the password change and which DC authenticates the branch user. Password changes receive urgent replication treatment, and failed authentication may be forwarded to the PDC Emulator, but network or replication failure can still create inconsistent behavior. Run `repadmin /showrepl`, `repadmin /replsummary`, and targeted replication checks between the involved DCs. Verify site and subnet mapping, DNS resolution, firewall paths, time, and the PDC Emulator's availability. Review `pwdLastSet` and replication metadata on multiple DCs. Cached interactive credentials can also allow an offline workstation logon and must be distinguished from online domain authentication. Fix the replication or site problem; do not normalize the condition by asking the user to maintain two passwords.
+
+## 203. A user's account keeps locking every few minutes. How do you find the source?
+
+**Level:** Intermediate Scenario
+
+**Answer:** Establish the lockout time and the DC that recorded event `4740`; its caller-computer field often identifies the source. Query the PDC Emulator and other DCs, because lockout processing is coordinated around the PDC. Correlate `4625`, `4771`, `4776`, VPN, wireless, email, scheduled-task, service, IIS, mobile-device, and application logs. Common causes are saved credentials, disconnected RDP sessions, services, mapped drives, old phone passwords, and scripts. Check `badPwdCount` carefully because it is DC-specific and can change as authentication moves. Do not immediately raise the lockout threshold or disable the policy. If failures span many accounts or sources, treat it as possible password spraying and involve security operations.
+
+## 204. A mapped drive GPO applies to everyone except one user. What is your troubleshooting sequence?
+
+**Level:** Intermediate Scenario
+
+**Answer:** Confirm the user, computer, target OU, and whether the mapping is a user or computer preference. Generate `gpresult /h report.html` in the affected session and compare it with a working user. Check GPO link, enabled sections, inheritance, enforced or blocked inheritance, security filtering, WMI filters, loopback processing, item-level targeting, group membership, and whether the user has Read and Apply Group Policy. Verify SYSVOL access and GPO version consistency, then inspect Group Policy operational events. For Group Policy Preferences, review action type, drive-letter conflicts, “run in logged-on user's security context,” and path permissions. Do not use repeated `gpupdate /force` as diagnosis; determine why the GPO is denied, filtered, unavailable, or failing during execution.
+
+## 205. A workstation reports “The trust relationship between this workstation and the primary domain failed.” What happened, and how do you repair it?
+
+**Level:** Intermediate Scenario
+
+**Answer:** The computer's local machine-account password no longer matches the value in AD, or the client cannot contact a suitable DC and reports a misleading trust error. First verify DNS, time, network access, duplicate computer names, restored snapshots, and the secure channel with `Test-ComputerSecureChannel -Verbose` or `nltest /sc_verify:<domain>`. If connectivity is sound, repair the secure channel with an authorized method such as `Test-ComputerSecureChannel -Repair` or `Reset-ComputerMachinePassword`, using credentials that may reset the computer account. Rejoining the domain is a fallback, not the first step, because it can alter local profiles and application state. Investigate repeated failures for imaging, snapshot rollback, cloning, or duplicate-account processes.
+
