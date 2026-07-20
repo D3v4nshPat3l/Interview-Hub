@@ -1751,3 +1751,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Raise them after all DCs run supported versions compatible with the target level, replication and backups are healthy, application and security-tool compatibility is confirmed, and rollback or recovery implications are understood. Functional levels enable specific AD capabilities and prevent introduction of older DC versions; they do not automatically harden every protocol or upgrade clients. Inventory trusts, read-only DCs, lab or disaster-recovery DCs, and forgotten sites. Use current Microsoft support matrices rather than historical interview tables because available levels and reversible transitions change by release. Perform the change during controlled maintenance, validate every domain before the forest, and monitor replication and authentication afterward.
 
+## 271. How would you decide whether to enable the Windows Server 2025 32K AD database-page feature?
+
+**Level:** Expert Scenario
+
+**Answer:** Start with a demonstrated scalability requirement such as very large multivalued attributes or growth limitations; do not enable it merely because it is newer. Confirm all DCs are Windows Server 2025 or later, databases are 32K-capable, required functional levels are set, replication is healthy, backups and forest recovery are tested, and directory-dependent applications have been validated. In-place upgraded DCs may retain an 8K-format database, so the migration may require replacement or supported database conversion steps. Pilot in a representative environment and document that enabling the forest-wide optional feature changes compatibility expectations. Measure the problem before and after; the feature is not a general-purpose cure for poor LDAP queries or excessive group design.
+
+## 272. A domain still uses FRS for SYSVOL. What is the migration plan?
+
+**Level:** Expert Scenario
+
+**Answer:** Treat FRS retirement as urgent because modern Windows Server DCs require DFSR for SYSVOL. Verify current SYSVOL consistency, AD replication, DNS, backups, and absence of journal-wrap or morphed-folder problems. Use `dfsrmig /getglobalstate` and `/getmigrationstate` to determine status. Progress through the documented states—Prepared, Redirected, then Eliminated—allowing every DC to reach each state before proceeding. Monitor DFSR and FRS logs, shares, GPO versions, and branch connectivity. The Eliminated state is not reversible, so resolve unhealthy or stale DCs first. Do not introduce an unsupported new DC while hoping promotion will complete around an unfinished migration.
+
+## 273. A branch has poor physical security and an unreliable WAN. Would you deploy an RODC?
+
+**Level:** Advanced Scenario
+
+**Answer:** An RODC may provide local authentication, DNS, and reduced credential exposure because it has a read-only directory and controlled credential caching. Assess user count, WAN outage duration, local applications, BitLocker and hardware protection, remote management, and whether branch users can operate with only cached credentials. Design the Password Replication Policy so only required branch identities can cache, deny privileged accounts, and delegate only the local RODC administrator role rather than domain privilege. Prepopulate necessary credentials where justified and monitor what is actually cached. If the branch cannot physically protect any server or lacks trusted support, cloud or WAN resilience may be safer than deploying an identity asset on site.
+
+## 274. How would you design a two-tier enterprise PKI for AD authentication?
+
+**Level:** Expert Scenario
+
+**Answer:** Use an offline, tightly protected root CA that signs one or more online enterprise issuing CAs. Define certificate policies, naming, algorithms, lifetimes, revocation publication, AIA and CDP availability, key protection—potentially HSM-backed—administrator separation, audit retention, backup, and disaster recovery. Issuing CAs integrate with AD and publish carefully designed templates. Separate CA management from template management and enrollment approval where practical. Keep root operations offline and documented, and test CRL expiry and recovery before production. For AD authentication, review mapping behavior, template EKUs, subject construction, enrollment rights, and domain-controller certificate renewal. A two-tier topology does not compensate for a weak template or publicly reachable enrollment endpoint.
+
+## 275. A company has 500 traditional service accounts. How do you migrate them to managed accounts?
+
+**Level:** Expert Scenario
+
+**Answer:** Build an authoritative inventory of owner, application, hosts, logon types, SPNs, privilege, dependencies, password age, and outage tolerance. Classify workloads by support for sMSA, gMSA, dMSA, virtual accounts, or application-native identities. Pilot low-risk services, establish KDS prerequisites, create one managed identity per service boundary, grant minimal host retrieval and resource rights, migrate SPNs carefully, and test failover and restart. Use change waves with rollback and application-owner signoff. For unsupported accounts, place credentials in a vault and schedule rotation. Remove interactive logon and broad groups throughout the program. Measure reduction in static credentials and stale owners, not only the number of accounts converted.
+
