@@ -1406,3 +1406,38 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Gather IP subnets, WAN paths, bandwidth, latency, business hours, expected users and devices, local-service requirements, and failure tolerance. Create the AD site and map every routed client subnet to it. Define site links reflecting actual network connectivity, costs, schedules, and replication intervals rather than the organizational chart. Decide whether the office needs a writable DC, RODC, DNS, or no local DC based on population, WAN reliability, physical security, and recovery objectives. Validate DC Locator from representative clients and monitor replication after deployment. Coordinate with network teams so new subnets are added during change management; an unmapped subnet can cause clients to select remote DCs even when a local DC exists.
 
+## 216. You must move the PDC Emulator role. What do you verify before and after the transfer?
+
+**Level:** Advanced Scenario
+
+**Answer:** Select a healthy, well-connected, secured writable DC with reliable DNS and time connectivity. Confirm replication is clean, the target is advertising, and it can assume the domain's authoritative time role. Transfer rather than seize while the current holder is available. Use PowerShell or the appropriate MMC, then verify role ownership with `netdom query fsmo` or `Get-ADDomain`. Reconfigure and test the time hierarchy, monitor password-change and lockout behavior, check event logs, and confirm operations-master replication. Update monitoring and recovery documentation. A role transfer does not migrate unrelated services, DNS configuration, or external time settings automatically.
+
+## 217. A domain controller's system drive is almost full. What is your response?
+
+**Level:** Advanced Scenario
+
+**Answer:** Treat low disk as an availability and integrity risk. Identify growth in logs, crash dumps, update caches, antivirus quarantine, SYSVOL, `ntds.dit`, ESE logs, or third-party agents. Verify backups and replication before deleting anything. Do not manually delete `ntds.dit`, ESE transaction logs, SYSVOL content, or unknown files to gain space. Free safe temporary space, extend the volume where supported, correct runaway logging, and move supported data paths only through documented procedures. Check Directory Service, DFSR, DNS, and system events for paused replication or database errors. If the DC is nonunique, rebuilding it may be safer than invasive database maintenance. Confirm healthy replication and backup after remediation.
+
+## 218. A newly promoted DC does not publish SYSVOL or NETLOGON shares. How do you diagnose it?
+
+**Level:** Advanced Scenario
+
+**Answer:** Confirm the server completed promotion, rebooted, uses correct DNS, and has healthy AD replication. Check `net share`, DFS Replication event logs, `dcdiag /test:sysvolcheck /test:advertising`, `repadmin /showrepl`, and the DFSR state for the SYSVOL replicated folder. Determine whether initial synchronization is waiting on an unavailable or unhealthy upstream DC, whether the source is paused after an unexpected shutdown, or whether migration from FRS is incomplete. Fix AD replication, DNS, time, firewall, and DFSR health first. Do not use registry shortcuts that mark SYSVOL authoritative or bypass initial sync unless following a documented recovery procedure with a verified good source.
+
+## 219. A security GPO applies to every laptop except one. How do you prove where the failure occurs?
+
+**Level:** Intermediate Scenario
+
+**Answer:** Confirm the laptop's computer object and OU, then generate computer-scope Resultant Set of Policy with administrative rights. In `gpresult /h`, inspect denied GPOs and reasons. Verify the client can locate a DC, read both the GPC in AD and GPT in SYSVOL, and resolve the domain DFS path. Compare the GPO's AD and SYSVOL version numbers, examine Group Policy operational events, and check security filtering, WMI filters, inheritance, slow-link behavior, and local policy conflicts. Run `gpupdate` once while collecting evidence. If only a particular setting fails, validate client-side extension support and policy precedence. Do not unlink and relink the GPO globally to repair one endpoint.
+
+## 220. Clients repeatedly log “No logon servers available.” What categories of failure do you test?
+
+**Level:** Advanced Scenario
+
+**Answer:** Test client DNS configuration and SRV resolution, IP routing and firewall access, site and subnet mapping, DC service availability, time, secure channel, and whether a DC is advertising. Use `ipconfig /all`, `nltest /dsgetdc:<domain> /force`, `nltest /sc_verify:<domain>`, `dcdiag`, `repadmin`, and targeted port tests. Determine whether the issue is local to one client, subnet, site, DC, or authentication protocol. Review Netlogon, DNS Client, System, and DC logs. Cached logon success does not prove domain connectivity. Fix the dependency rather than adding public DNS as a secondary resolver or hard-coding a single remote DC, both of which often make AD discovery less reliable.
+
+---
+# L3 DNS, Replication, Authentication, and GPO Scenarios
+
+*Questions 221-240 test root-cause analysis across distributed AD dependencies.*
+
