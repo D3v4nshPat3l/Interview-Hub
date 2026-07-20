@@ -971,3 +971,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Password changes are written to the DC handling the request and receive urgent replication behavior to improve convergence. The PDC Emulator is involved in special password-validation behavior: when another DC rejects a password, it may consult the PDC before final failure, and password changes are sent promptly toward the PDC. This reduces failures immediately after a change but does not eliminate all site or connectivity effects. Troubleshoot which DC processed the change, replication status, PDC availability, and cached credentials rather than assuming global instant consistency.
 
+## 146. What is urgent replication?
+
+**Level:** Advanced
+
+**Answer:** Urgent replication is change notification triggered for security-sensitive updates, such as certain password and account lockout changes, so partners are notified without waiting for ordinary intervals. It still depends on available topology, connectivity, and replication scope. The term does not mean every DC in every site receives the change simultaneously. Intersite design and notification configuration affect propagation. Use metadata and event timing to validate actual convergence.
+
+## 147. What is conflict resolution in AD replication?
+
+**Level:** Advanced
+
+**Answer:** When conflicting changes occur, AD compares attribute or object version metadata, originating timestamps, and originating DC GUIDs to select a winner. Different attributes on the same object can merge because replication is primarily attribute-based. Concurrent object creation with the same name may produce conflict-mangled names containing `CNF` and a GUID. Conflict resolution ensures deterministic convergence but does not guarantee the business-correct value wins. Investigate the origin, automation, permissions, and replication timing before cleaning up conflicts.
+
+## 148. What is linked-value replication?
+
+**Level:** Advanced
+
+**Answer:** Linked-value replication tracks individual values of multivalued linked attributes, such as group membership, rather than replicating the entire membership list as one unit. It improves convergence and reduces conflicts for large groups. Membership metadata can be inspected to determine when and where a member was added or removed. This is valuable in incident response and troubleshooting, but retention and garbage collection limit historical visibility. Record critical group changes in centralized logs as well.
+
+## 149. How do you check replication metadata for an object?
+
+**Level:** Intermediate
+
+**Answer:** Use `repadmin /showobjmeta <DC> <distinguished-name>` or PowerShell such as `Get-ADReplicationAttributeMetadata`. Review attribute version, originating DC, originating time, local USN, and invocation ID. For group membership, use linked-value metadata options or appropriate PowerShell. Metadata helps distinguish which DC originated a change and whether replicas received it. Time fields depend on clock quality, and metadata does not identify the human actor by itself; correlate with directory-service auditing, administrative logs, and endpoint evidence.
+
+## 150. What are application directory partitions?
+
+**Level:** Intermediate
+
+**Answer:** Application partitions allow applications to store directory data with a customized set of domain-controller replicas instead of replicating to every DC in a domain or forest. AD-integrated DNS uses application partitions such as `DomainDnsZones` and `ForestDnsZones`. They can contain dynamic objects but not security principals in the normal domain-account sense. Troubleshooting requires checking which DCs hold a replica, partition cross-references, DNS enlistment, and replication status. A DC can be healthy for the domain partition while missing an application partition required for DNS.
+
