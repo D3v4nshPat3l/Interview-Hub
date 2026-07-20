@@ -319,3 +319,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 *Core DC services, directory storage, special roles, and operational placement.*
 
+## 41. What is a domain controller?
+
+**Level:** Beginner
+
+**Answer:** A domain controller is a Windows Server running AD DS that hosts directory partitions and provides domain services such as authentication, LDAP, replication, DC Locator registration, and policy support. Writable domain controllers can originate changes to the domain partition. An RODC receives primarily read-only replicas and uses a controlled password replication policy. Domain controllers are peers in a multi-master system for most operations, but some operations are assigned to FSMO role holders. A DC is not merely a server with the AD Users and Computers console installed. Because domain controllers hold sensitive credentials and trust data, they are Tier 0 systems and should not host unrelated applications or be administered from ordinary workstations.
+
+## 42. Where is the AD database stored?
+
+**Level:** Beginner
+
+**Answer:** The main AD DS database is normally `%SystemRoot%\NTDS\ntds.dit`. It is an Extensible Storage Engine database accompanied by transaction logs and checkpoint files, commonly in the NTDS directory unless paths were changed during promotion. The SYSTEM registry hive contains the boot key material needed as part of credential protection. A consistent domain-controller backup therefore requires AD-aware system-state or supported backup methods rather than copying `ntds.dit` while the service is running. `SYSVOL` is separate and contains policy and sign-in-script files; confusing it with `ntds.dit` is a fundamental error.
+
+## 43. What is stored in `ntds.dit`?
+
+**Level:** Intermediate
+
+**Answer:** `ntds.dit` stores the directory data held by that domain controller, including objects, attributes, link data, schema and configuration replicas, and credential-related values protected by the operating system. A domain controller holds a full replica of its own domain partition; a Global Catalog also holds partial replicas of other domain partitions. The file should never be treated as an ordinary application database. Access to a copy, compatible backup, snapshot, or replication-equivalent credential data can expose domain secrets. Protect domain-controller backups, hypervisor access, storage snapshots, and recovery media with the same rigor as the live DC.
+
+## 44. What is multi-master replication?
+
+**Level:** Intermediate
+
+**Answer:** Multi-master replication means most directory changes can be made on any writable domain controller that hosts the relevant partition. Each DC assigns update sequence numbers locally and replication metadata tracks originating versions, timestamps, and invocation IDs so changes can converge. Multi-master does not mean simultaneous conflicting updates are merged semantically; AD uses conflict-resolution rules. Password changes receive special handling, and some operations are single-master through FSMO roles. The model improves availability and geographic administration, but it depends on DNS, connectivity, time, authentication, and healthy replication topology.
+
+## 45. What is a Global Catalog server?
+
+**Level:** Intermediate
+
+**Answer:** A Global Catalog server is a domain controller that holds a writable full copy of its own domain partition and a read-only partial attribute set for objects in every other domain in the forest. It supports forest-wide searches without referrals and helps evaluate universal group membership during sign-in. The attributes included in the partial attribute set are defined by the schema and selected for common search use. GC queries normally use ports 3268 or 3269. Not every DC must be a GC, although modern environments frequently make all writable DCs GCs unless a specific design constraint exists. GC availability is especially important in multi-domain forests.
+
