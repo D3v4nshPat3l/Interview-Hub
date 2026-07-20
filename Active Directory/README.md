@@ -409,3 +409,38 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Placement should prioritize reliability, replication health, administrative control, and workload rather than arbitrary separation. The Schema Master and Domain Naming Master are often colocated in the forest root. The PDC Emulator should be on a highly available, well-connected DC because of time, password, and lockout functions. The RID Master is commonly colocated with the PDC Emulator. Infrastructure Master placement depends on GC topology and Recycle Bin state. Avoid putting all roles on fragile or remote infrastructure, but do not overengineer separation in a small environment. Document recovery targets and ensure role holders are backed up and monitored.
 
+## 56. What is an RODC?
+
+**Level:** Intermediate
+
+**Answer:** A Read-Only Domain Controller hosts primarily read-only directory replicas and is designed for locations where physical security, connectivity, or local administrative trust is limited. Changes are referred to a writable DC. An RODC can cache selected credentials according to its Password Replication Policy, supports delegated local administration, and uses a separate `krbtgt` account associated with that RODC. It can also use the filtered attribute set to exclude sensitive schema attributes. RODCs reduce some risks but are not disposable appliances; theft or compromise still requires identifying cached credentials, resetting affected passwords, and evaluating trust paths.
+
+## 57. What is the Directory Services Restore Mode password?
+
+**Level:** Intermediate
+
+**Answer:** The DSRM password is a local recovery credential set on a domain controller for offline directory recovery and maintenance. In DSRM, AD DS is not running and authentication relies on the local recovery context rather than normal domain accounts. The password must be unique, protected, rotated, and recoverable under emergency procedures. Windows LAPS can manage and back up DSRM passwords on supported domain controllers. A DSRM credential should not be shared across all DCs or stored in an unsecured runbook. Its use should trigger change-control and security review.
+
+## 58. What is the role of the Netlogon service on a domain controller?
+
+**Level:** Intermediate
+
+**Answer:** Netlogon supports secure-channel operations, domain-controller registration and discovery, authentication-related communication, and publication of DC Locator DNS records. It registers SRV records based on the domain controller's capabilities and site. On clients and members, Netlogon participates in locating a DC and maintaining the machine-account secure channel. Troubleshooting may involve `nltest`, the Netlogon event log, `netlogon.dns`, DNS registration, and secure-channel tests. Restarting Netlogon can trigger DNS record registration, but doing so without fixing DNS or permission problems only treats the symptom.
+
+## 59. What is the difference between promoting a new DC and cloning a DC?
+
+**Level:** Advanced
+
+**Answer:** Promotion installs AD DS and creates a new domain controller through supported replication and configuration workflows. DC cloning is a controlled feature for compatible virtualized domain controllers that uses an authorized source, cloning configuration, and VM-GenerationID-aware safeguards. Copying a DC virtual disk or restoring an arbitrary snapshot is not cloning. A cloned DC receives a new identity and performs supported initialization. Before using cloning, verify hypervisor support, permitted applications, source-DC membership in the cloneable group, network configuration, and recovery planning.
+
+## 60. What is VM-GenerationID, and why is it important for virtualized domain controllers?
+
+**Level:** Advanced
+
+**Answer:** VM-GenerationID is a hypervisor-provided value that allows supported versions of AD DS to detect certain virtual-machine rollback or cloning events. When AD detects a generation change, it can reset its invocation ID and discard the local RID pool, reducing the risk of USN rollback and duplicate SID issuance. It does not make every snapshot workflow safe, replace system-state backup, or protect against copying unsupported images. Hypervisor administrators are effectively part of the Tier 0 trust boundary because they can control domain-controller execution, storage, memory, and network state.
+
+---
+# DNS, DC Locator, Time, Ports, and Secure Channels
+
+*The infrastructure dependencies behind sign-in, domain join, authentication, and replication.*
+
