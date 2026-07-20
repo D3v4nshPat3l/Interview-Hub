@@ -158,3 +158,38 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** AD DS is a domain directory designed around Windows enterprise networks, domain controllers, Kerberos, NTLM, LDAP, Group Policy, domain join, and hierarchical objects. Microsoft Entra ID is a cloud identity and access platform designed for modern application authentication and authorization using protocols such as OAuth 2.0, OpenID Connect, and SAML. Entra ID has tenants, users, groups, applications, service principals, roles, Conditional Access, and cloud device identities, but it does not provide traditional AD domain controllers or classic GPO processing. Hybrid organizations synchronize or provision selected identities between the systems, but synchronization does not make them one database. Microsoft Entra Domain Services is a separate managed-domain service that exposes LDAP, Kerberos, NTLM, and Group Policy for compatible workloads.
 
+## 16. What is AD LDS, and how is it different from AD DS?
+
+**Level:** Intermediate
+
+**Answer:** Active Directory Lightweight Directory Services is an LDAP directory service that can run multiple application-specific directory instances without creating a Windows security domain. It uses the same underlying directory technology and many AD-compatible APIs, but it does not provide domain join, domain user logon, Group Policy, or domain controllers in the AD DS sense. Applications can define an appropriate schema and store directory data without extending the enterprise AD DS forest. AD LDS is useful when an application needs LDAP and directory semantics but should not depend on or modify the corporate identity directory.
+
+## 17. What is AD CS?
+
+**Level:** Beginner
+
+**Answer:** Active Directory Certificate Services is Microsoft's public key infrastructure role for issuing, managing, validating, renewing, and revoking digital certificates. In an enterprise deployment, AD CS can integrate with AD DS for certificate templates, autoenrollment, access control, and identity mapping. Certificates may support TLS, user or computer authentication, smart-card sign-in, code signing, IPsec, and other cryptographic use cases. AD CS is security-critical because a certificate that maps to a privileged identity can be equivalent to that identity's authentication capability. Interview answers should therefore include governance of certification authorities, offline roots, template permissions, issuance requirements, revocation, key protection, auditing, and recovery - not only the definition of a CA.
+
+## 18. What is AD FS?
+
+**Level:** Beginner
+
+**Answer:** Active Directory Federation Services is a federation service that issues security tokens so users can access claims-aware applications across organizational or security boundaries. AD FS typically authenticates a user against AD DS and then issues a signed token containing claims for a relying party. It has historically been used for federated sign-in to Microsoft 365 and third-party applications. Many organizations now prefer cloud authentication with Microsoft Entra ID because AD FS introduces additional servers, certificates, proxy components, monitoring, and recovery requirements. Where AD FS remains, its signing keys, service account, configuration database, and administrative plane are Tier 0 assets.
+
+## 19. What is single sign-on in an AD environment?
+
+**Level:** Beginner
+
+**Answer:** Single sign-on means a user authenticates once and can subsequently access multiple authorized resources without repeatedly entering credentials. In an AD domain, Windows integrated authentication commonly uses the user's logon session and Kerberos tickets to achieve SSO to services with correctly registered SPNs. SSO is not the same as using one password everywhere by manual re-entry, and it does not bypass authorization. Failures often occur because of SPN problems, DNS aliases, time skew, browser zone settings, delegation requirements, or fallback to NTLM. In hybrid environments, seamless sign-on to cloud applications may involve Entra join, hybrid join, Primary Refresh Tokens, federation, or Entra Connect features rather than classic domain Kerberos alone.
+
+## 20. What are the most important protocols and ports associated with AD DS?
+
+**Level:** Intermediate
+
+**Answer:** Important services include DNS on TCP/UDP 53, Kerberos on TCP/UDP 88, LDAP on TCP/UDP 389, LDAPS on TCP 636, Global Catalog LDAP on TCP 3268 and 3269, SMB on TCP 445, RPC Endpoint Mapper on TCP 135, dynamic RPC ports, Kerberos password change on TCP/UDP 464, and NTP on UDP 123. ICMP can also matter for diagnostics and path behavior. Port lists alone are insufficient: the communication direction, dynamic RPC range, site topology, firewall state, name resolution, authentication method, and certificate requirements determine whether a workflow succeeds. Avoid the common mistake of opening only 389 and 88 between sites and assuming all domain operations will work.
+
+---
+# Objects, Schema, Naming, Groups, and Delegation
+
+*Identity attributes, security principals, naming, access control, and delegated administration.*
+
