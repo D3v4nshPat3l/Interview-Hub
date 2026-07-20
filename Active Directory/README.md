@@ -660,3 +660,38 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** A Golden Ticket is a forged TGT created using key material for the domain's `krbtgt` account. It can contain manipulated identity and authorization data and may provide durable domain-level persistence. Its existence normally implies severe compromise of domain secrets or a domain controller. Response requires more than resetting one user: contain privileged access, investigate the compromise path, reset `krbtgt` twice with adequate replication and planning, rotate other exposed credentials, review trusts and certificates, and consider forest recovery when integrity cannot be established. Detection combines ticket anomalies, encryption behavior, impossible identity data, endpoint evidence, and identity-threat analytics.
 
+## 96. What is a Silver Ticket?
+
+**Level:** Advanced
+
+**Answer:** A Silver Ticket is a forged service ticket created with the key of a particular service account or computer account. It normally targets services associated with that identity and may avoid contacting the KDC during use, reducing KDC-side visibility. Impact depends on the service and account privileges. Response includes rotating the compromised service or machine account key, correcting service identity design, reviewing the host, and investigating how the key was obtained. Managed service accounts and machine-bound approaches reduce risks associated with static human-managed service credentials.
+
+## 97. What is unconstrained delegation?
+
+**Level:** Advanced
+
+**Answer:** Unconstrained delegation allows a service to receive a forwardable representation of a user's credentials so it can access other services on the user's behalf. On a compromised delegated host, privileged users' tickets may be exposed, making this configuration high risk. Inventory accounts and computers trusted for unconstrained delegation, remove it where possible, avoid privileged sign-in to those systems, use Protected Users or “account is sensitive and cannot be delegated” for compatible privileged identities, and migrate applications to constrained or resource-based models. Domain controllers have special delegation-related behavior and require separate consideration.
+
+## 98. What is constrained delegation?
+
+**Level:** Advanced
+
+**Answer:** Constrained delegation limits the services to which an account may delegate, represented through attributes such as `msDS-AllowedToDelegateTo`. Protocol transition can allow a service to obtain a Kerberos identity for a user who did not initially authenticate with Kerberos, depending on configuration. It is safer than unconstrained delegation but still powerful: compromise of the delegating account can permit impersonation to listed services. Review target SPNs, protocol-transition settings, service-account privilege, and whether the application actually requires delegation. Prefer least-privilege service identities and monitor changes.
+
+## 99. What is resource-based constrained delegation?
+
+**Level:** Advanced
+
+**Answer:** Resource-based constrained delegation, or RBCD, places the authorization decision on the target resource through `msDS-AllowedToActOnBehalfOfOtherIdentity`. This simplifies cross-domain and service-owner administration because the resource owner controls which principals may act on behalf of users. Security depends on who can modify the target computer or service object's attribute. An apparently low-level right such as control over a computer object can therefore become an impersonation path. Audit write permissions, machine-account creation, RBCD attribute changes, and service tickets. Remove stale entries after migrations or testing.
+
+## 100. What are Protected Users and “Account is sensitive and cannot be delegated”?
+
+**Level:** Advanced
+
+**Answer:** Protected Users is a group that applies stronger credential protections to compatible domain accounts, including restrictions on NTLM, weaker Kerberos encryption, credential caching, and delegation. It can break legacy applications and should be tested before broad use. The “Account is sensitive and cannot be delegated” flag prevents supported delegation of that account but does not provide every protection of Protected Users. Both are useful for privileged identities, but neither replaces tiering, secure administration, MFA at appropriate access layers, endpoint hardening, and credential rotation. Emergency and service accounts require compatibility analysis before enrollment.
+
+---
+# Group Policy and SYSVOL
+
+*Policy architecture, processing, replication, security filtering, and troubleshooting.*
+
