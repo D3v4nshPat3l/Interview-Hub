@@ -1096,3 +1096,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Active Directory Federation Services is a Security Token Service that authenticates users and issues signed claims-based tokens to relying parties. Its trust model depends on the integrity of the federation servers, service account, token-signing and token-decrypting certificates, relying-party configuration, claims rules, web application proxies, DNS, TLS, and AD DS. A stolen token-signing key can enable forged tokens until the trust and keys are remediated, so certificate protection and rollover are critical. Harden federation servers as privileged assets, minimize local administrators, use managed service accounts where supported, monitor configuration and certificate exports, restrict administrative endpoints, and keep proxies separated from internal federation servers. Organizations migrating away from AD FS should inventory every relying party and authentication requirement rather than simply removing servers after enabling cloud authentication.
 
+## 166. What is the difference between an enterprise CA and a standalone CA in AD CS?
+
+**Level:** Intermediate
+
+**Answer:** An enterprise certification authority integrates with AD DS, uses certificate templates, can publish certificates and revocation information into the directory, and can support autoenrollment. A standalone CA does not require AD DS integration and generally processes requests using local policy rather than enterprise templates. Enterprise CAs are convenient but become highly privileged because certificates can authenticate users and computers, sign code, encrypt data, or establish trust. Standalone offline root CAs are commonly used in a two-tier PKI, with one or more online enterprise issuing CAs beneath them. The design should define trust boundaries, issuance policies, hardware protection, administrator separation, certificate lifetimes, revocation availability, audit retention, disaster recovery, and key-compromise procedures. “The CA is not a domain controller” does not mean it is lower impact; a compromised enterprise CA can undermine the identity system.
+
+## 167. What is a certificate template?
+
+**Level:** Intermediate
+
+**Answer:** A certificate template is an AD object that defines how an enterprise CA may issue a class of certificates. It controls intended purposes, subject-name construction, cryptographic settings, validity, renewal, enrollment permissions, approval requirements, authorized signatures, issuance policies, and whether private keys may be exported. A CA must also be configured to issue the template. Security review must examine both template permissions and CA policy because an apparently harmless permission can become dangerous when a requester may supply an arbitrary subject alternative name, obtain an authentication-capable certificate, alter the template, act as an enrollment agent, or bypass approval. Remove unused templates from issuance, restrict owners and write permissions, avoid broad enrollment for privileged authentication templates, and monitor template and CA configuration changes.
+
+## 168. How does certificate autoenrollment work?
+
+**Level:** Intermediate
+
+**Answer:** Autoenrollment uses Group Policy and enterprise CA integration to let eligible users or computers automatically request, renew, and manage certificates based on certificate-template permissions and settings. During policy processing, the client evaluates templates, existing certificates, renewal thresholds, and CA availability. Troubleshooting requires checking GPO scope, template issuance, Read and Enroll or Autoenroll permissions, DNS and RPC connectivity to the CA, certificate-services event logs, enrollment-policy endpoints, time, and the certificate store. Run `gpresult`, inspect `certlm.msc` or `certmgr.msc`, and use `certutil` diagnostic commands appropriate to the case. Do not solve enrollment failures by broadly granting Enroll or Full Control; that can turn an availability issue into a privilege-escalation path.
+
+## 169. How can certificates be used for Active Directory authentication?
+
+**Level:** Advanced
+
+**Answer:** AD can map a certificate to an account and use public-key authentication mechanisms such as PKINIT to obtain a Kerberos ticket. Smart-card logon and Windows Hello for Business certificate-trust deployments are examples. The certificate must chain to a trusted authority, contain suitable enhanced key usages and identity information, meet mapping rules, and pass validity and revocation checks. Because a valid authentication certificate may substitute for a password, issuance controls are identity controls. Protect CA keys, certificate templates, enrollment agents, request approval, private keys, and account mappings. During incident response, disabling an account may not be sufficient if certificates, refresh tokens, or cached tickets remain valid; revoke or invalidate the relevant credentials and verify how revocation is consumed by each relying service.
+
+## 170. What are the common security classes of AD CS misconfiguration?
+
+**Level:** Advanced
+
+**Answer:** Common classes include templates that let low-privileged requesters supply another identity, templates with authentication purposes and weak enrollment controls, enrollment-agent abuse, writable templates or CA objects, dangerous CA-wide flags, overly privileged CA managers, web-enrollment endpoints exposed to NTLM relay, weak certificate mappings, and inadequate protection of CA private keys. The “ESC” labels used by security tools are useful shorthand, but risk depends on the exact template, CA, mapping behavior, requester rights, and available authentication paths. Defenders should inventory CAs and templates, identify who can enroll and who can modify policy, require secure transport and relay protections, remove obsolete enrollment endpoints, apply current patches, monitor certificate issuance and configuration changes, and test revocation and key-compromise procedures. Do not remediate solely by renaming a template or removing one enrollment permission without reviewing inherited and indirect rights.
+
