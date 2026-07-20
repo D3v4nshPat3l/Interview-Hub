@@ -379,3 +379,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** The RID Master allocates pools of relative identifiers to domain controllers. When a DC creates a security principal, it combines the domain SID with a RID from its local pool to form a unique SID. This allows DCs to create accounts without contacting the RID Master for every object. If the role is unavailable, account creation continues until local pools are exhausted. Monitor RID pool health and investigate unexpectedly high consumption, which may indicate automation errors or abuse. Never attempt to reuse deleted SIDs; uniqueness is central to Windows authorization.
 
+## 51. What does the PDC Emulator do?
+
+**Level:** Intermediate
+
+**Answer:** The PDC Emulator has several high-impact functions. It is the authoritative time source for the domain hierarchy, with the forest-root PDC ultimately synchronized to a reliable external source. It receives urgent password-change information and is consulted when another DC rejects a recently changed password. It is preferred for account lockout processing, Group Policy editing coordination, and certain legacy compatibility functions. Because it affects time, passwords, lockouts, and operations, it should be reliable, well monitored, and placed on capable infrastructure. Moving the role requires validating time configuration afterward.
+
+## 52. What does the Infrastructure Master do?
+
+**Level:** Advanced
+
+**Answer:** The Infrastructure Master maintains references to security principals from other domains, historically updating phantom references when external objects are renamed or moved. In a multi-domain forest where not all DCs are Global Catalogs, placing the Infrastructure Master on a GC can prevent it from seeing stale references because the GC already appears current. If every DC in the domain is a GC, placement does not matter. When Active Directory Recycle Bin is enabled, the role has little or no practical work for cross-domain reference updates. This is a classic interview topic where the correct answer depends on topology rather than a memorized prohibition.
+
+## 53. How do you identify FSMO role holders?
+
+**Level:** Beginner
+
+**Answer:** Common methods include `netdom query fsmo`, `Get-ADForest`, `Get-ADDomain`, and `Get-ADDomainController -Filter * | Select-Object HostName,OperationMasterRoles`. GUI consoles can also show the roles. In an incident or outage, do not stop at identifying the configured holder; verify that the server is alive, advertising, synchronized, and replicating. A stale directory reference or unreachable role holder can exist even though a command prints a name. Document the role distribution as part of routine operations and disaster recovery.
+
+## 54. What is the difference between transferring and seizing an FSMO role?
+
+**Level:** Intermediate
+
+**Answer:** A transfer is a cooperative move performed while the current role holder is online and healthy. The old holder hands off the role cleanly. A seizure forcibly assigns the role when the previous holder is permanently unavailable or cannot be returned safely. Seizure is a recovery action, not a shortcut. After seizing, the old DC should not be brought back online without supported cleanup or rebuilding because two systems believing they own a role can create serious problems. Before seizure, confirm the outage, evaluate how long the operation can wait, check replication, and preserve evidence if compromise is suspected.
+
+## 55. How should FSMO roles be placed?
+
+**Level:** Advanced
+
+**Answer:** Placement should prioritize reliability, replication health, administrative control, and workload rather than arbitrary separation. The Schema Master and Domain Naming Master are often colocated in the forest root. The PDC Emulator should be on a highly available, well-connected DC because of time, password, and lockout functions. The RID Master is commonly colocated with the PDC Emulator. Infrastructure Master placement depends on GC topology and Recycle Bin state. Avoid putting all roles on fragile or remote infrastructure, but do not overengineer separation in a small environment. Document recovery targets and ensure role holders are backed up and monitored.
+
