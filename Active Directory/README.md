@@ -1126,3 +1126,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Common classes include templates that let low-privileged requesters supply another identity, templates with authentication purposes and weak enrollment controls, enrollment-agent abuse, writable templates or CA objects, dangerous CA-wide flags, overly privileged CA managers, web-enrollment endpoints exposed to NTLM relay, weak certificate mappings, and inadequate protection of CA private keys. The “ESC” labels used by security tools are useful shorthand, but risk depends on the exact template, CA, mapping behavior, requester rights, and available authentication paths. Defenders should inventory CAs and templates, identify who can enroll and who can modify policy, require secure transport and relay protections, remove obsolete enrollment endpoints, apply current patches, monitor certificate issuance and configuration changes, and test revocation and key-compromise procedures. Do not remediate solely by renaming a template or removing one enrollment permission without reviewing inherited and indirect rights.
 
+## 171. What is Windows LAPS?
+
+**Level:** Intermediate
+
+**Answer:** Windows Local Administrator Password Solution manages a unique, random local administrator password for each joined device and backs it up to AD DS or Microsoft Entra ID according to policy. It reduces the lateral-movement risk created by a shared local administrator password. Windows LAPS is built into supported Windows versions and adds features beyond legacy Microsoft LAPS, including password encryption in AD, password history, post-authentication actions, automatic account management on newer systems, and support for Directory Services Repair Mode passwords on domain controllers. A secure deployment delegates password-read and reset rights narrowly, protects recovery workflows, audits reads, validates schema and policy, and prevents help-desk staff from receiving broad control over computer objects. LAPS does not eliminate the need to restrict local administrator use or protect privileged workstations.
+
+## 172. How does Windows LAPS differ from legacy Microsoft LAPS?
+
+**Level:** Intermediate
+
+**Answer:** Legacy Microsoft LAPS used a separately installed client-side extension and stored the managed password in attributes such as `ms-Mcs-AdmPwd`. Windows LAPS is integrated into supported Windows operating systems and uses newer attributes and policy settings. It can encrypt passwords in AD DS, maintain password history, back up to Entra ID, manage DSRM credentials, and perform post-authentication actions. Windows LAPS includes emulation modes for migration, but legacy and new policies must be planned carefully to avoid conflicting ownership of the account or password. Migration should inventory clients, schema state, GPOs, readers, scripts, management tools, and operational dependencies. Remove obsolete broad permissions after transition and verify that monitoring covers both old and new password attributes until legacy LAPS is fully retired.
+
+## 173. How should access to LAPS passwords be secured and audited?
+
+**Level:** Advanced
+
+**Answer:** Delegate password retrieval only to roles that genuinely need it, preferably through controlled just-in-time workflows. Review extended rights on computer OUs, inherited permissions, groups allowed to decrypt encrypted passwords, and accounts allowed to reset expiration. Separate the ability to read a password from the ability to modify computer objects or policy. Enable directory-service auditing for sensitive attribute access where operationally feasible, collect Windows LAPS operational events, and monitor unusual volume, off-hours retrieval, or access to high-value systems. Protect management consoles and transcripts because the password can leak after a legitimate read. Configure rapid rotation after use and define incident handling for suspected disclosure. Encryption in AD reduces exposure to generic directory readers, but it does not protect against a compromised authorized decryptor or Tier 0 administrator.
+
+## 174. What is a standalone Managed Service Account?
+
+**Level:** Intermediate
+
+**Answer:** A standalone Managed Service Account, or sMSA, is a domain account whose password is automatically managed for a service running on one computer. It reduces manual password handling and supports automatic SPN management in suitable configurations. Because it is tied to a single host, it is not appropriate for a load-balanced service running on multiple servers. The service and application must support using the account without an interactively supplied password. Administrators should still limit logon rights, service permissions, local privileges, and access to the host. For multi-host services, a group Managed Service Account is generally the better fit.
+
+## 175. What is a group Managed Service Account?
+
+**Level:** Intermediate
+
+**Answer:** A group Managed Service Account, or gMSA, is a domain service account with an automatically managed password that can be retrieved by a defined set of authorized computers. It supports services, scheduled tasks, and application pools across multiple hosts when the application supports managed accounts. The Key Distribution Service derives password material from a KDS root key, and AD stores authorization information controlling which principals may retrieve it. Security depends heavily on the `PrincipalsAllowedToRetrieveManagedPassword` scope: compromising an authorized host may expose the gMSA credential. Use a separate gMSA per service boundary, minimize retrieval hosts, avoid interactive logon, monitor configuration changes, and remove retired hosts promptly. A gMSA solves password rotation, not excessive service privileges.
+
