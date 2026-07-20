@@ -457,3 +457,107 @@ For a strong spoken interview answer, use four layers:
 
 ---
 
+# Windows Hardening and Endpoint Protection
+
+## 101. What is Windows hardening?
+
+**Answer:** Windows hardening is the process of reducing attack surface and increasing resilience through secure configuration, patching, least privilege, application control, credential protection, encryption, logging, backup, and monitoring. It starts with a known baseline, then adjusts controls for the system's role and business requirements. Hardening is not a one-time checklist: configuration drift, new software, new threats, and servicing changes require continuous assessment. A strong program tests changes in stages, documents exceptions, measures compliance, and verifies that security telemetry remains available. Disabling a feature without understanding dependencies can create outages while providing little risk reduction.
+
+## 102. What is a Windows security baseline?
+
+**Answer:** A security baseline is a tested set of recommended configuration settings for a defined Windows version and role. Microsoft publishes baselines through its security compliance tooling and management guidance, and organizations may also map CIS or STIG benchmarks to their requirements. A baseline is a starting point, not a universal mandate. Settings must be evaluated for compatibility, threat model, regulatory obligations, and operational impact. Good governance records deviations, owners, rationale, compensating controls, and review dates. Baseline compliance should be measured continuously rather than assumed because a GPO was linked once.
+
+## 103. Why is patch management important?
+
+**Answer:** Patch management reduces exposure to known vulnerabilities and reliability defects by identifying assets, evaluating updates, testing, deploying, verifying, and handling exceptions. It includes the operating system, Microsoft applications, third-party software, drivers, firmware, and security intelligence. Installing every update immediately without testing may create outages, while delaying critical fixes creates exploitable windows. Mature programs prioritize by exploitability, exposure, asset criticality, compensating controls, and active threat intelligence. Verification matters because a deployment report can say “successful” while a device is offline, reboot-pending, or missing a superseding update.
+
+## 104. What is WSUS?
+
+**Answer:** Windows Server Update Services allows organizations to synchronize Microsoft updates, approve them for groups, and control distribution to managed Windows systems. WSUS provides update metadata and content management but is not a complete vulnerability-management platform. Administrators must maintain products, classifications, synchronization, cleanup, database health, client targeting, and reporting. Modern organizations may use Windows Update for Business, Intune, Configuration Manager, Autopatch, or combinations. Security teams should validate actual patch state with endpoint inventory and vulnerability data rather than relying only on WSUS approval status.
+
+## 105. What is Windows Update for Business?
+
+**Answer:** Windows Update for Business is a set of policies and cloud-based servicing capabilities that lets organizations control update timing, rings, deadlines, deferrals, and feature-update targets while devices obtain content from the Windows Update service or supported delivery mechanisms. It reduces the need to approve every individual update manually. Deployment rings help test changes on representative devices before broad release. Administrators still need reporting, exception handling, rollback planning, bandwidth management, and application compatibility validation. A ring is a risk-management mechanism, not permission to leave high-risk systems indefinitely unpatched.
+
+## 106. What is Microsoft Defender Antivirus?
+
+**Answer:** Microsoft Defender Antivirus is the built-in anti-malware engine in modern Windows. It uses signatures, behavior monitoring, cloud-delivered protection, machine-learning models, heuristics, scanning, and platform integrations to detect and remediate threats. In managed environments it can integrate with Microsoft Defender for Endpoint, but the antivirus engine and the EDR service are distinct capabilities. Security depends on current platform and intelligence versions, real-time protection, cloud connectivity, tamper protection, exclusions, and policy. An absence of detections does not prove a system is clean; attackers may evade, disable, or operate outside covered telemetry.
+
+## 107. What is Microsoft Defender for Endpoint?
+
+**Answer:** Microsoft Defender for Endpoint is an enterprise endpoint-security platform that provides capabilities such as EDR telemetry, alerting, investigation, threat hunting, vulnerability management, attack-surface reduction integration, and response actions, depending on license and configuration. It extends beyond local antivirus. Analysts use device timelines, alerts, advanced hunting, incident correlation, and live-response features. Effective deployment requires onboarding health, sensor connectivity, role-based access, retention awareness, and tuning. Portal conclusions should be validated with endpoint and other evidence because no EDR sees every action or retains all data forever.
+
+## 108. What is tamper protection?
+
+**Answer:** Tamper protection helps prevent unauthorized changes to important Microsoft Defender security settings, including attempts by malware or local administrators to disable protections through common configuration paths. It is especially useful when centrally managed because local compromise should not easily weaken the endpoint's controls. It does not prevent every kernel-level, offline, or platform exploit and should not be described as unbreakable. Responders should investigate tamper alerts and configuration changes while checking whether the device remained onboarded and whether policy was actually enforced.
+
+## 109. What are Attack Surface Reduction rules?
+
+**Answer:** Attack Surface Reduction, or ASR, rules target behaviors frequently abused in attacks, such as Office applications creating child processes, credential stealing from LSASS, executable content launched from email or webmail, or script abuse. Rules can generally be configured in audit, warn, block, or disabled states depending on the rule and management method. A safe rollout starts with telemetry, analyzes business impact, creates narrow exclusions only when necessary, and moves toward enforcement. Broad exclusions can negate the control. ASR complements, rather than replaces, application control, EDR, patching, and user training.
+
+## 110. What is Controlled Folder Access?
+
+**Answer:** Controlled Folder Access is a Microsoft Defender feature intended to reduce ransomware impact by restricting untrusted applications from modifying protected folders. Windows includes default protected locations and administrators can add others and allow approved applications. It is behavior-focused, not a complete backup or ransomware solution. Legitimate applications can be blocked if not recognized, so audit and staged deployment are important. Attackers with sufficient privilege may target backups, cloud data, or unprotected locations. Organizations still need offline or immutable backups, least privilege, application control, and tested restoration.
+
+## 111. What is Microsoft Defender SmartScreen?
+
+**Answer:** SmartScreen evaluates websites, downloads, application reputation, and phishing indicators using local and cloud intelligence. It can warn or block users from known malicious or low-reputation content. Reputation is not the same as a code-signing guarantee, and newly created legitimate tools can also have limited reputation. SmartScreen is most effective when users cannot casually bypass it and when browser and operating-system policies are managed. It does not inspect every possible delivery path or prove that an allowed file is benign.
+
+## 112. What is App Control for Business?
+
+**Answer:** App Control for Business, historically associated with Windows Defender Application Control, enforces code-integrity policies that determine which binaries, scripts, installers, and in some cases drivers are trusted to run. Policies can use signer, publisher, hash, path, reputation, and managed-installer concepts depending on design. It provides stronger platform-level application control than relying only on user discretion. Deployment should begin with inventory and audit mode, use trusted signing strategies, test recovery paths, and protect policy management. Poorly designed policies can block critical boot or business components.
+
+## 113. What is AppLocker?
+
+**Answer:** AppLocker controls execution of executables, scripts, Windows Installer files, packaged apps, and optionally DLLs using rules based on publisher, path, or hash and assignments to users or groups. Rule collections can operate in audit or enforcement mode. AppLocker is useful for many enterprise scenarios but does not control all interpreted code or every application behavior after launch. Allowed applications can become proxy execution tools. Microsoft positions App Control for Business as the stronger strategic control for many modern scenarios, while AppLocker remains useful where its user/group targeting and administration model fit.
+
+## 114. What is the difference between AppLocker and App Control for Business?
+
+**Answer:** Both restrict code execution, but they operate at different layers and have different strengths. AppLocker is policy-driven around file collections and user or group targeting. App Control for Business is built on Windows code integrity and can provide stronger device-wide trust enforcement, including kernel-mode controls. AppLocker may be easier for some user-specific requirements, while App Control is often preferred for robust allowlisting. They can coexist in planned designs, but policy complexity increases. Interviewers expect you to mention audit-first deployment, trusted signers, exception governance, and protection against living-off-the-land binaries.
+
+## 115. What is the Microsoft vulnerable driver blocklist?
+
+**Answer:** The vulnerable driver blocklist prevents known vulnerable or maliciously abused signed drivers from loading under supported Windows security configurations. This addresses bring-your-own-vulnerable-driver attacks, where adversaries exploit a legitimate signed kernel driver to disable security or gain kernel access. Blocklists require current platform support and policy; organizations should verify that protections are enabled and drivers remain compatible. The list cannot contain every vulnerable driver immediately, so application control, HVCI, driver inventory, patching, and EDR monitoring remain necessary.
+
+## 116. What is BitLocker?
+
+**Answer:** BitLocker encrypts Windows volumes to protect data at rest, especially if a device or drive is lost, stolen, or accessed offline. It can use the TPM to release keys when the boot state is trusted and can require additional authentication such as a PIN. Recovery keys are essential for legitimate recovery and must be escrowed and access-controlled. BitLocker does not protect files from malware or an attacker operating after the volume is unlocked. Incident responders should understand key protectors and avoid firmware or boot changes that trigger recovery before keys are secured.
+
+## 117. What is the difference between TPM-only and TPM-plus-PIN BitLocker?
+
+**Answer:** TPM-only mode releases the volume key automatically when measured boot conditions are acceptable, offering transparent protection against offline theft. TPM-plus-PIN requires knowledge of a pre-boot PIN in addition to the trusted platform state, which provides stronger resistance to some attacks involving a stolen powered-off device. The stronger mode adds support and usability considerations, including PIN recovery and accessibility. Neither mode protects against malware after successful boot. Organizations should choose protectors based on threat model, device risk, user workflow, and recovery capability.
+
+## 118. What is BitLocker recovery mode?
+
+**Answer:** BitLocker enters recovery when normal key protectors cannot unlock the volume, often because boot measurements, firmware, TPM state, policy, or hardware configuration changed. The user or administrator must provide an authorized recovery key or use another configured protector. Recovery is a security feature, not merely an error. Before making BIOS, UEFI, TPM, boot-order, or disk changes, administrators should verify key escrow and suspend BitLocker when appropriate under change control. Investigators should document the original state and obtain lawful access to recovery material without altering evidence unnecessarily.
+
+## 119. What is EFS?
+
+**Answer:** Encrypting File System provides file-level encryption on NTFS using per-file encryption keys protected by user or recovery certificates. It differs from BitLocker, which encrypts entire volumes. EFS can protect selected files while the system is running, but operational complexity includes certificate backup, data-recovery agents, key roaming, and application behavior. If the user profile or private key is lost and no recovery agent exists, data may be unrecoverable. EFS does not prevent an authenticated user or malware running as that user from reading decrypted files.
+
+## 120. What is DPAPI?
+
+**Answer:** Data Protection API allows Windows applications to protect data using keys derived from the user's or system's security context and associated master keys. Browsers, Credential Manager, applications, and Windows components use DPAPI to protect secrets. DPAPI reduces the need for every application to implement its own key storage, but secrets can often be decrypted when the relevant user is logged on or when an investigator has appropriate credentials and master-key material. Domain backup keys may affect recovery in domain environments. Analysts must preserve profiles, Registry hives, credentials, and context needed for lawful decryption.
+
+## 121. What is Windows Sandbox?
+
+**Answer:** Windows Sandbox provides a disposable, isolated Windows environment using virtualization-based technology. It is useful for testing untrusted applications without permanently changing the host, but it is not a substitute for a dedicated malware-analysis laboratory. Clipboard, networking, mapped folders, and configuration choices can create paths between host and sandbox. Sophisticated malware may detect virtualization or exploit unpatched components. For high-risk analysis, use segmented infrastructure, snapshots, controlled egress, instrumentation, and documented evidence-handling procedures.
+
+## 122. What is exploit protection?
+
+**Answer:** Windows exploit protection applies mitigations such as Data Execution Prevention, Address Space Layout Randomization, Control Flow Guard, and process-specific restrictions. These controls make exploitation less reliable or block classes of techniques. They do not patch the underlying vulnerability and can cause compatibility issues with unusual applications. Enterprise deployment should use Microsoft defaults as a baseline, test custom process settings, and monitor failures. Attackers may chain techniques or use signed vulnerable components, so exploit protection is one layer in defense in depth.
+
+## 123. What are DEP, ASLR, and CFG?
+
+**Answer:** Data Execution Prevention marks data pages non-executable unless explicitly permitted. Address Space Layout Randomization changes memory locations to make hard-coded addresses unreliable. Control Flow Guard restricts indirect calls to valid targets. Together they raise exploitation difficulty, but their effectiveness depends on application compilation, platform support, and absence of bypasses or information leaks. A process can opt out of some mitigations or load incompatible modules. Analysts can inspect mitigation state when investigating exploit behavior, but an enabled flag does not prove the process could not be exploited.
+
+## 124. What is least privilege on Windows?
+
+**Answer:** Least privilege means users, services, applications, and administrators receive only the rights needed for their tasks, for only as long as needed. On Windows this includes standard-user operation, limited local administrators, restricted service accounts, Just Enough Administration, controlled software installation, narrow share and NTFS permissions, and separation of administrative tiers. Least privilege reduces blast radius but must be paired with usable workflows; otherwise users seek workarounds. Reviews should consider privileges, group nesting, scheduled tasks, services, delegated management, and local rights—not merely the visible Administrators group.
+
+## 125. What is LAPS?
+
+**Answer:** Windows Local Administrator Password Solution manages unique, rotated local administrator passwords and can store them securely in Active Directory or Microsoft Entra ID depending on deployment. Unique passwords prevent one compromised local password from enabling lateral movement across many devices. Access to retrieve passwords must be tightly delegated and audited, and password history and post-authentication actions should be configured appropriately. LAPS reduces risk from shared local credentials but does not eliminate local-admin abuse, credential dumping, or the need to limit who can use administrative accounts.
+
+---
+
