@@ -725,3 +725,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Security filtering uses the GPO's ACL to determine which users or computers have both Read and Apply Group Policy permissions. By default, Authenticated Users commonly provides broad read and apply scope. Removing it without preserving appropriate read permissions can create unexpected failures, especially for computer-side processing of user policies. Use dedicated security groups, understand whether the target is a user or computer, and validate the effective ACL. Security filtering does not change the linked container; it narrows which objects within the scope apply the GPO.
 
+## 106. What is a WMI filter?
+
+**Level:** Intermediate
+
+**Answer:** A WMI filter is a query evaluated by the client to determine whether a linked GPO should apply. It can target operating-system version, hardware characteristics, or other WMI data. WMI filters add processing cost and can fail because of provider issues, query errors, or slow evaluation. Prefer item-level targeting or clear OU and group design when those methods are sufficient. When troubleshooting, confirm the filter result in `gpresult`, test the query locally, and consider namespaces, permissions, and operating-system changes.
+
+## 107. What is Group Policy loopback processing?
+
+**Level:** Advanced
+
+**Answer:** Loopback processing changes how user policy is calculated based on the computer being used. In Merge mode, the normal user GPOs are processed and then the user settings from the computer's GPO path are added, with the latter generally taking precedence. In Replace mode, the user's normal OU-based GPO list is replaced by the user settings associated with the computer's path. Loopback is common for kiosks, RDS hosts, classrooms, and shared administrative systems. It should be scoped to the relevant computers, documented, and validated because it can make user-policy behavior appear inconsistent across devices.
+
+## 108. What is the Default Domain Policy intended for?
+
+**Level:** Intermediate
+
+**Answer:** The Default Domain Policy is linked at the domain and should generally be kept focused on domain-wide account policy and a small set of truly domain-wide settings. It is not a mandatory location for every security configuration. Adding unrelated workstation, server, browser, and application settings makes recovery and troubleshooting harder. Create separate, purpose-built GPOs with clear ownership and scope. Do not unlink or casually replace the default policy; if it is damaged, supported tools such as `dcgpofix` may restore defaults, but that does not restore custom settings and should not be used as a first-line fix.
+
+## 109. What is the Default Domain Controllers Policy intended for?
+
+**Level:** Intermediate
+
+**Answer:** The Default Domain Controllers Policy is linked to the Domain Controllers OU and provides baseline settings relevant to domain controllers, including certain user rights and auditing defaults. It does not store passwords or define every domain-controller security control. Organizations should use separate tested GPOs for additional DC hardening while preserving required rights and understanding precedence. Removing critical rights from built-in groups can break services such as DFSR SYSVOL initialization. Changes to domain-controller policy require lab validation, staged deployment, and rollback planning.
+
+## 110. What is SYSVOL?
+
+**Level:** Beginner
+
+**Answer:** SYSVOL is a replicated folder present on each domain controller in a domain. It contains the file-based portion of GPOs, sign-in and startup scripts, and other public domain files required by clients. The `SYSVOL` and `NETLOGON` shares expose relevant content. Current domains use DFS Replication for SYSVOL. The AD database and transaction logs are not stored in SYSVOL. Healthy Group Policy requires both directory replication of the GPC and DFSR replication of the GPT.
+
