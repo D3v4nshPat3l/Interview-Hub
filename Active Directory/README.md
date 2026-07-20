@@ -1031,3 +1031,38 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Semantic database analysis checks internal directory data consistency beyond file-level ESE integrity. It can identify or repair certain inconsistencies under controlled recovery guidance. It is not a routine maintenance command and should not be used to “optimize” a healthy DC. Before any database repair, preserve backups, diagnose hardware and storage, compare other replicas, and consult current vendor guidance. Because AD is replicated, rebuilding a nonunique DC is often safer than repairing an uncertain database.
 
+## 156. What is the AD database 32K page feature in Windows Server 2025?
+
+**Level:** Expert
+
+**Answer:** Windows Server 2025 introduces support for a 32K ESE page format to improve AD DS and AD LDS scalability, including larger multivalued attributes. New installations are 32K-capable but may operate in an 8K simulation mode for compatibility. Enabling the forest-wide optional feature requires all DCs to be Windows Server 2025 or later, appropriate functional levels, 32K-capable databases, healthy replication, tested backups, and application compatibility validation. In-place upgraded DCs retain their existing 8K database format until rebuilt or otherwise made capable according to supported guidance. This is an architectural migration, not a casual performance toggle.
+
+## 157. What should be monitored daily in AD?
+
+**Level:** Intermediate
+
+**Answer:** Monitor domain-controller availability and advertising, replication failures and largest deltas, DNS service and SRV registration, SYSVOL and NETLOGON shares, DFSR events, time-source health, disk space, backup success, certificate expiry, privileged group and ACL changes, account lockout anomalies, authentication failure trends, stale DCs, and security alerts. Include AD CS, Entra Connect, AD FS, hypervisors, and backup systems if they are part of the identity control plane. Monitoring must have owners, thresholds, escalation paths, and regular test alerts; dashboards without response procedures do not create resilience.
+
+## 158. How often should AD recovery be tested?
+
+**Level:** Advanced
+
+**Answer:** Test frequency depends on risk and change rate, but critical organizations should perform component restores regularly and a full forest recovery exercise at a defined interval, commonly at least annually and after major architectural change. Tests should use isolated infrastructure, known-good backups, documented timings, dependency recovery, credential rotation, and business validation. A successful backup job is not evidence of recoverability. Record lessons, update runbooks, and track whether recovery objectives were met.
+
+## 159. What is the difference between high availability and disaster recovery for AD?
+
+**Level:** Intermediate
+
+**Answer:** High availability uses multiple healthy domain controllers, sites, DNS servers, and resilient infrastructure so service continues through ordinary failures. Disaster recovery restores trusted service after catastrophic loss, corruption, ransomware, or compromise. Replication provides availability but also replicates harmful deletions and malicious changes; it is not backup. A resilient design combines multiple DCs with isolated, immutable, tested backups and a forest recovery process.
+
+## 160. What makes a domain controller a Tier 0 asset?
+
+**Level:** Intermediate
+
+**Answer:** A domain controller can authenticate identities, modify directory data, issue Kerberos tickets, replicate credential material, and influence policy for domain systems. Control of a DC usually enables control of the domain and can threaten the forest. Tier 0 also includes systems and identities that can control DCs indirectly: virtualization hosts, backup systems, AD CS CAs, Entra Connect under some configurations, privileged management platforms, and accounts with replication or GPO control. Protecting only the DC operating system while leaving these dependencies exposed is an incomplete security model.
+
+---
+# Hybrid Identity, AD CS, LAPS, Service Accounts, and RODCs
+
+*Questions 161-180 cover identity synchronization, federation, certificate services, managed credentials, and branch-office domain controllers.*
+
