@@ -253,3 +253,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Group nesting places one group inside another so access can be modeled through roles and resource groups. It reduces repetitive administration but can obscure effective access when nesting is deep, cross-domain, circular, or undocumented. Token size can grow when users are members of many groups, potentially contributing to Kerberos or HTTP header problems. Universal group changes can create forest-wide catalog replication. Privileged groups hidden several levels deep are easy to miss during review. A mature design limits nesting depth, prohibits circular membership, uses ownership metadata, monitors changes to sensitive groups, and regularly resolves transitive membership rather than reviewing only direct members.
 
+## 31. What is an ACL, ACE, and security descriptor in Active Directory?
+
+**Level:** Intermediate
+
+**Answer:** A security descriptor defines the owner, discretionary access control list, system access control list, and control flags for a securable object. The DACL contains access control entries that allow or deny specific rights to trustees identified by SID. The SACL specifies what access should be audited, subject to audit policy. AD ACEs can apply to the whole object, specific attributes, validated writes, extended rights, child object creation, or inherited descendants. Rights such as `GenericAll`, `WriteDACL`, `WriteOwner`, password reset, and replication control rights can be security-critical. Reviewing only group membership is therefore insufficient; delegated ACLs can provide equivalent or indirect privilege.
+
+## 32. What is inheritance in AD permissions?
+
+**Level:** Intermediate
+
+**Answer:** Permission inheritance allows ACEs on a container, domain, or OU to flow to child objects according to inheritance flags and object-class filters. It is the foundation of scalable delegation, but it can also propagate excessive rights. An object can protect its DACL from inheritance, and some privileged objects are periodically protected by AdminSDHolder behavior. Troubleshooting requires identifying whether an ACE is explicit or inherited, the source container, the object types to which it applies, and whether deny entries or protected ACLs are involved. Editing the visible permissions on one object without understanding inheritance may create a temporary fix that is later overwritten or leave similar objects exposed.
+
+## 33. How should password-reset rights be delegated to a help desk?
+
+**Level:** Intermediate
+
+**Answer:** Create a dedicated help-desk security group, place user accounts in a well-defined OU scope, and delegate only the necessary rights - typically reset password, require password change at next sign-in, unlock account, and read limited account properties. Do not grant broad `GenericAll`, Domain Admin membership, or rights over privileged accounts and service accounts. Separate ordinary users from administrators so help-desk delegation cannot reset Tier 0 credentials. Document the delegated ACEs, use separate administrative identities, require MFA at the access layer, log changes, and periodically verify group membership and effective rights. A good answer also mentions that the help desk may need a secure administrative workstation or controlled management endpoint.
+
+## 34. What is the difference between resetting and changing a password?
+
+**Level:** Beginner
+
+**Answer:** A password change is normally initiated by the user and requires knowledge of the current password. A password reset is an administrative action that sets a new password without the old one and therefore requires delegated reset rights. The distinction matters for auditing, credential history behavior, and incident response. Resetting an account after compromise may not invalidate every existing session, ticket, token, cached credential, application password, certificate, or cloud refresh token. Privileged incident response must identify all credential forms and session persistence, not merely perform one AD password reset.
+
+## 35. What is AdminSDHolder?
+
+**Level:** Advanced
+
+**Answer:** AdminSDHolder is a protected object in the System container whose security descriptor is used as a template for certain protected administrative accounts and groups. The SDProp process periodically applies protected ACL behavior, helping prevent delegated OU administrators from controlling highly privileged identities. Protected objects commonly have inheritance disabled and the `adminCount` attribute set. A user removed from a protected group may retain `adminCount=1` and a protected ACL until cleaned up, creating confusing delegation behavior. Security teams should monitor changes to the AdminSDHolder DACL because a malicious ACE can become a persistent forest-wide privilege mechanism for protected accounts.
+
