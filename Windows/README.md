@@ -665,3 +665,107 @@ For a strong spoken interview answer, use four layers:
 
 ---
 
+# Windows Forensic Artifacts
+
+## 151. What is a Windows forensic artifact?
+
+**Answer:** A Windows forensic artifact is data created or maintained by Windows or an application that can help answer an investigative question. Examples include Registry keys, event records, file-system metadata, shortcut files, Jump Lists, Prefetch files, browser databases, and execution caches. An artifact is not automatically proof of a user's intent or physical presence. Investigators must understand how it is generated, when it updates, retention behavior, version differences, and alternative explanations. Strong conclusions use multiple independent artifacts and clearly separate observed data from inference.
+
+## 152. Why is artifact validation important?
+
+**Answer:** Artifact parsers can contain bugs, formats change, and common community explanations can become outdated. Validation means comparing tool output with raw structures, authoritative documentation, controlled test systems, known datasets, or a second independent implementation. Record tool name, version, settings, and hashes of source evidence. When a field is uncertain, report the uncertainty rather than converting it into a confident claim. Validation is especially important when an artifact is central to attribution, timing, or legal conclusions.
+
+## 153. What are Windows Prefetch files?
+
+**Answer:** Windows Prefetch files are performance artifacts created for certain executable launches to help optimize startup. They are commonly stored under `C:\Windows\Prefetch` and can include an executable name, a hash-derived filename component, run-count information, recent execution times, and referenced files or directories. Format and enablement vary by Windows version and system role. A Prefetch record strongly supports that Windows processed the executable through the Prefetch mechanism, but it does not prove which user launched it, that execution completed successfully, or that every execution is recorded.
+
+## 154. What is the forensic value of Amcache?
+
+**Answer:** The Amcache hive contains application and file inventory information used by Windows compatibility and inventory mechanisms. Depending on Windows version and parser, it may include file paths, product metadata, hashes or partial hashes, publisher information, and timestamps. Amcache can show that Windows observed a file, but common fields are frequently misinterpreted as definitive execution evidence. Investigators should understand the exact table and field semantics for the relevant build and correlate with Prefetch, event logs, Jump Lists, process telemetry, or file-system metadata.
+
+## 155. What is Shimcache or AppCompatCache?
+
+**Answer:** AppCompatCache, often called Shimcache, is application-compatibility data stored in the SYSTEM hive. It can preserve paths and metadata for executables considered by the compatibility infrastructure. Its format and behavior vary significantly across Windows versions. On modern systems, a Shimcache entry should not be treated as stand-alone proof that a program executed. It can be useful for identifying files of interest and historical presence, especially when combined with Prefetch, Amcache, event logs, and timeline evidence. Examiners should avoid outdated rules learned from older Windows releases.
+
+## 156. What are BAM and DAM artifacts?
+
+**Answer:** Background Activity Moderator and Desktop Activity Moderator data can contain per-user references to executable paths and time-related values associated with application activity. They are stored in the SYSTEM hive under version-dependent service paths. These artifacts can support evidence that an executable was associated with a user context, but retention is limited and behavior can differ across builds. They should not be used alone to prove intentional execution. Acquire the SYSTEM hive and transaction logs and verify parser support for the target version.
+
+## 157. What are UserAssist artifacts?
+
+**Answer:** UserAssist data is stored in a user's `NTUSER.DAT` hive and tracks certain GUI-launched programs and shell objects. Value names are commonly ROT13-encoded, and records can include run counts and time-related fields. UserAssist is useful for showing interaction through Explorer-related mechanisms, but it does not capture every execution method, command-line launch, service, or background process. Counts and timestamps require version-aware interpretation. Because the artifact is user-hive specific, it can help associate activity with a profile, though not necessarily with a physical person.
+
+## 158. What are RecentDocs artifacts?
+
+**Answer:** RecentDocs Registry data records recently accessed documents and file extensions for a user through shell interactions. It can help identify filenames, ordering, and categories even when the original files are gone. It is not a complete history of every file opened, and entries can be affected by application behavior, privacy settings, cleanup tools, and profile use. Investigators should correlate RecentDocs with LNK files, Jump Lists, application-specific recent-file lists, MFT data, and cloud or server logs.
+
+## 159. What are ShellBags?
+
+**Answer:** ShellBags are Registry artifacts that store Explorer folder-view preferences and related shell namespace information for a user. They can preserve evidence of folders that were browsed, including removable media or network locations that are no longer connected. ShellBags do not prove a specific file was opened or copied, and timestamp semantics vary among keys and Windows versions. They are particularly valuable when combined with USB history, LNK files, Jump Lists, and file-system metadata to reconstruct navigation and device use.
+
+## 160. What are LNK files?
+
+**Answer:** Windows shortcut, or LNK, files are shell-link files that can reference a target file, folder, program, or network location. Automatically created shortcuts in recent-item locations may contain target paths, volume information, file size, timestamps copied from the target, machine identifiers, and other metadata. An LNK can survive after the target is deleted or unavailable. It indicates shortcut creation or use by a shell-related workflow, but not necessarily that the target content was viewed fully. Timestamps inside the LNK are not always the shortcut file's own timestamps.
+
+## 161. What are Jump Lists?
+
+**Answer:** Jump Lists record application-specific recent or frequent destinations and tasks. They are stored in AutomaticDestinations and CustomDestinations files under the user's profile. AutomaticDestinations files use a structured storage format containing LNK-like entries, while custom files have a different structure. Jump Lists can connect an application to documents, paths, removable media, or network shares. They are not complete usage histories and can be reset, cleaned, or disabled. Analysts should map application identifiers carefully and compare entries with LNK files and application databases.
+
+## 162. What is the Recycle Bin artifact structure?
+
+**Answer:** On modern Windows, each deleted item in `$Recycle.Bin\<SID>` commonly has an `$I` metadata file and a corresponding `$R` content file. The `$I` file can contain the original path, deletion time, and original size, while `$R` holds the moved content. Exact formats vary by Windows release. This can link a deletion to a user SID and original location, but the responsible human still requires corroboration. Shift-delete, application-specific deletion, command-line deletion, remote deletion, or cleanup may bypass normal Recycle Bin behavior.
+
+## 163. What is the SRUM database?
+
+**Answer:** System Resource Usage Monitor stores resource and network-usage information in an ESE database, commonly `SRUDB.dat`. It can associate applications, users, interfaces, and time buckets with network or energy usage, depending on the system and table. SRUM is valuable for identifying historical application activity and network consumption when packet data is unavailable. It does not contain packet payloads and may not provide destination-level detail for every connection. Proper interpretation requires related Registry data, interface mapping, time normalization, and version-aware parsing.
+
+## 164. What is the Windows Timeline or ActivitiesCache artifact?
+
+**Answer:** Some Windows versions and features maintain activity-history data in SQLite databases such as `ActivitiesCache.db`. Records may describe application or document activities, device identifiers, and time fields. Feature behavior, synchronization, retention, and availability have changed across Windows releases, so investigators must first confirm whether the artifact exists and what feature produced it. It should be treated as contextual history rather than a complete user-action log. Cloud-synchronized activity may also require account-side evidence.
+
+## 165. What is `setupapi.dev.log`?
+
+**Answer:** `setupapi.dev.log` records Plug and Play device installation activity, including driver selection and device setup. It can help establish when USB storage and other hardware were first installed or configured. It is not a complete connection history for every subsequent attachment. Device instance IDs, serial information, driver sections, and timestamps should be correlated with Registry device-enumeration keys, mounted-device data, event logs, and LNK or ShellBag artifacts. Some devices expose nonunique or missing serial numbers, limiting attribution.
+
+## 166. What Windows Registry artifacts help investigate USB devices?
+
+**Answer:** Relevant locations can include USB and USBSTOR enumeration keys in the SYSTEM hive, MountedDevices, device classes, portable-device entries, and per-user mount or shell artifacts. They can reveal vendor, product, instance identifiers, volume serials, drive-letter associations, and installation history. No single key gives a perfect “plug-in and unplug” timeline across every version. Investigators should correlate SetupAPI logs, Kernel-PnP or DriverFrameworks events, LNK files, Jump Lists, ShellBags, volume metadata, and the device itself when available.
+
+## 167. What are MountedDevices artifacts?
+
+**Answer:** The `MountedDevices` key in the SYSTEM hive maps volume identifiers to drive letters and mount points. It helps connect historical drive letters to disk signatures or volume GUIDs. This is important because an LNK file may reference `E:\` while the device later receives another letter. Mappings can change, be stale, or be reused, so analysts should compare volume serials, device identifiers, and file-system metadata. A drive-letter mapping supports association with a volume, not proof of a specific file operation.
+
+## 168. What are Windows Search artifacts?
+
+**Answer:** Windows Search maintains indexing databases and related configuration that can contain filenames, paths, metadata, and sometimes cached properties for indexed content. The database format and location vary by Windows version. Search artifacts can reveal files that were later moved or deleted, but indexing is selective and asynchronous. A record means the indexing service observed data; it does not prove a user searched for or opened it. Acquisition should preserve the database, logs, and relevant configuration and use a parser appropriate to the build.
+
+## 169. What are browser forensic artifacts on Windows?
+
+**Answer:** Browser profiles can contain history, downloads, cookies, cache, bookmarks, autofill, session data, extensions, permissions, and protected credentials. Chromium-based browsers commonly use SQLite databases and LevelDB, while Firefox uses its own profile databases. Sync can introduce records from other devices, private modes reduce but do not eliminate all evidence, and cleanup can remove local history. Investigators should preserve live profiles carefully, account for WAL and journal files, normalize timestamps, and correlate with DNS, proxy, firewall, EDR, and cloud account data.
+
+## 170. What is `Zone.Identifier`?
+
+**Answer:** `Zone.Identifier` is an NTFS alternate data stream commonly used to store Mark-of-the-Web information about a file's origin, such as an Internet or intranet zone and sometimes source URL details. Windows and applications can use it to apply warnings, protected view, or reputation checks. Its presence supports that a supporting application marked the file, but its absence does not prove the file was not downloaded because the stream can be removed, lost on another file system, or never written. Copy and archive behavior can preserve or discard it.
+
+## 171. What are scheduled-task artifacts?
+
+**Answer:** Scheduled tasks are represented through Task Scheduler files, Registry TaskCache data, and Task Scheduler event logs. They can reveal task names, triggers, actions, accounts, run levels, and creation or execution history. Attackers use tasks for persistence and remote execution, while administrators use them extensively. Investigators should compare the XML task definition, Registry identifiers, file timestamps, event IDs, creator account, executable path, and process telemetry. A task definition alone does not prove it ran successfully.
+
+## 172. What are Windows service artifacts in forensics?
+
+**Answer:** Service configuration is primarily stored under `HKLM\SYSTEM\CurrentControlSet\Services`, with supporting events in the System and Security logs and process evidence when the service runs. Useful fields include image path, service account, start type, display name, dependencies, failure actions, and DLL parameters for hosted services. Event IDs related to service installation or state changes can add timing. Configuration can be modified after use, so compare current state with shadow copies, Registry transaction logs, EDR, and file metadata.
+
+## 173. What are WMI persistence artifacts?
+
+**Answer:** Permanent WMI event subscriptions commonly consist of an event filter, event consumer, and binding in WMI namespaces. They can execute commands or scripts when a trigger occurs. Legitimate management products also use them. Investigators should enumerate subscription objects, inspect consumer commands and scripts, review WMI-Activity logs, and correlate repository data with process creation and file artifacts. Deleting suspicious objects before preservation can destroy evidence and may break legitimate management, so response should be controlled.
+
+## 174. What are RDP forensic artifacts?
+
+**Answer:** RDP investigations can use Security logons, TerminalServices LocalSessionManager and RemoteConnectionManager logs, client connection history, Registry keys, Jump Lists, cached server names, firewall data, and gateway logs. Logon type 10 commonly indicates RemoteInteractive activity, but authentication paths and newer features can produce additional context. Analysts should correlate account, source address, session ID, logon ID, disconnect and reconnect events, clipboard or drive-redirection evidence, and server-side process activity. A saved server name does not prove a successful connection.
+
+## 175. What are Windows Defender forensic artifacts?
+
+**Answer:** Microsoft Defender can produce operational event logs, detection history, quarantine data, support logs, configuration state, and cloud or Defender for Endpoint telemetry. These sources can show detection name, affected path, action, engine version, and remediation outcome. A detection label is a vendor assessment that should be preserved but can have false positives or generic naming. Quarantined content may be encoded or access-controlled and must be handled safely. Investigators should also check whether exclusions, real-time protection, cloud protection, or tamper protection changed.
+
+---
+
