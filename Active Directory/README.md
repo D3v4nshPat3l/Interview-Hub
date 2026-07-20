@@ -1191,3 +1191,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 *Questions 181-200 explain common identity attack paths from a defensive interview perspective: prerequisite, impact, evidence, and remediation.*
 
+## 181. What is the Active Directory attack surface?
+
+**Level:** Intermediate
+
+**Answer:** The AD attack surface includes more than domain controllers. It includes users and computers, privileged groups, service accounts, delegated ACLs, Group Policy, trusts, DNS, AD CS, federation, synchronization servers, management systems, virtualization hosts, backup infrastructure, endpoint credential exposure, and protocols such as Kerberos, NTLM, LDAP, SMB, and RPC. Attackers often progress through a chain of individually ordinary permissions rather than one critical vulnerability. A useful assessment maps identities to sessions, local administration, group membership, object-control rights, delegation, certificate enrollment, replication rights, and cross-domain reachability. Prioritize paths that lead to Tier 0 and distinguish theoretical graph edges from operationally exploitable paths. Remediation should remove unnecessary privilege, reduce credential exposure, harden protocols, isolate administration, and continuously verify that attack paths have not reappeared.
+
+## 182. What is BloodHound, and how should its results be interpreted?
+
+**Level:** Intermediate
+
+**Answer:** BloodHound models relationships among AD principals, computers, groups, sessions, ACLs, local administrative rights, delegation, trusts, and other control paths as a graph. Defenders use it to identify shortest paths to high-value assets, hidden privilege, and excessive delegation. A graph edge means a documented relationship or potential capability, not guaranteed compromise. Validate collection freshness, tool version, data completeness, endpoint visibility, nested groups, and environmental controls before accepting a path. Remediate the root control relationship rather than merely hiding the final node. Run collection under authorized accounts, protect the data because it is an attack map, and compare snapshots over time to detect privilege drift. Similar analysis can be performed with Microsoft Defender for Identity posture assessments and native directory reviews.
+
+## 183. What is DCSync?
+
+**Level:** Advanced
+
+**Answer:** DCSync is abuse of the directory replication protocol by an account that has sufficient replication rights, allowing it to request password-derived data and other replicated secrets as though it were a domain controller. It does not require interactive logon to a DC. Rights commonly associated with the capability include Replicating Directory Changes and Replicating Directory Changes All, with additional rights relevant to certain filtered attributes. Defenders should minimize these permissions, inventory all non-DC principals that hold them, monitor replication requests from systems that are not DCs, and investigate privileged-directory changes. Response requires containing the principal and host, determining which secrets were accessed, rotating exposed privileged and service credentials, considering `krbtgt` rotation, and checking for persistence. Simply resetting the attacker's password may not invalidate tickets or copied secrets.
+
+## 184. What is DCShadow?
+
+**Level:** Expert
+
+**Answer:** DCShadow is a technique that registers attacker-controlled components as a domain controller and submits changes through replication interfaces, potentially bypassing monitoring focused only on normal LDAP modifications. It requires substantial directory and infrastructure privilege, so its presence usually indicates a severe compromise. Defenders should monitor creation or modification of server, NTDS Settings, service principal name, and replication-related objects; detect unexpected replication partners; restrict privileged administration; and collect domain-controller, network, and configuration-partition telemetry. During response, isolate the involved systems, compare replication metadata across DCs, review object versions and originating invocation IDs, remove unauthorized metadata, and search for resulting persistence such as ACL, group, SIDHistory, or AdminSDHolder changes. Restore trust in the identity control plane before returning systems to production.
+
+## 185. What is a Golden Ticket, and what is the correct response?
+
+**Level:** Advanced
+
+**Answer:** A Golden Ticket is a forged Kerberos Ticket Granting Ticket created using the secret of the domain's `krbtgt` account. It can contain fabricated authorization data and remain usable within ticket validity and persistence constraints even after an ordinary user password reset. Detection relies on anomalies such as impossible account or group combinations, unusual ticket properties, authentication from unexpected systems, inconsistent lifetimes, and correlated endpoint or network evidence; no single event always proves forgery. Response requires treating the domain as deeply compromised, containing attacker access, removing persistence, resetting privileged and service credentials, and resetting the `krbtgt` account twice with adequate replication and validation between resets. A rushed rotation before containment can disrupt services while leaving the attacker able to reacquire secrets.
+
