@@ -128,3 +128,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** The logical structure consists of forests, trees, domains, OUs, objects, and directory partitions. It describes namespace, delegation, policy scope, and the organization of directory data. The physical structure consists mainly of domain controllers, sites, subnets, site links, replication connections, and the underlying network. A user may belong to an OU based on management needs while the user's workstation is mapped to a site based on its IP subnet. The two structures solve different problems: OUs do not control replication topology, and sites do not provide an OU-like administrative hierarchy. Confusing sites with domains or OUs is a common interview mistake.
 
+## 11. What is an Active Directory site?
+
+**Level:** Beginner
+
+**Answer:** An AD site represents one or more well-connected IP subnets. Sites influence domain-controller location, replication topology, service affinity, and traffic optimization. Clients determine their site from their IP address and subnet mappings, then DC Locator prefers an appropriate domain controller in or near that site. Intersite replication is scheduled and cost-aware, whereas intrasite replication is optimized for fast, reliable networks. A site is not part of the DNS namespace and is not a security boundary. Accurate subnet-to-site mapping is critical; missing or incorrect subnets can send clients to remote domain controllers, increase WAN traffic, slow sign-in, and create misleading troubleshooting symptoms.
+
+## 12. What is a directory partition or naming context?
+
+**Level:** Intermediate
+
+**Answer:** A directory partition, also called a naming context, is a replicated portion of the AD database with a defined replication scope. The domain partition contains domain-specific objects such as users, computers, and groups and replicates to domain controllers in that domain. The configuration partition stores forest-wide topology and service configuration and replicates to every domain controller in the forest. The schema partition defines object classes and attributes and also replicates forest-wide. Application partitions can hold application-specific data with a chosen replica set; AD-integrated DNS commonly uses `DomainDnsZones` and `ForestDnsZones`. Understanding partitions explains why an LDAP search base matters and why not every domain controller stores every object as a full writable replica.
+
+## 13. What is the Active Directory schema?
+
+**Level:** Intermediate
+
+**Answer:** The schema is the forest-wide definition of the object classes and attributes that may exist in AD DS. It defines, for example, which attributes a user object can contain, the syntax of those attributes, and whether attributes are indexed or included in special sets. Schema changes replicate to all domain controllers and are generally difficult to reverse, so extensions require testing, change control, backups, vendor validation, and a rollback strategy based on disabling or superseding rather than deleting definitions. Only the Schema Master accepts schema modifications. Applications such as Exchange may extend the schema. A schema extension does not automatically grant users access to new attributes; normal ACLs still apply.
+
+## 14. What are domain and forest functional levels?
+
+**Level:** Intermediate
+
+**Answer:** Functional levels enable AD DS capabilities that require every domain controller in the relevant scope to support them. A domain functional level affects domain features and constrains the operating systems that can run as domain controllers in that domain. A forest functional level affects forest-wide capabilities and requires compatible levels across domains. Functional level is not the same as the Windows Server version on member servers or clients. Current interviews may include Windows Server 2025 functional levels, but an administrator should first inventory domain-controller versions, application dependencies, replication health, and backup readiness. Raising a level should be a controlled change, not a routine click performed simply because newer servers exist.
+
+## 15. What is the difference between AD DS and Microsoft Entra ID?
+
+**Level:** Beginner
+
+**Answer:** AD DS is a domain directory designed around Windows enterprise networks, domain controllers, Kerberos, NTLM, LDAP, Group Policy, domain join, and hierarchical objects. Microsoft Entra ID is a cloud identity and access platform designed for modern application authentication and authorization using protocols such as OAuth 2.0, OpenID Connect, and SAML. Entra ID has tenants, users, groups, applications, service principals, roles, Conditional Access, and cloud device identities, but it does not provide traditional AD domain controllers or classic GPO processing. Hybrid organizations synchronize or provision selected identities between the systems, but synchronization does not make them one database. Microsoft Entra Domain Services is a separate managed-domain service that exposes LDAP, Kerberos, NTLM, and Group Policy for compatible workloads.
+
