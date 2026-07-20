@@ -570,3 +570,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 *Windows authentication mechanisms, fallback behavior, tickets, service identities, and constrained impersonation.*
 
+## 81. How does Kerberos authentication work at a high level?
+
+**Level:** Intermediate
+
+**Answer:** The client first obtains a Ticket Granting Ticket from the KDC's Authentication Service, normally after proving knowledge of the user's key during preauthentication. When the client needs a service, it presents the TGT to the Ticket Granting Service and requests a service ticket for the target SPN. The client presents that service ticket to the server, which decrypts its protected portion using the service account's key. The ticket contains authorization data, including a Privilege Attribute Certificate in Windows environments. Kerberos supports mutual authentication and reusable tickets, reducing repeated password validation. DNS, SPNs, time, account keys, and trust relationships must all be correct.
+
+## 82. What is a TGT?
+
+**Level:** Beginner
+
+**Answer:** A Ticket Granting Ticket is a Kerberos credential issued by the KDC after initial authentication. Its encrypted portion is protected with the domain `krbtgt` account's key and allows the client to request service tickets without resending the password. A TGT has a validity period, renewal rules, flags, and authorization information. Possession of a valid TGT is highly sensitive because it represents the user's authenticated session. Password resets may not instantly remove already issued tickets from all systems, so incident response often includes session and ticket invalidation considerations.
+
+## 83. What is a Kerberos service ticket?
+
+**Level:** Beginner
+
+**Answer:** A service ticket is issued for a specific SPN and is presented to the target service. Its server-readable portion is encrypted with the key associated with the service account. That design is why the SPN must be registered on the correct account and why duplicate SPNs produce failures. A service ticket normally contains the client's identity and authorization data but does not give the service the user's password. `klist` can show cached tickets and help determine whether Kerberos was used.
+
+## 84. What is the Kerberos PAC?
+
+**Level:** Advanced
+
+**Answer:** The Privilege Attribute Certificate is Microsoft authorization data carried in Kerberos tickets. It includes information such as the user's SID, group memberships, privileges, and related logon data used to build an access token. The KDC signs the PAC, and services or domain controllers may validate it according to protocol behavior. Forged or manipulated authorization data is central to Golden Ticket and related attacks. Defenders should understand that a Kerberos ticket is not only proof of authentication; it can also convey authorization context that affects access across many systems.
+
+## 85. What is Kerberos preauthentication?
+
+**Level:** Intermediate
+
+**Answer:** Kerberos preauthentication requires the client to prove knowledge of its key before the KDC issues a TGT, commonly by encrypting timestamp data. It prevents unauthenticated retrieval of material that can be tested offline for many accounts. Accounts configured with “Do not require Kerberos preauthentication” are vulnerable to AS-REP roasting because an attacker can request an AS response without first proving knowledge of the password. Exceptions should be rare, documented, monitored, and remediated. Event 4768 and related KDC events help investigate TGT requests.
+
