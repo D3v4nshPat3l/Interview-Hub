@@ -1156,3 +1156,38 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** A group Managed Service Account, or gMSA, is a domain service account with an automatically managed password that can be retrieved by a defined set of authorized computers. It supports services, scheduled tasks, and application pools across multiple hosts when the application supports managed accounts. The Key Distribution Service derives password material from a KDS root key, and AD stores authorization information controlling which principals may retrieve it. Security depends heavily on the `PrincipalsAllowedToRetrieveManagedPassword` scope: compromising an authorized host may expose the gMSA credential. Use a separate gMSA per service boundary, minimize retrieval hosts, avoid interactive logon, monitor configuration changes, and remove retired hosts promptly. A gMSA solves password rotation, not excessive service privileges.
 
+## 176. What is a delegated Managed Service Account in Windows Server 2025?
+
+**Level:** Expert
+
+**Answer:** A delegated Managed Service Account, or dMSA, is a Windows Server 2025 capability designed to replace traditional service accounts while tying credential use more closely to authorized machine identities. It provides managed credentials and a migration path intended to reduce the risks of static service-account passwords and credential theft. Deployment requires compatible domain controllers and clients, current documentation review, application testing, and careful migration of SPNs, rights, dependencies, and rollback procedures. Treat dMSA adoption as an identity-engineering project rather than a simple account rename. Inventory every service, determine where it runs, identify its required network access, remove interactive logon, and monitor any fallback to the legacy account. Continue using gMSAs where dMSA prerequisites or application support are not met.
+
+## 177. What are the core service-account security practices?
+
+**Level:** Intermediate
+
+**Answer:** Prefer gMSA or dMSA where supported. Create a separate identity per service or trust boundary, grant only required local and network rights, deny interactive and remote interactive logon, restrict where the account may authenticate, and use strong automatically rotated credentials. Document the owner, application, hosts, SPNs, dependencies, recovery process, and retirement date. Do not place service accounts in Domain Admins or other broad groups to solve access problems. Monitor abnormal logon types, new hosts, SPN changes, group membership, delegation settings, and password resets. For unavoidable traditional accounts, use a vault, long random passwords, controlled rotation, and tested application restart procedures. An account with “password never expires” and an unknown owner is technical debt and a likely attack path.
+
+## 178. What is the KDS root key, and why is it required for gMSAs?
+
+**Level:** Advanced
+
+**Answer:** The Key Distribution Service root key provides secret material from which domain controllers derive gMSA passwords. The key must replicate to the DCs that will service password retrieval. In production, administrators commonly allow time for replication before creating and using gMSAs; forcing immediate effective time should be limited to controlled lab scenarios because another DC may not yet have the key. Verify replication, domain functional prerequisites, host authorization, and service support before rollout. Protect KDS configuration as Tier 0 data. Recreating keys casually is not a routine troubleshooting step and can disrupt managed accounts; diagnose replication and authorization first.
+
+## 179. What is the RODC Password Replication Policy?
+
+**Level:** Advanced
+
+**Answer:** The Password Replication Policy controls which account credentials an RODC may cache. The Allowed RODC Password Replication Group can permit caching, while the Denied RODC Password Replication Group and explicit denials prevent high-value credentials from being stored. Deny takes precedence. Design the policy around the branch's users and computers, not convenience. Prepopulate only required credentials, ensure privileged accounts never authenticate to the RODC site where possible, and review the set of accounts whose passwords were actually cached. An RODC still holds a read-only directory copy, its own machine secret, Kerberos material scoped to that RODC, DNS data if installed, and local operating-system state; it is risk-reduced, not risk-free.
+
+## 180. How should an organization respond to a stolen or compromised RODC?
+
+**Level:** Expert
+
+**Answer:** Isolate and disable the RODC account, preserve evidence if the event is malicious, and use the RODC account's password-replication information to identify credentials that were cached or exposed. Reset the RODC computer account and the passwords of affected user and computer accounts according to a prioritized plan. Remove stale DNS and metadata, review replication and authentication logs, examine whether branch administrator credentials or network secrets were present, and rebuild rather than trust the recovered server. Because each RODC has a separate `krbtgt_<number>` account, exposure is more contained than compromise of the writable domain `krbtgt`, but cached credentials can still enable lateral movement. Validate the branch's physical controls, PRP design, administrator role separation, BitLocker configuration, and monitoring before redeployment.
+
+---
+# AD Security, Attack Paths, Detection, and Hardening
+
+*Questions 181-200 explain common identity attack paths from a defensive interview perspective: prerequisite, impact, evidence, and remediation.*
+
