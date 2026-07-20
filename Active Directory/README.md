@@ -444,3 +444,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 *The infrastructure dependencies behind sign-in, domain join, authentication, and replication.*
 
+## 61. Why is DNS critical to Active Directory?
+
+**Level:** Beginner
+
+**Answer:** AD DS uses DNS as a service-location system, not merely to translate hostnames to IP addresses. Domain controllers register SRV records for LDAP, Kerberos, Global Catalog, and site-specific roles. Clients query these records through DC Locator to find a suitable domain controller. Replication partners also depend on name resolution. Incorrect client DNS settings can therefore cause domain join failure, slow sign-in, GPO failure, replication errors, and authentication fallback. Domain members should normally use DNS servers that can resolve the AD namespace, usually AD-integrated DNS servers, rather than public resolvers directly. External names can be resolved through forwarders, conditional forwarders, or delegation.
+
+## 62. What DNS records does a domain controller register?
+
+**Level:** Intermediate
+
+**Answer:** A domain controller registers host records and multiple SRV records describing services and capabilities. Common examples include `_ldap._tcp.<domain>`, `_kerberos._tcp.<domain>`, `_ldap._tcp.dc._msdcs.<domain>`, site-specific records under `_sites`, and Global Catalog records for GC servers. The exact set depends on whether the DC is writable, a GC, a KDC, and which site it belongs to. Netlogon performs much of this registration. Use DNS Manager, `nslookup` or `Resolve-DnsName`, and `%SystemRoot%\System32\Config\netlogon.dns` to validate expected records. A record existing is not enough; confirm it points to the correct reachable server and no stale duplicates remain.
+
+## 63. How does DC Locator work?
+
+**Level:** Intermediate
+
+**Answer:** A client calls the local Netlogon service, which uses the DC Locator process to discover and select a domain controller. DNS SRV queries identify candidate DCs, and the client sends a locator request to determine availability and capabilities. Site and subnet information helps prefer a local or closest DC. The result is cached to provide a consistent domain-controller choice. Flags can request a writable DC, GC, PDC, KDC, or other capability. Troubleshooting requires checking the client's DNS servers, domain suffix, subnet mapping, SRV records, site determination, network path, and cached selection. `nltest /dsgetdc:<domain>` and `nltest /dsgetsite` are useful validation tools.
+
+## 64. What is an AD-integrated DNS zone?
+
+**Level:** Intermediate
+
+**Answer:** An AD-integrated zone stores DNS zone data in an AD application or domain partition instead of a traditional primary-zone file. This enables multi-master secure updates and uses AD replication for zone distribution. `DomainDnsZones` normally replicates to DNS servers in a domain, while `ForestDnsZones` can replicate forest-wide. Administrators can choose other scopes. AD integration does not guarantee healthy DNS; permissions, scavenging, delegation, replication, and client configuration still require management. Secure dynamic updates should normally be used for internal AD zones so only authenticated principals can update authorized records.
+
+## 65. What is the `_msdcs` zone?
+
+**Level:** Intermediate
+
+**Answer:** `_msdcs` contains forest- and domain-controller-locator records, including records based on DC GUIDs and records for services such as Global Catalog and PDC location. In modern forests it is commonly a separate forest-wide AD-integrated zone delegated from the forest-root namespace. Replication and DC discovery can fail when the zone is missing, not delegated correctly, or contains stale records. Validate its replication scope, name servers, delegation, secure updates, and records before recreating data manually.
+
