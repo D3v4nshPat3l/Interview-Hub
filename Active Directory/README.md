@@ -1531,3 +1531,38 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Review Group Policy operational event timing and `gpresult` to identify the filter and evaluation duration. Test the WMI query locally with PowerShell or WMI tools under comparable context, and inspect the WMI repository and provider health. Broad queries, expensive classes, remote dependencies, or unavailable namespaces can delay processing. Replace the filter with security filtering, item-level targeting, OU design, or a simpler query where possible. Cache or inventory facts through endpoint management rather than calculating them during every logon. Validate the replacement across representative operating systems. Do not disable all WMI filters globally; isolate the costly query and preserve the business targeting requirement.
 
+## 236. Two users in the same domain receive different password policies. How can that be legitimate?
+
+**Level:** Advanced Scenario
+
+**Answer:** The domain's default account policy can be overridden for users by fine-grained password policies represented by Password Settings Objects. A PSO can apply directly to a user or to a global security group, and precedence determines the resultant policy. Use `Get-ADUserResultantPasswordPolicy` and inspect PSO precedence and direct versus group assignment. Also distinguish domain-account policy from local computer account policy and cloud authentication policy. If the difference is unexpected, check nested group changes and replication. Do not attempt to apply password policy by linking a GPO to a user OU; domain account password policy is not scoped that way.
+
+## 237. The PDC Emulator is offline. Which symptoms are urgent, and what do you do?
+
+**Level:** Advanced Scenario
+
+**Answer:** Other DCs continue authenticating, but the domain may experience time hierarchy disruption, slower convergence of recent password changes, lockout-processing issues, legacy compatibility problems, and inability to edit certain default policies through expected paths. Confirm whether the outage is temporary and whether the role holder's database is trustworthy. If it will return soon, restore service and verify replication. If permanently lost, seize the role to a healthy DC only after ensuring the old holder will not reappear as role owner. Configure the new forest-root PDC's external time source, validate role ownership, monitor password and lockout behavior, and clean up the failed DC if necessary. Seizure is a recovery decision, not a routine response to a brief reboot.
+
+## 238. A DC reports RID pool exhaustion or RID Master warnings. How do you respond?
+
+**Level:** Expert Scenario
+
+**Answer:** Confirm the current RID Master, replication health, and the local RID pool state on affected DCs. Determine whether rapid object creation, automation loops, repeated domain-controller restores, or malicious activity is consuming RIDs. Check Directory Service events and object-creation audit logs. Restore connectivity to the RID Master or transfer the role to a healthy DC if the current holder is permanently unavailable. Do not manipulate the domain's RID ceiling or seize the role repeatedly without vendor guidance; RIDs are not reused, and incorrect recovery can threaten SID uniqueness. Stop runaway provisioning, preserve evidence, and monitor remaining capacity and issuance after stabilization.
+
+## 239. The only Global Catalog in a remote site is unavailable. What user impact should you expect?
+
+**Level:** Advanced Scenario
+
+**Answer:** Impact depends on domain design, universal-group membership caching, application behavior, and whether another reachable GC exists. In a multidomain forest, universal group expansion and forest-wide searches rely on a GC. Logon may be delayed or fail for users whose universal memberships cannot be evaluated, except under conditions such as cached membership or special administrative behavior. Exchange and directory-aware applications may also fail or use a distant GC. Restore or redirect GC service, validate DNS site-specific GC SRV records, and consider deploying multiple GCs or enabling universal group membership caching where appropriate. A single-domain forest generally has fewer reasons not to make every writable DC a GC.
+
+## 240. A two-way trust appears to work from Domain A to Domain B but not from B to A. How do you troubleshoot it?
+
+**Level:** Expert Scenario
+
+**Answer:** Clarify access direction: users in the trusted domain access resources in the trusting domain, so terminology is frequently reversed. Test each trust direction with `netdom trust` or `nltest`, verify DNS conditional forwarding or resolution, routing, time, firewall paths, and trust passwords. Check selective authentication, SID filtering, name suffix routing, forest-wide authentication, resource ACLs, and whether the user can obtain referral and service tickets. Review DC and client Kerberos or Netlogon events on both sides. A successful trust validation does not grant resource access; authorization must still be configured. Document the trust diagram with separate arrows for trust direction and access direction to prevent diagnostic errors.
+
+---
+# Security and Incident-Response Scenarios
+
+*Questions 241-260 evaluate containment, evidence, credential rotation, and restoration of trust.*
+
