@@ -223,3 +223,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** `sAMAccountName` is the legacy account name used in forms such as `DOMAIN\username` and is limited by older compatibility rules. A user principal name, or UPN, has the form `user@suffix` and is the preferred user-friendly sign-in name for many modern applications. The UPN suffix does not have to match the AD domain DNS name if an alternative suffix is configured in the forest. A UPN is not an email address by definition, although organizations often align them. Duplicate or unverified suffixes can cause hybrid identity and application problems. During a domain or tenant migration, UPN planning is a key dependency because it affects user experience, synchronization matching, and cloud sign-in.
 
+## 26. What is `userAccountControl`?
+
+**Level:** Intermediate
+
+**Answer:** `userAccountControl` is a bitmask attribute containing multiple account-control flags. Examples include account disabled, password never expires, smart card required, trusted for delegation, do not require Kerberos preauthentication, and normal account. Because several flags can be combined, the decimal value should not be interpreted as one simple state. PowerShell and administrative tools normally expose friendly properties, but LDAP filters and forensic investigations may inspect the bitmask directly. Security reviews should identify risky flags such as reversible password encryption, unnecessary delegation, disabled preauthentication, or nonexpiring passwords. A change to one flag can have authentication and attack-surface consequences beyond the visible checkbox.
+
+## 27. What is an SPN, and which objects can hold one?
+
+**Level:** Intermediate
+
+**Answer:** A Service Principal Name identifies a service instance to Kerberos, normally in a form such as `HTTP/web01.corp.example.com`. The KDC uses the SPN to determine which account's key should protect the service ticket. SPNs are stored on the account under which the service runs, commonly a computer account, user-based service account, gMSA, or dMSA. An SPN should be unique in the forest. Duplicate or missing SPNs can cause Kerberos failure, `KRB_AP_ERR_MODIFIED`, or NTLM fallback. Administrators should use `setspn -S` rather than blindly adding values because `-S` checks for duplicates. DNS aliases, load balancers, service migrations, and account changes frequently require deliberate SPN updates.
+
+## 28. What are group type and group scope?
+
+**Level:** Beginner
+
+**Answer:** Group type determines whether a group is security-enabled or used only for distribution. Group scope determines where members may come from and where the group may be used. Domain Local groups are normally used to assign permissions to resources in their own domain and can contain members from trusted domains. Global groups normally collect accounts from their own domain and can be granted permissions in trusting domains. Universal groups can contain members from across the forest and can be used forest-wide or across trusts. Universal membership is stored in the Global Catalog, so frequent changes in large multi-domain forests can increase replication traffic. Correct group design separates role membership from resource permission assignment.
+
+## 29. Explain AGDLP and AGUDLP.
+
+**Level:** Intermediate
+
+**Answer:** AGDLP means Accounts are placed into Global groups, Global groups are placed into Domain Local groups, and permissions are assigned to the Domain Local groups. This separates business-role membership from resource ACLs and makes access easier to review. AGUDLP inserts Universal groups between Global and Domain Local groups for multi-domain designs: Accounts -> Global -> Universal -> Domain Local -> Permissions. These are design patterns, not enforced technical rules. The best implementation uses clear naming, avoids deep or circular nesting, documents owners, and periodically reviews effective membership. Directly assigning individual users to file ACLs may work initially but creates audit and lifecycle problems.
+
+## 30. What is group nesting, and what are its risks?
+
+**Level:** Intermediate
+
+**Answer:** Group nesting places one group inside another so access can be modeled through roles and resource groups. It reduces repetitive administration but can obscure effective access when nesting is deep, cross-domain, circular, or undocumented. Token size can grow when users are members of many groups, potentially contributing to Kerberos or HTTP header problems. Universal group changes can create forest-wide catalog replication. Privileged groups hidden several levels deep are easy to miss during review. A mature design limits nesting depth, prohibits circular membership, uses ownership metadata, monitors changes to sensitive groups, and regularly resolves transitive membership rather than reviewing only direct members.
+
