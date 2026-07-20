@@ -534,3 +534,39 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Offline domain join provisions domain-join metadata in advance so a computer can become domain-joined without contacting a domain controller during the initial join action. `djoin.exe` can create a provisioning blob that is applied to the target image. This is useful for imaging, remote deployment, and isolated build processes. The blob is sensitive because it contains domain-join material and must be transferred securely, scoped correctly, and deleted after use. The machine still needs domain connectivity later for normal authentication, policy, and password maintenance.
 
+## 76. Which firewall ports are required between clients and domain controllers?
+
+**Level:** Intermediate
+
+**Answer:** Requirements depend on operations, but typically include DNS 53, Kerberos 88, LDAP 389, SMB 445, RPC Endpoint Mapper 135 plus the configured dynamic RPC range, Kerberos password change 464, and NTP 123. GC access uses 3268 or 3269, and LDAPS uses 636 when applications require it. Some workflows also need ICMP and application-specific ports. Between domain controllers, replication, DFSR for SYSVOL, DNS, RPC, and authentication dependencies must be allowed bidirectionally as designed. Use Microsoft's current port guidance and packet captures rather than an incomplete memorized list.
+
+## 77. What is LDAP, and how does AD use it?
+
+**Level:** Beginner
+
+**Answer:** LDAP is the protocol used to search, read, add, modify, and delete directory objects according to permissions. AD DS implements LDAP with Microsoft extensions and exposes directory partitions through LDAP endpoints. Applications can bind using Kerberos, NTLM, certificates, or simple credentials depending on configuration. LDAP does not itself equal authentication; it is a directory-access protocol that can carry different bind mechanisms. Secure designs prefer signed SASL binds or TLS-protected connections, validate certificates for LDAPS, restrict anonymous access, and monitor legacy simple binds.
+
+## 78. What is LDAP signing?
+
+**Level:** Advanced
+
+**Answer:** LDAP signing provides integrity protection for supported LDAP sessions so traffic cannot be modified undetected in transit. Domain controllers can be configured to require signing for SASL binds, and clients can be configured to request or require it. Unsigned binds create relay and man-in-the-middle risk. Enabling enforcement without inventory can break printers, appliances, Java applications, or scripts using simple or unsigned binds. A safe rollout audits relevant domain-controller events, identifies clients, remediates or isolates them, validates channel binding and TLS where applicable, then enforces policy in stages.
+
+## 79. What is LDAP channel binding?
+
+**Level:** Advanced
+
+**Answer:** LDAP channel binding ties authentication at the application layer to the underlying TLS channel by incorporating channel-binding token information. It helps prevent an attacker from relaying credentials from one TLS session to another. It is especially relevant to LDAPS and NTLM relay defenses. Channel binding is distinct from LDAP signing, and the two controls should be assessed together. Compatibility varies by client and application, so use audit modes and current Microsoft guidance before enforcement. Certificate trust, hostname matching, and TLS configuration must also be correct.
+
+## 80. What diagnostic order should you follow for a suspected AD connectivity problem?
+
+**Level:** Intermediate
+
+**Answer:** Start at the affected client and define the failed operation precisely. Check IP configuration, routing, VPN state, DNS server addresses, and time. Resolve the domain and relevant SRV records. Use `nltest /dsgetdc`, `nltest /dsgetsite`, and a TCP connectivity test for required services. Validate the selected DC's health with `dcdiag` and replication with `repadmin`. Check the client, System, Netlogon, DNS, Kerberos, and Directory Service logs as appropriate. Compare a working and failing client. Do not begin by deleting accounts, forcing all replication, or opening every firewall port; preserve evidence and isolate the broken dependency.
+
+---
+
+# Kerberos, NTLM, SPNs, and Delegation
+
+*Windows authentication mechanisms, fallback behavior, tickets, service identities, and constrained impersonation.*
+
