@@ -561,3 +561,107 @@ For a strong spoken interview answer, use four layers:
 
 ---
 
+# Auditing, Event Logs, PowerShell, Sysmon, and Monitoring
+
+## 126. What is Windows Event Log?
+
+**Answer:** Windows Event Log is the platform used by Windows components and applications to record structured events in channels such as Security, System, Application, and many provider-specific operational logs. Modern `.evtx` files contain records with provider, event ID, timestamp, level, computer, record ID, and structured event data. Event IDs are meaningful only with the provider, version, channel, and field context. Logs can roll over, be cleared, disabled, corrupted, or never configured. Therefore, absence of an event is not proof that an action did not occur.
+
+## 127. What is the difference between the Security, System, and Application logs?
+
+**Answer:** The Security log contains audit events generated according to security policy, such as logons, process creation, and object access. The System log contains events from Windows system components, services, drivers, and boot-related providers. The Application log contains events written by applications and some platform components. Many important sources use separate channels under Applications and Services Logs, including PowerShell, Sysmon, Defender, Task Scheduler, WMI, and Remote Desktop. Analysts should identify the relevant provider rather than searching only the three classic logs.
+
+## 128. What is Advanced Audit Policy?
+
+**Answer:** Advanced Audit Policy provides granular security-audit subcategories, such as Logon, Process Creation, Account Management, Object Access, Policy Change, and Detailed Tracking. It is more precise than legacy broad audit categories. Policies can be configured locally or through Group Policy, but conflicts and precedence must be understood. A strong audit design enables events based on risk and investigative value, estimates volume, protects retention, and forwards critical data. Enabling every subcategory without capacity planning can cause noise and log rollover.
+
+## 129. What does Event ID 4624 mean?
+
+**Answer:** Security Event ID 4624 records creation of a successful logon session on the destination system. Important fields include account, domain, logon type, source address, workstation, authentication package, process, and logon ID. Different logon types represent interactive, network, service, batch, unlock, remote interactive, cached interactive, and other contexts. A 4624 event does not automatically mean a human typed a password or that activity was benign. Analysts correlate the logon ID with privilege, process, share, and logoff events and validate the source and authentication method.
+
+## 130. What does Event ID 4625 mean?
+
+**Answer:** Event ID 4625 records a failed logon attempt on the system where the attempt was processed. Status and substatus fields help distinguish bad passwords, unknown users, disabled accounts, restrictions, or other causes. Source network address, process, logon type, account, and authentication package provide context. A burst of failures may indicate brute force, password spraying, a stale service credential, a mapped drive, or a misconfigured application. Detection should account for baselines and success events that follow failures.
+
+## 131. What does Event ID 4672 mean?
+
+**Answer:** Event ID 4672 indicates that sensitive privileges were assigned to a new logon session. It commonly appears for legitimate highly privileged accounts and built-in system contexts. The event is most useful when correlated through the logon ID with 4624 and subsequent activity. It does not prove that the privileges were used. Analysts should focus on unexpected accounts, source systems, logon types, timing, and actions such as service creation, credential access, or security-policy changes.
+
+## 132. What does Event ID 4688 mean?
+
+**Answer:** Event ID 4688 records creation of a new process when Audit Process Creation is enabled. Useful fields can include the new process path, creator process, account, logon ID, token elevation type, integrity label, and command line if command-line auditing is separately enabled. Process IDs are reused, so time and boot context matter. Command lines may expose passwords or tokens, creating privacy and log-access concerns. A process-creation event is powerful but should be correlated with image hashes, signer, parentage, network, file, and module telemetry.
+
+## 133. What does Event ID 1102 mean?
+
+**Answer:** Event ID 1102 indicates that the Security audit log was cleared. This is uncommon in normal operation and should be investigated, though legitimate maintenance or imaging procedures can generate it. Analysts should identify the account and logon ID, examine events before the clear, and check forwarded copies, EDR, event collector, shadow copies, and other logs. Attackers may also stop logging, reduce log size, or delete files without generating the exact same event. Monitoring should therefore cover multiple forms of audit impairment.
+
+## 134. What is Windows Event Forwarding?
+
+**Answer:** Windows Event Forwarding sends selected events from source computers to one or more Windows Event Collector subscriptions. It can use collector-initiated or source-initiated subscriptions and supports filtering to reduce volume. WEF is useful because centralized copies may survive endpoint log clearing or loss. Security depends on authentication, certificate or Kerberos configuration, subscription design, collector hardening, storage capacity, and monitoring of forwarding health. A subscription existing on paper does not prove every endpoint is delivering events, so organizations need heartbeat and gap detection.
+
+## 135. What is an EVTX file?
+
+**Answer:** EVTX is the modern Windows Event Log file format. Each channel is typically stored as an `.evtx` file under the Windows event-log directory, though APIs should normally be used on live systems. The file contains chunks and event records with XML-renderable data. Copying an active EVTX file directly can fail or produce an inconsistent snapshot; forensic acquisition should use appropriate APIs, shadow copies, or disk imaging. Record timestamps are generally stored in UTC-based form and rendered according to tools and time settings. Deleted or slack records may sometimes be recoverable but require cautious validation.
+
+## 136. How do you query Windows events with PowerShell?
+
+**Answer:** `Get-WinEvent` is the preferred PowerShell cmdlet for modern logs. It can filter by log name, provider, ID, time, level, or XML query and can read exported EVTX files. Server-side filtering through a filter hashtable or XPath is more efficient than retrieving everything and filtering later. Analysts should preserve original event XML when fields matter because formatted messages can vary with language and installed provider resources. Scripts should record time zone, host, query, and tool version and should handle missing channels and access errors explicitly.
+
+## 137. What is PowerShell execution policy?
+
+**Answer:** PowerShell execution policy controls conditions under which scripts are loaded, such as requiring signatures or warning for downloaded scripts. It is a safety feature intended to reduce accidental execution, not a robust security boundary. Users or processes may bypass it through several legitimate mechanisms if they already have execution capability. Organizations should not rely on execution policy as application control. Combine it with App Control or AppLocker, constrained administration, logging, antivirus scanning interfaces, least privilege, and EDR.
+
+## 138. What is PowerShell Script Block Logging?
+
+**Answer:** Script Block Logging records PowerShell script content as it is processed, typically in the `Microsoft-Windows-PowerShell/Operational` log with Event ID 4104. It can reveal deobfuscated or dynamically generated code, making it valuable for incident response. Some sensitive values may appear in logs, so access and retention must be protected. Attackers may disable logging, use other interpreters, downgrade in older environments, or avoid PowerShell entirely. Central collection and tamper detection improve resilience.
+
+## 139. What is PowerShell Module Logging?
+
+**Answer:** Module Logging records pipeline execution details for selected modules and commands, commonly producing Event ID 4103. It provides operational context that complements Script Block Logging but can be verbose. Administrators should enable it based on threat model and high-value modules, then centralize and tune collection. The event does not necessarily contain every raw script character. Correlation with 4104, process creation, AMSI, EDR, and remote-management logs provides a more complete picture.
+
+## 140. What is PowerShell transcription?
+
+**Answer:** PowerShell transcription creates text records of console input and output for PowerShell sessions. It can record commands and results that event logs do not present in the same way. Transcripts must be written to a protected central location because local users with sufficient rights may alter or delete them, and sensitive information can be captured. Transcription coverage depends on host and configuration and should not be assumed universal. It is a supplementary audit source, not a replacement for script-block logging and endpoint telemetry.
+
+## 141. What is AMSI?
+
+**Answer:** Antimalware Scan Interface allows applications and scripting engines to submit content to registered antimalware providers for inspection. PowerShell, Windows Script Host, Office VBA, and other components can integrate with AMSI. It is valuable because content may be scanned after layers of obfuscation are removed. Attackers attempt to patch, bypass, or avoid AMSI, so detections should monitor tampering and not assume a clean scan proves benign behavior. AMSI also depends on a functioning provider and current policy.
+
+## 142. What is Sysmon?
+
+**Answer:** System Monitor, or Sysmon, is a Microsoft Sysinternals service and driver that records detailed system activity to the Windows Event Log. Depending on configuration, it can log process creation, network connections, file creation, registry changes, image loads, driver loads, process access, DNS queries, and other events. Sysmon does not analyze, alert, or block by itself. Its value depends on a well-designed configuration, centralized collection, version management, and tuning. Default installation without thoughtful rules can create either too little useful data or excessive volume.
+
+## 143. What is Sysmon Event ID 1?
+
+**Answer:** Sysmon Event ID 1 records process creation. It commonly includes process and parent GUIDs, PIDs, image path, command line, user, hashes, signer-related fields, integrity level, and timestamps, depending on version and configuration. Process GUIDs help correlate activity even when PIDs are reused. Analysts should validate the Sysmon schema and configuration because fields and hash algorithms vary. A suspicious command line is an investigative lead, not a complete verdict; examine the executable, ancestry, account, network activity, and business context.
+
+## 144. What is Sysmon Event ID 3?
+
+**Answer:** Sysmon Event ID 3 records network connections when network-connection logging is enabled and the event matches configuration. It can include process identity, source and destination addresses and ports, protocol, and hostname information. High-volume environments often filter these events heavily. The event reflects a connection observed by Sysmon, not necessarily successful application-layer authentication or data transfer. Correlate with firewall, proxy, DNS, packet, and server logs. Missing Event ID 3 may mean filtering or disabled telemetry rather than no connection.
+
+## 145. What is Sysmon Event ID 10?
+
+**Answer:** Sysmon Event ID 10 records one process opening another process with specified access rights. It is often used to detect credential dumping, injection, or process tampering, especially access to LSASS. Many legitimate security tools, debuggers, and system components also access processes. Analysis should consider source and target images, call trace when available, granted access mask, signer, account, and timing. A rule that alerts on every LSASS access without exclusions can generate noise, while overly broad exclusions can hide attacks.
+
+## 146. What are Sysmon process GUIDs?
+
+**Answer:** Sysmon creates process GUIDs to provide a more stable identifier for a process instance than the operating-system PID, which can be reused. The GUID can correlate process creation with network, file, registry, and process-access events generated by Sysmon. It is specific to Sysmon's event generation and should not be treated as a universal Windows identifier across all tools. Analysts must still use timestamp, host, boot, and image context, especially when combining Sysmon with Security events or EDR data.
+
+## 147. How should Sysmon be configured?
+
+**Answer:** Start from documented detection goals and data-retention capacity. Enable high-value event types, use include rules where narrow coverage is desired, and use carefully tested exclusions for known noise. Collect hashes that support investigations without creating unnecessary cost. Version-control the XML, test changes, deploy centrally, and monitor configuration updates or service failures. Review event volume by host role because domain controllers, developer workstations, and kiosks behave differently. A popular public configuration is a starting point, not a substitute for local threat modeling and validation.
+
+## 148. What is ETW?
+
+**Answer:** Event Tracing for Windows is a high-performance tracing framework used by the operating system and applications. Providers emit structured events to sessions that consumers can collect in real time or to trace files. Windows Event Log uses related provider concepts, but ETW also supports diagnostic and performance traces outside ordinary EVTX channels. EDR products and troubleshooting tools rely heavily on ETW. Attackers may attempt to impair providers or consumers, while defenders should avoid assuming every ETW event is permanently retained. Collection must be configured before volatile events occur.
+
+## 149. What is Performance Monitor?
+
+**Answer:** Performance Monitor collects counters and trace data for processor, memory, disk, network, processes, and applications. It can display real-time values or record Data Collector Sets for later analysis. Security teams use performance data to distinguish malware symptoms from resource exhaustion and to establish baselines. A high CPU value alone does not identify cause; process, thread, I/O, call-stack, and timeline context are needed. Collection overhead, sampling interval, and counter definitions should be documented for defensible comparisons.
+
+## 150. How do you design useful Windows detections?
+
+**Answer:** Begin with a threat behavior and available telemetry, not a tool-specific keyword. Define the expected data source, fields, prerequisites, false-positive cases, severity, and response action. Build detections around combinations such as unusual parent-child process relationships, suspicious command lines, credential-process access, rare service creation, or authentication anomalies. Test with authorized simulations and known benign workloads. Monitor data health and version changes. A detection is a hypothesis generator; analysts must validate the alert with context and preserve evidence before remediation.
+
+---
+
