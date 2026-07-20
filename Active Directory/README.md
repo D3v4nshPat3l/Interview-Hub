@@ -1471,3 +1471,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Review site-link schedules, intervals, costs, bridgehead selection, WAN maintenance windows, and whether backup or batch traffic saturates the link. A schedule may permit connections only during a narrow window, while change volume exceeds available bandwidth. Examine replication queue and largest delta over time rather than one snapshot. Confirm topology generation and connection objects, then correlate network telemetry and KCC events. Consider widening the schedule, reducing interval, improving capacity, or changing topology after modeling business impact. Compression and notification behavior differ between intersite and intrasite replication. Do not force full synchronization every night as a permanent fix; that can intensify congestion and mask an undersized or incorrectly scheduled topology.
 
+## 226. Users receive `KRB_AP_ERR_MODIFIED` when accessing one service. What is the diagnostic logic?
+
+**Level:** Advanced Scenario
+
+**Answer:** The service ticket was encrypted for a key that the receiving service cannot use. Common causes are duplicate SPNs on different accounts, the SPN assigned to the wrong account, a load-balanced node using inconsistent service credentials, stale machine-account password, or a client resolving the name to the wrong host. Identify the exact SPN requested with Kerberos logs or `klist`, query it with `setspn -Q`, and check duplicates with `setspn -X`. Verify DNS, aliases, application-pool identity, service credential consistency, and account password replication. Correct the SPN and credential ownership, then purge tickets and restart only the affected service if required. Do not register the same SPN on every cluster node unless the service architecture explicitly supports it through one shared identity.
+
+## 227. Access works when users connect by hostname but fails by IP address. Why?
+
+**Level:** Intermediate Scenario
+
+**Answer:** Kerberos normally identifies a service by SPN derived from a name, not an IP address. Connecting by IP often prevents the client from constructing a matching SPN and causes fallback to NTLM or failure if NTLM is restricted. The correct fix is to use a stable DNS name with a properly registered SPN and valid certificate where applicable. Check name resolution, application configuration, aliases, and whether the service supports Kerberos. Do not weaken NTLM policy solely to support hard-coded IP connections. If an appliance cannot use DNS names, document the exception, restrict its network path and account, and plan replacement or an application-layer solution.
+
+## 228. Kerberos authentication fails across a site after a time-service change. How do you recover?
+
+**Level:** Advanced Scenario
+
+**Answer:** Measure actual offset on clients, member servers, DCs, and the PDC Emulator with `w32tm /query /status`, `/source`, and `/monitor`. Verify the domain hierarchy: domain members follow domain time, DCs follow the hierarchy, and the forest-root PDC Emulator uses reliable external sources. Check NTP reachability, GPO conflicts, hypervisor time integration, manual peer flags, and event logs. Correct the authoritative source and hierarchy rather than setting clocks manually on many systems. Large corrections may require careful service coordination. Once time converges, purge stale Kerberos tickets or restart affected services where justified. Investigate why monitoring did not catch offset before it exceeded authentication tolerance.
+
+## 229. Clients in a site use a distant DC even though a local DC is healthy. What do you examine?
+
+**Level:** Advanced Scenario
+
+**Answer:** Check the client's IP address and whether its exact subnet is defined and associated with the correct AD site. Use `nltest /dsgetsite` and `nltest /dsgetdc:<domain> /force`. Confirm the local DC advertises the required capabilities, registers site-specific SRV records, hosts DNS and Global Catalog if needed, and is reachable on required ports. Review DNS server order, cached DC Locator information, site coverage, and whether the client is a VPN user whose assigned subnet maps elsewhere. Check Netlogon and DNS registration events on the DC. Do not hard-code a preferred DC in applications or clients as a substitute for correct site topology.
+
+## 230. A DC is missing its SRV records. How do you restore them correctly?
+
+**Level:** Advanced Scenario
+
+**Answer:** Verify the DC points to authoritative AD-integrated DNS, its primary DNS suffix and domain membership are correct, and the Netlogon and DNS Client services are running. Check zone existence, dynamic-update policy, application-partition replication, permissions on existing records, and event logs. Run `dcdiag /test:dns`, inspect `%windir%\System32\Config\Netlogon.dns`, and trigger supported registration with `nltest /dsregdns` or restart Netlogon after correcting the cause. Register host records with `ipconfig /registerdns` as needed. Confirm the records appear on multiple DNS servers through replication. Manually adding a few SRV records is not a complete repair because site-specific and GUID records must remain accurate over time.
+
