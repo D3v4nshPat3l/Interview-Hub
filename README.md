@@ -195,8 +195,8 @@ Interview-Hub
 |---|---:|---:|
 | Networking | Available | 300+ Questions |
 | Linux | Available | 300+ Questions |
-| Windows | Planned | 300+ Questions |
-| Active Directory | Planned | 400+ Questions |
+| Windows | Available | 300+ Questions |
+| Active Directory | Available | 400+ Questions |
 | Web Security | Planned | 500+ Questions |
 | API Security | Planned | 250+ Questions |
 | OWASP Top 10 | Planned | 250+ Questions |
