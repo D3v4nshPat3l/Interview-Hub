@@ -873,3 +873,107 @@ For a strong spoken interview answer, use four layers:
 
 ---
 
+# Incident Response, Threat Hunting, and Troubleshooting
+
+## 201. What are the main phases of Windows incident response?
+
+**Answer:** A practical lifecycle includes preparation; detection and analysis; containment; eradication; recovery; and post-incident improvement. For Windows incidents, preparation includes asset inventory, time synchronization, endpoint telemetry, privileged-access design, backups, forensic tools, and legal escalation. The phases are iterative: containment may reveal new evidence, and recovery may uncover persistence. Actions should balance evidence preservation, business impact, safety, and threat removal. Every major action, command, time, and decision should be documented.
+
+## 202. What is the difference between containment, eradication, and recovery?
+
+**Answer:** Containment limits attacker access or impact, for example isolating a device, blocking credentials, or restricting network paths. Eradication removes malicious code, persistence, unauthorized accounts, and root causes such as vulnerable software. Recovery restores systems and business services to a trusted state and monitors for recurrence. Reimaging a host may be part of eradication or recovery, but it does not automatically remove stolen credentials or cloud persistence. Strong responders define success criteria for each phase and avoid reconnecting systems before identity and lateral-movement risks are addressed.
+
+## 203. When should you isolate a Windows endpoint?
+
+**Answer:** Isolate when continued connectivity creates unacceptable risk, such as active ransomware, credential theft, command-and-control, data exfiltration, or lateral movement. Before isolation, consider whether remote access is needed to collect volatile evidence, whether isolation will terminate the attacker's connection, and whether the device controls safety-critical operations. EDR network isolation can preserve management connectivity while blocking most traffic, but capabilities vary. Record the time, method, authorization, and observed effect. Isolation is containment, not remediation.
+
+## 204. What should you collect first from a compromised Windows host?
+
+**Answer:** Collection priorities depend on volatility and objectives. Typical high-value data includes current time and time zone, logged-on users, memory, processes, command lines, network connections, ARP and DNS caches, open files, services, drivers, scheduled tasks, WMI subscriptions, event logs, EDR timeline, Defender state, Registry hives, and relevant disk artifacts. If the volume is encrypted and unlocked, preserve access before power loss. Use trusted tools and minimize changes. Do not run an enormous checklist without considering whether it will overwrite logs or delay urgent containment.
+
+## 205. How would you investigate suspected ransomware?
+
+**Answer:** Confirm scope and active encryption, isolate affected systems and segments, protect backups, and identify patient zero and compromised accounts. Preserve memory and endpoint telemetry where feasible. Determine the process tree, executable and scripts, initial access, privilege escalation, lateral movement, file-share access, ransom note, extensions, shadow-copy deletion, backup attacks, and exfiltration. Search enterprise-wide for hashes, paths, commands, accounts, and network indicators. Recovery should use clean systems and tested backups; paying does not guarantee restoration or deletion of stolen data.
+
+## 206. How would you investigate a suspected credential-dumping event?
+
+**Answer:** Preserve the alert and endpoint state, identify the source process, account, integrity level, granted access, command line, signer, and target process. Examine Sysmon process-access events, EDR telemetry, Defender alerts, process creation, loaded drivers, memory regions, and LSASS protection state. Determine whether a dump file, handle duplication, snapshot, comsvcs abuse, or vulnerable driver was used. Scope later logons and lateral movement from exposed accounts. Resetting passwords is necessary only as part of a broader credential-containment plan that considers Kerberos tickets, service accounts, tokens, and privileged sessions.
+
+## 207. How would you investigate suspicious PowerShell?
+
+**Answer:** Correlate process creation, Script Block Logging, Module Logging, transcription, AMSI or Defender alerts, Sysmon, EDR, and WinRM logs. Identify the parent process, user, host, encoded or obfuscated content, network destinations, downloaded files, and child processes. Decode safely without executing content. Determine whether the command is an administrative script, security tool, installer, or attacker activity. Search for the same script block, command fragments, URLs, hashes, and account across the environment. Preserve original event XML and scripts before remediation.
+
+## 208. How would you investigate a new suspicious service?
+
+**Answer:** Record service name, display name, image path, arguments, account, start type, description, dependencies, creation time, and Registry data. Validate the executable path, file permissions, hash, signer, compile metadata, and whether the path is quoted. Review service-install events, process creation, EDR timeline, parent process, and remote-management activity. Determine whether the service started and what it did. Search other hosts for the same name or binary. Do not delete it until evidence and dependencies are preserved.
+
+## 209. How would you investigate a suspicious scheduled task?
+
+**Answer:** Export the task definition and preserve the corresponding task file, TaskCache Registry entries, and Task Scheduler operational events. Review triggers, actions, user, run level, hidden setting, working directory, and network paths. Validate referenced binaries or scripts and identify the creator process and account. Determine execution history and child processes. Search enterprise telemetry for the task name, GUID, command, and file hash. A task with a random name is suspicious but not conclusive because software installers also create dynamic tasks.
+
+## 210. How would you investigate unauthorized RDP access?
+
+**Answer:** Correlate Security 4624/4625 events, logon type, Terminal Services logs, source IP, gateway or VPN logs, MFA and identity records, session connect/disconnect events, and processes started in the session. Review clipboard, drive, printer, and file-redirection configuration and artifacts. Determine how RDP was exposed, whether NLA was used, and whether the account was compromised. Scope the source IP and account across other hosts. A public IP in a log may represent a NAT, gateway, or provider and should not be treated as direct human attribution.
+
+## 211. How would you investigate a USB data-exfiltration allegation?
+
+**Answer:** Establish authorized scope and preserve the system and suspected media. Correlate USBSTOR and device-enumeration data, SetupAPI logs, MountedDevices, volume serials, LNK files, Jump Lists, ShellBags, RecentDocs, MFT, USN Journal, EDR file events, and the contents and metadata of the removable device. Build a timeline of connection, navigation, file access, and possible copy operations. Avoid claiming that a device connection proves copying. Strong conclusions require matching filenames, sizes, hashes, timestamps, or direct copy telemetry.
+
+## 212. How would you investigate a cleared Security log?
+
+**Answer:** Start with Event ID 1102 and identify the account and logon session. Preserve remaining logs, EDR data, forwarded events, WEF collector copies, SIEM records, shadow copies, and system artifacts. Look for process or command evidence involving `wevtutil`, PowerShell, Event Viewer, service changes, or direct file deletion. Determine whether the clear was authorized maintenance. Also check for audit-policy changes, log-size reductions, service impairment, and collection gaps because attackers may evade logging without producing 1102.
+
+## 213. How would you detect lateral movement on Windows?
+
+**Answer:** Look for unusual remote logons, explicit credentials, service creation, scheduled tasks, WMI, WinRM, SMB admin shares, RDP, remote registry, PsExec-like behavior, and remote process creation. Correlate source and destination hosts, accounts, logon types, network connections, and process trees. Baseline legitimate administration tools and jump hosts to reduce false positives. Lateral movement is a sequence, not a single event: stolen credentials, discovery, remote authentication, execution, and follow-on actions together provide stronger evidence.
+
+## 214. What is threat hunting?
+
+**Answer:** Threat hunting is a hypothesis-driven search for malicious activity that has not been conclusively detected by existing alerts. A Windows hunt might ask whether attackers are using rare services, unsigned drivers, anomalous LSASS access, encoded PowerShell, or unusual remote logons. Hunters define required data, query the environment, validate results, and convert repeatable findings into detections or hardening actions. Hunting is not random searching through logs. It depends on telemetry quality, asset context, threat intelligence, and disciplined documentation.
+
+## 215. How do you hunt for living-off-the-land activity?
+
+**Answer:** Living-off-the-land activity uses legitimate Windows binaries, scripts, and management tools for malicious goals. Hunt for behavior rather than banning filenames: unusual parents, rare command-line switches, network connections from normally local tools, execution from user-writable paths, suspicious script content, and activity outside administrative baselines. Examples may involve `rundll32`, `regsvr32`, `mshta`, `certutil`, WMI, PowerShell, or scheduled tasks. Each binary has legitimate uses, so context, account, destination, and sequence are essential.
+
+## 216. What is a false positive?
+
+**Answer:** A false positive is an alert that matches detection logic but does not represent the malicious or policy-violating condition the rule intends to find. It is different from a benign true positive, where the behavior occurred but was authorized. Analysts should classify why the alert fired, preserve examples, and tune using specific conditions rather than broad exclusions. Excessive false positives cause alert fatigue, while aggressive suppression can create blind spots. Detection quality includes both precision and coverage.
+
+## 217. What is a false negative?
+
+**Answer:** A false negative occurs when malicious activity is present but the detection or analysis fails to identify it. Causes include missing telemetry, filtering, evasion, unsupported versions, poor logic, retention gaps, or analyst error. False negatives are difficult to measure because the missed event may remain unknown. Purple-team testing, incident retrospectives, threat-informed validation, and data-health monitoring help uncover gaps. A detection with few false positives can still be weak if it misses most relevant attacks.
+
+## 218. How do you validate an IOC?
+
+**Answer:** Determine the indicator type, source, confidence, age, scope, and expected context. Hashes are exact but easy for attackers to change; domains and IP addresses can be shared or reassigned; filenames and Registry paths are often nonunique. Search multiple telemetry sources and confirm whether the indicator was merely present, resolved, connected, executed, or caused behavior. Preserve the original intelligence and any enrichment. Indicators support investigation but should not replace behavior-based analysis.
+
+## 219. What is root-cause analysis in a Windows incident?
+
+**Answer:** Root-cause analysis identifies the underlying conditions that allowed the incident, not only the visible malware. It may find an unpatched vulnerability, phishing-resistant authentication gap, exposed RDP, excessive privilege, shared local passwords, unsafe service permissions, weak application control, or missing monitoring. The analysis reconstructs initial access, execution, persistence, privilege escalation, defense evasion, credential access, lateral movement, and impact. Corrective actions should address both the initiating weakness and systemic control failures. Blaming a user without examining process and technology is rarely sufficient.
+
+## 220. How do you decide whether to reimage or clean a Windows host?
+
+**Answer:** Reimage when trust in the operating system cannot be restored efficiently, especially after kernel compromise, unknown persistence, credential theft, widespread malware, or unreliable evidence of eradication. Cleaning may be reasonable for a well-understood low-impact issue with validated removal and business constraints. Reimaging must use trusted media, secure configuration, current patches, restored data from validated sources, and rotated credentials. It does not fix compromised cloud accounts, network devices, or shared secrets. The decision should be documented with risk and recovery requirements.
+
+## 221. How would you troubleshoot a slow Windows computer?
+
+**Answer:** Define the symptom and time range, then measure CPU, memory, disk latency, queueing, network, GPU, boot, and application response. Use Task Manager, Resource Monitor, Performance Monitor, Windows Performance Recorder, event logs, and application telemetry. Check updates, drivers, storage health, thermal throttling, antivirus scans, paging, startup items, and user profile issues. Avoid disabling security tools as a first response. Compare with a baseline and identify whether the bottleneck is capacity, contention, error, or application design.
+
+## 222. How would you troubleshoot a blue-screen crash?
+
+**Answer:** Record the stop code, parameters, time, recent changes, and whether a dump was created. Preserve `MEMORY.DMP` or minidumps and related event logs. Use a compatible debugger and symbols to inspect the bugcheck, stack, modules, and failure context, while recognizing that the blamed driver may be a victim of earlier memory corruption. Check driver and firmware updates, hardware diagnostics, storage, memory, virtualization, and security software. Repeatedly forcing crashes without preserving dumps can overwrite useful evidence.
+
+## 223. How would you troubleshoot a Windows service that will not start?
+
+**Answer:** Check the service status, start type, account, password, dependencies, executable path, permissions, and Service Control Manager events. Run the executable or component only in a safe diagnostic context and inspect application-specific logs. Confirm that required ports, certificates, files, and Registry settings are available. Error 1069 suggests logon failure, while dependency or timeout errors point elsewhere. Avoid granting broad rights to “make it work”; identify the exact missing permission or configuration.
+
+## 224. How would you troubleshoot a domain logon failure?
+
+**Answer:** Determine whether the issue affects one user, one device, or many. Verify time synchronization, DNS configuration, domain-controller reachability, secure channel state, account status, password changes, network profile, certificates, and cached-logon behavior. Review 4625 status codes and domain-controller events. Test with known-good accounts without exposing credentials. Do not point domain clients to public DNS as a workaround because Active Directory service discovery depends on domain DNS.
+
+## 225. How do you write a defensible Windows incident report?
+
+**Answer:** State scope, authority, systems, evidence sources, time zone, tools, methods, findings, limitations, and conclusions. Separate facts from interpretation and include enough detail for peer review without burying decision-makers in raw output. Use exact timestamps, account SIDs where useful, hashes, paths, event providers and IDs, and references to exhibits. Explain alternative interpretations and data gaps. Record containment and remediation separately from forensic findings. A good report is technically reproducible, readable, and honest about uncertainty.
+
+---
+
