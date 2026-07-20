@@ -1221,3 +1221,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** A Golden Ticket is a forged Kerberos Ticket Granting Ticket created using the secret of the domain's `krbtgt` account. It can contain fabricated authorization data and remain usable within ticket validity and persistence constraints even after an ordinary user password reset. Detection relies on anomalies such as impossible account or group combinations, unusual ticket properties, authentication from unexpected systems, inconsistent lifetimes, and correlated endpoint or network evidence; no single event always proves forgery. Response requires treating the domain as deeply compromised, containing attacker access, removing persistence, resetting privileged and service credentials, and resetting the `krbtgt` account twice with adequate replication and validation between resets. A rushed rotation before containment can disrupt services while leaving the attacker able to reacquire secrets.
 
+## 186. What is Kerberoasting, and how is it mitigated?
+
+**Level:** Advanced
+
+**Answer:** Kerberoasting abuses the legitimate ability of an authenticated user to request a service ticket for an SPN. Part of that ticket is encrypted with a key derived from the service account credential, allowing offline password guessing. The request itself is not proof of malicious activity because applications routinely request service tickets. Reduce risk by using gMSAs or dMSAs, long random passwords for traditional service accounts, AES-capable accounts, least privilege, restricted logon, and retirement of unused SPNs. Monitor unusual volume, broad requests across many SPNs, weak encryption use, and activity from endpoints or users that do not normally access those services. If a service account may have been cracked, rotate it safely, review where it logged on and what it could access, and investigate lateral movement rather than treating rotation as the complete response.
+
+## 187. What is AS-REP roasting, and how is it prevented?
+
+**Level:** Advanced
+
+**Answer:** AS-REP roasting applies to accounts configured not to require Kerberos preauthentication. An attacker can request an authentication response for such an account without proving knowledge of its password and then attempt offline password guessing against encrypted response data. Prevent it by ensuring preauthentication is required unless a documented legacy exception exists, using strong managed credentials for any exception, and monitoring changes to the relevant `userAccountControl` flag. Inventory accounts with “Do not require Kerberos preauthentication,” identify owners and dependencies, and remove obsolete exceptions. During investigation, correlate authentication-service requests, source systems, account configuration changes, password age, and subsequent logons. The mere existence of an exception is a vulnerability condition; confirmed cracking requires additional evidence.
+
+## 188. What is NTLM relay?
+
+**Level:** Advanced
+
+**Answer:** NTLM relay forwards a captured or coerced NTLM authentication exchange to another service that accepts it, allowing the attacker to act with the victim's privileges without learning the plaintext password. Success depends on protocol and target conditions such as missing SMB signing, weak LDAP signing or channel binding, exposed web enrollment, lack of Extended Protection, and the ability to induce authentication. Mitigation is layered: reduce or block NTLM where possible, require SMB signing, require LDAP signing and channel binding according to compatibility testing, enable Extended Protection on applicable services, disable unnecessary name-resolution fallbacks and coercible services, segment administration, and restrict outbound authentication from high-value systems. Detection should correlate inbound authentication, source and destination mismatch, unusual machine-account actions, certificate issuance, and configuration changes resulting from the relay.
+
+## 189. Why are LDAP signing, LDAP channel binding, and SMB signing important?
+
+**Level:** Advanced
+
+**Answer:** LDAP signing protects integrity and authenticates the LDAP session so an intermediary cannot silently modify signed traffic. LDAP channel binding binds authentication to the TLS channel and helps prevent relaying credentials into a different protected session. SMB signing provides message integrity and makes common SMB relay attacks substantially harder. These controls are related but not interchangeable, and enforcement can break legacy applications, devices, or old operating systems. Begin with auditing and inventory, identify unsigned binds and incompatible clients, remediate them, then phase enforcement with rollback and exception governance. Use LDAPS or StartTLS correctly, but remember that TLS alone does not automatically guarantee the desired authentication binding. Monitor policy drift after rollout and do not leave “temporary” compatibility exceptions without owners and expiry dates.
+
+## 190. What is password spraying, and how does it differ from brute force?
+
+**Level:** Intermediate
+
+**Answer:** Password spraying tests one or a small number of likely passwords across many accounts, often slowly enough to avoid per-account lockout thresholds. Traditional brute force tests many passwords against one account. Spraying frequently targets remote access, cloud sign-in, Kerberos, LDAP, SMB, or web authentication and may use valid usernames obtained from public or directory sources. Defenses include phishing-resistant MFA where supported, banned-password protection, strong password policy, elimination of shared and stale accounts, smart lockout, network restrictions, and detection based on one source or infrastructure pattern touching many accounts. Investigators should aggregate failures by source, password pattern where available, protocol, time window, and targeted population. Do not automatically lock every account during response; indiscriminate action can cause a second denial-of-service incident.
+
