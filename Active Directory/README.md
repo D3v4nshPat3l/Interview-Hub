@@ -1501,3 +1501,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Verify the DC points to authoritative AD-integrated DNS, its primary DNS suffix and domain membership are correct, and the Netlogon and DNS Client services are running. Check zone existence, dynamic-update policy, application-partition replication, permissions on existing records, and event logs. Run `dcdiag /test:dns`, inspect `%windir%\System32\Config\Netlogon.dns`, and trigger supported registration with `nltest /dsregdns` or restart Netlogon after correcting the cause. Register host records with `ipconfig /registerdns` as needed. Confirm the records appear on multiple DNS servers through replication. Manually adding a few SRV records is not a complete repair because site-specific and GUID records must remain accurate over time.
 
+## 231. LDAP queries are intermittent and sometimes return different data. What AD-specific conditions can cause this?
+
+**Level:** Advanced Scenario
+
+**Answer:** Determine which DC or Global Catalog answers each query, which port and search base are used, and whether the application expects domain-complete or forest-wide attributes. Different DCs may be at different replication states; a Global Catalog contains a partial attribute set for other domains. DNS load distribution, site mapping, read-only DCs, stale connections, referral handling, paging, and timeouts can also vary results. Capture server names and LDAP result codes in application logs, then compare replication and object metadata. If an application requires immediate read-after-write consistency, direct the follow-up read to the writing DC or design for convergence rather than assuming every replica updates instantly. Do not disable multi-DC discovery simply because the application omitted server identity from its logs.
+
+## 232. The GPO version in AD differs from the version in SYSVOL. What does that mean?
+
+**Level:** Advanced Scenario
+
+**Answer:** A GPO has a Group Policy Container in AD and a Group Policy Template in SYSVOL. Version mismatch indicates the directory and file components did not converge, an edit was interrupted, or replication is unhealthy. Determine whether the mismatch exists on one DC or across the domain. Compare `gPCFileSysPath`, version attributes, `GPT.INI`, SYSVOL files, AD replication, and DFSR events. Identify the last legitimate change and a known-good copy before modifying anything. Repair the underlying AD or DFSR replication issue, then restore or recreate the GPO through supported tools if corruption remains. Do not manually increment version numbers to make the warning disappear; that can cause clients to accept an incomplete policy.
+
+## 233. SYSVOL DFSR is broken on several DCs. How do you choose authoritative and nonauthoritative recovery?
+
+**Level:** Expert Scenario
+
+**Answer:** First establish whether AD replication is healthy and identify which DC has the complete, current, trusted SYSVOL. Preserve backups and compare policy files, scripts, timestamps, and GPO versions. In a nonauthoritative recovery, an affected DC discards or rebuilds its local SYSVOL replica from an upstream partner. An authoritative recovery declares one verified copy as the source that other DCs should follow. Follow Microsoft’s DFSR SYSVOL recovery procedure exactly, including AD attributes and service sequencing; casual registry edits can create split-brain data. After recovery, verify `SYSVOL` and `NETLOGON` shares, DFSR events, backlog, GPO consistency, and client processing. If no copy is trusted, recover from known-good GPO backups and incident evidence rather than selecting the newest timestamp blindly.
+
+## 234. User policy is applied based on the terminal server OU instead of the user's OU. Which feature explains this?
+
+**Level:** Intermediate Scenario
+
+**Answer:** Group Policy loopback processing changes how user settings are calculated on computers such as RDS hosts, kiosks, or classrooms. In Merge mode, user-linked GPOs apply first and computer-location user settings are added with higher precedence. In Replace mode, the user's normal OU-linked user settings are ignored and only user settings based on the computer's location are applied. Check the loopback policy on the computer, GPO scope, inheritance, and `gpresult`. Use loopback deliberately and keep RDS computer OUs and GPOs clearly documented. Unexpected loopback often explains why a user's settings differ between a workstation and a terminal server.
+
+## 235. A WMI-filtered GPO makes logon slow. How do you prove and correct it?
+
+**Level:** Advanced Scenario
+
+**Answer:** Review Group Policy operational event timing and `gpresult` to identify the filter and evaluation duration. Test the WMI query locally with PowerShell or WMI tools under comparable context, and inspect the WMI repository and provider health. Broad queries, expensive classes, remote dependencies, or unavailable namespaces can delay processing. Replace the filter with security filtering, item-level targeting, OU design, or a simpler query where possible. Cache or inventory facts through endpoint management rather than calculating them during every logon. Validate the replacement across representative operating systems. Do not disable all WMI filters globally; isolate the costly query and preserve the business targeting requirement.
+
