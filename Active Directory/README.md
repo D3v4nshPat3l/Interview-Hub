@@ -1626,3 +1626,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Windows LAPS can manage DSRM passwords on DCs, and any local or recovery credential associated with a DC is Tier 0 material. Broad password-read rights could enable offline recovery-mode access or compromise of other managed systems. Identify the exact ACL and whether access is inherited from a parent OU, a decryption group, or a broad control right. Remove the help-desk group from DC-related read and decrypt permissions, rotate affected passwords, audit historical reads where logs exist, and review the endpoints used by authorized readers. Separate workstation support from server and DC recovery roles. Verify that the Domain Controllers OU and any nested OUs have explicit, controlled delegation and that future automation does not reapply the broad ACE.
 
+## 251. A broad server group is authorized to retrieve a privileged gMSA password. How do you reduce risk?
+
+**Level:** Advanced Scenario
+
+**Answer:** Enumerate every computer and nested principal in the retrieval group, determine which hosts actually run the service, and assess whether any are lower trust or externally exposed. Replace the broad group with a dedicated set of required computer accounts, remove stale hosts, and separate gMSAs by service boundary. Rotate the managed password by following supported account operations and restart services as needed; because authorized hosts may have retrieved prior material, contain any compromised host first. Review the gMSA's privileges, SPNs, logon history, and resource access. Monitor changes to retrieval permissions and authentication from new systems. The goal is not merely a smaller group but a demonstrably minimal execution boundary.
+
+## 252. A branch RODC is stolen. How do you determine which credentials require reset?
+
+**Level:** Expert Scenario
+
+**Answer:** Disable the RODC account and use AD tools to identify accounts whose credentials were revealed to or cached on that RODC, not merely accounts allowed by policy. Include the RODC's own machine account and branch computer accounts as appropriate. Prioritize users with access beyond the branch, local administrators, service identities, and any policy exceptions. Reset exposed credentials through a coordinated plan, remove the RODC metadata and DNS records, and review authentication and physical-access logs. Because privileged accounts should be denied caching, any privileged credential in the revealed list indicates a policy or operational failure that requires broader investigation. Rebuild from trusted media and improve BitLocker, physical security, PRP, branch administration, and network segmentation before replacement.
+
+## 253. Ransomware has encrypted one domain controller. Should you restore it or rebuild it?
+
+**Level:** Expert Scenario
+
+**Answer:** Isolate the DC immediately and treat the event as an identity compromise, not only a file-encryption problem. Determine whether other writable DCs are healthy and trusted, whether replication carried malicious changes, and whether the attacker obtained privileged credentials. Preserve forensic evidence. In most environments, a compromised nonunique DC should be forcibly removed, its metadata cleaned, and a new DC built from trusted media rather than restoring the operating system into production. Recovery from backup may be necessary during widespread loss, but only within a forest recovery plan. Rotate exposed credentials, inspect GPOs, AD CS, backups, hypervisors, and management systems, and validate replication and DNS. An unencrypted second DC does not prove the domain is clean.
+
+## 254. A Domain Admin signed in to a user's workstation. What immediate and long-term actions are appropriate?
+
+**Level:** Advanced Scenario
+
+**Answer:** Assume privileged credential material or reusable tickets may have been exposed on that workstation. Isolate and investigate the endpoint, revoke the administrator's sessions, reset the privileged account, and examine whether the account accessed other systems afterward. Depending on evidence and controls, rotate related credentials and inspect for credential dumping or lateral movement. Long term, enforce administrative tiering, separate admin accounts, deny Tier 0 logon to lower-tier devices, deploy privileged access workstations, use LAPS for local support, and monitor privileged logons. Training alone is insufficient if technical controls permit the behavior. Review whether support processes or application dependencies forced the administrator to break the model.
+
+## 255. An Entra Connect server is compromised. What environments must be considered in scope?
+
+**Level:** Expert Scenario
+
+**Answer:** Scope both on-premises AD and Entra ID. Isolate the server, preserve its database, configuration, logs, memory, connector details, and endpoint telemetry. Disable or rotate connector credentials and service accounts through a coordinated procedure, review synchronization-rule and filtering changes, inspect privileged role assignments and cloud object changes, and determine whether replication-derived password data or writeback capabilities were exposed. Deploy a clean staging or replacement server from documented configuration rather than trusting an in-place cleanup. Revoke affected tokens and rotate credentials based on evidence and privilege. Review hybrid application registrations, password writeback, device writeback, and federation dependencies. Recovery is complete only when both directories and the synchronization trust are verified.
+
