@@ -1721,3 +1721,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Confirm a forest trust is necessary; application federation, guest identities, or a one-way external trust may provide less exposure. If used, set the trust direction based on who needs access and prefer one-way trust. Use selective authentication so partner users must be explicitly allowed to authenticate to designated servers, apply SID filtering, control name suffix routing, restrict network paths, and place resources behind dedicated groups and servers. Establish monitoring and a review date. Do not grant partner groups directly to broad local administrator or application roles; use resource-domain groups and least privilege. Test DNS resolution, Kerberos referral, revocation, outage behavior, and trust removal. Include compromise notification and emergency-disable procedures in the partner agreement.
 
+## 266. A company is choosing among PHS, PTA, and AD FS. How do you present the architecture decision?
+
+**Level:** Expert Scenario
+
+**Answer:** Compare security, resilience, operational complexity, application requirements, regulatory constraints, and failure modes. PHS generally provides the fewest on-premises runtime dependencies and cloud authentication continuity. PTA keeps password validation on premises but depends on healthy agents and outbound connectivity. AD FS supports specialized federation and claims requirements but adds privileged servers, proxies, signing keys, certificates, and relying-party operations. Evaluate whether claimed requirements are current or inherited assumptions. Include MFA and Conditional Access separately, because they are not provided merely by choosing an authentication transport. Present a supported default, exceptions with evidence, high-availability design, migration and rollback, monitoring, and incident-response impact. The simplest option that meets requirements is usually easier to secure consistently.
+
+## 267. How would you migrate from AD FS to Password Hash Synchronization?
+
+**Level:** Expert Scenario
+
+**Answer:** Inventory domains, relying parties, claims rules, smart-card or certificate requirements, third-party MFA, legacy protocols, and applications that depend directly on AD FS rather than Entra ID. Enable and validate PHS before changing sign-in, confirm synchronization scope and password-hash health, test Conditional Access and MFA, and maintain cloud-only emergency accounts. Use staged rollout or staged authentication where supported, monitor sign-in behavior, and prepare rollback. Convert managed domains in controlled waves and keep AD FS available until all relying parties and token paths are proven independent. After migration, remove federation endpoints, certificates, service accounts, DNS, proxies, firewall rules, and monitoring through a decommission plan. Preserve logs and configuration for incident and audit retention.
+
+## 268. What is the purpose of an Entra Connect staging server?
+
+**Level:** Advanced Scenario
+
+**Answer:** A staging server imports and synchronizes data but does not export changes while staging mode is enabled. It provides warm standby, configuration validation, troubleshooting, and a controlled way to compare pending exports before failover. The active and staging servers should use compatible versions and equivalent synchronization configuration, with documented handling of custom rules and encryption keys. Test promotion and rollback periodically. Only one server should actively export for a given topology unless a specifically supported design says otherwise. A staging server is not a substitute for configuration backup, monitoring, or secure rebuild procedures, and it must be hardened at the same privilege tier as the active server.
+
+## 269. An organization wants to introduce Windows Server 2025 domain controllers. What is the upgrade sequence?
+
+**Level:** Expert Scenario
+
+**Answer:** Assess application, security product, backup, monitoring, schema, replication, encryption, and functional-level compatibility. Establish healthy replication, DNS, SYSVOL, and tested backups first. Update existing DCs and supporting infrastructure as required, introduce new Windows Server 2025 DCs into a pilot site, make them DNS and Global Catalog servers as designed, and validate authentication, replication, GPO, AD CS, and application behavior. Transfer FSMO roles only after stability. Decommission unsupported DCs through normal demotion. Raise functional levels only when every DC and rollback requirement permits it; OS upgrade and functional-level change are separate decisions. Evaluate optional features such as 32K database pages or dMSA as later projects, not assumptions of the first promotion.
+
+## 270. When should domain and forest functional levels be raised?
+
+**Level:** Advanced Scenario
+
+**Answer:** Raise them after all DCs run supported versions compatible with the target level, replication and backups are healthy, application and security-tool compatibility is confirmed, and rollback or recovery implications are understood. Functional levels enable specific AD capabilities and prevent introduction of older DC versions; they do not automatically harden every protocol or upgrade clients. Inventory trusts, read-only DCs, lab or disaster-recovery DCs, and forgotten sites. Use current Microsoft support matrices rather than historical interview tables because available levels and reversible transitions change by release. Perform the change during controlled maintenance, validate every domain before the forest, and monitor replication and authentication afterward.
+
