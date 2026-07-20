@@ -1376,3 +1376,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Confirm the change replicated to the user's authenticating DC and that the user has obtained a new access token; existing sessions do not automatically gain new group SIDs. Have the user sign out and sign in, or purge only the relevant Kerberos tickets when appropriate. Verify nested group scope and the AGDLP or AGUDLP design, then evaluate both share and NTFS permissions, explicit denies, ownership, dynamic access controls, and the exact path. Use `whoami /groups`, `klist`, effective-access tools, and access logs. If a universal group changed, check Global Catalog availability and replication. Do not keep nesting the user into additional privileged groups until access happens; identify the missing or denied authorization edge.
 
+## 211. The help desk must reset passwords but must not administer privileged accounts. How do you delegate this safely?
+
+**Level:** Intermediate Scenario
+
+**Answer:** Place ordinary user accounts in controlled OUs and delegate the minimum required rights to a dedicated help-desk group using the Delegation of Control Wizard or explicit ACLs. Typical rights are reset password, force password change at next logon, unlock account, and read limited attributes. Keep privileged and service accounts in separate protected OUs with no inherited help-desk delegation. Test effective permissions using representative accounts and confirm AdminSDHolder-protected users behave as expected. Use separate named admin accounts, MFA and privileged workstations where possible, approval for sensitive resets, and logging of reset and group-change events. Periodically recertify membership and OU ACLs. Do not delegate Full Control over the OU merely because the wizard's default task does not cover one edge case.
+
+## 212. How do you clean up stale computer accounts without breaking active systems?
+
+**Level:** Intermediate Scenario
+
+**Answer:** Use multiple signals: `lastLogonTimestamp`, per-DC `lastLogon` when higher precision is required, password age, DNS and DHCP records, endpoint-management inventory, vulnerability-scanner data, and business ownership. Define a conservative inactivity threshold and exclusions for offline, seasonal, disaster-recovery, kiosk, or embedded systems. First move candidates into a quarantine OU with restrictive but reversible policy or disable them, notify owners, monitor authentication failures, and retain a rollback window. Then delete according to retention policy and use Recycle Bin for recovery where enabled. Remove associated DNS, certificates, management records, and group memberships. A single old timestamp is not sufficient evidence because replication granularity, imaging, and long-offline devices can mislead.
+
+## 213. How would you provision hundreds of users reliably?
+
+**Level:** Intermediate Scenario
+
+**Answer:** Start with an approved data source and schema: unique identifier, legal name, UPN, department, manager, location, employment dates, license or entitlement data, and owner. Validate uniqueness and naming rules before any write. Use idempotent PowerShell or an identity-governance workflow that can preview changes, log each operation, handle errors, and rerun safely. Create users disabled or with controlled initial credentials, place them in the correct OU, assign role-based groups rather than direct resource permissions, and enforce joiner-mover-leaver governance. Protect input files because they contain personal data. Test in a nonproduction OU and sample the results. Avoid scripts that silently continue after duplicate UPNs, failed manager references, or partial group assignment.
+
+## 214. What is a safe process for decommissioning a domain controller?
+
+**Level:** Advanced Scenario
+
+**Answer:** Verify the DC is not the only DNS, Global Catalog, time, DHCP authorization, CA, application, or site dependency and does not hold FSMO roles that must move. Confirm healthy inbound and outbound replication, SYSVOL, backups, and replacement capacity. Update clients, network devices, applications, monitoring, and static DNS references. Demote gracefully using supported Server Manager or PowerShell, allowing metadata and DNS cleanup to occur. Then verify Sites and Services, DNS records, replication topology, DFSR membership, monitoring, and asset records. Securely erase or repurpose the server only after confirming no rollback is required. If graceful demotion fails, perform forced removal and metadata cleanup under a documented recovery procedure.
+
+## 215. A new office is opening. How do you create the AD site design?
+
+**Level:** Intermediate Scenario
+
+**Answer:** Gather IP subnets, WAN paths, bandwidth, latency, business hours, expected users and devices, local-service requirements, and failure tolerance. Create the AD site and map every routed client subnet to it. Define site links reflecting actual network connectivity, costs, schedules, and replication intervals rather than the organizational chart. Decide whether the office needs a writable DC, RODC, DNS, or no local DC based on population, WAN reliability, physical security, and recovery objectives. Validate DC Locator from representative clients and monitor replication after deployment. Coordinate with network teams so new subnets are added during change management; an unmapped subnet can cause clients to select remote DCs even when a local DC exists.
+
