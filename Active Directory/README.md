@@ -1876,3 +1876,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Activate the trust emergency procedure. Determine trust direction, authentication scope, selective-authentication configuration, SID filtering, network reachability, and which partner principals have local or application privilege. Disable or quarantine the trust if business impact permits, block relevant network paths, disable mapped partner groups, and revoke active sessions. Review authentication and resource-access logs for partner identities, privileged actions, SIDHistory anomalies, and service-account use. Rotate trust passwords and resource credentials after containment as appropriate. Coordinate evidence and communications with the partner but independently validate your environment. Reenable only after explicit assurance, new trust secrets, reviewed access, and monitoring. A two-way forest trust is a security dependency, not merely a convenience link.
 
+## 291. Internal DNS returns different domain-controller addresses depending on which DNS server is queried. How do you resolve split-brain directory DNS?
+
+**Level:** Expert Scenario
+
+**Answer:** Identify zone type, replication scope, authoritative servers, serial and record timestamps, aging and scavenging configuration, application-partition enrollment, and AD replication health. Compare the zone on each DNS server and inspect `DomainDnsZones` and `ForestDnsZones` replication. Remove unauthorized secondary or file-backed copies that conflict with AD-integrated zones, correct delegation and conditional forwarders, and fix dynamic update permissions. Validate DC host, SRV, and GUID records before deleting anything. If malicious tampering is possible, preserve zone and directory metadata. Flush caches only after authoritative data is corrected. Split answers are a symptom; the root may be partition replication, duplicate zones, stale DCs, or network devices answering DNS.
+
+## 292. Thousands of accounts were disabled by a faulty automation. How do you recover safely?
+
+**Level:** Expert Scenario
+
+**Answer:** Stop the automation and preserve its code, input, credentials, and logs. Identify exactly which accounts changed through directory audit events, replication metadata, and a prechange export or identity-governance record. Exclude accounts that were legitimately disabled before the event. Reenable in controlled batches, prioritizing operational and emergency identities, while validating employment status, password state, group memberships, licenses, and dependent services. Monitor replication and authentication load. If attributes beyond `userAccountControl` changed, restore those from authoritative source data rather than assuming enablement is enough. Rotate the automation credential, correct permissions, add dry-run and approval controls, and require idempotent change sets with rollback manifests.
+
+## 293. After a WAN outage, replication traffic saturates links and business applications fail. What do you change?
+
+**Level:** Expert Scenario
+
+**Answer:** Measure replication backlog, naming contexts, change volume, site links, bridgeheads, schedules, and network utilization. Confirm the topology matches actual WAN paths and that a misconfigured connection is not creating unnecessary traffic. Prioritize restoration of critical sites and allow convergence in controlled windows rather than repeatedly forcing `/syncall` everywhere. Adjust site-link schedules, intervals, costs, or bandwidth temporarily with network-team coordination, and consider QoS. Check whether a bulk directory or GPO change during the outage caused the surge. After stabilization, capacity-plan for recovery backlog and improve change controls. AD replication should coexist with business traffic; a design that works only in steady state is incomplete.
+
+## 294. A virtualization team reverted a domain controller snapshot. What risks and checks apply?
+
+**Level:** Expert Scenario
+
+**Answer:** Modern virtualized DCs on supported hypervisors use VM-Generation ID safeguards that detect rollback and reset replication identity and RID state, but this is not permission to use snapshots as backup. Confirm the hypervisor and guest support the mechanism, review Directory Service events for Generation ID handling, validate invocation ID, RID pool, replication, SYSVOL, DNS, and time. If unsupported or evidence shows USN rollback or duplicate identity, isolate and rebuild the DC. Determine what changes were lost locally and whether applications depended on them. Correct the virtualization process so DC snapshots are not reverted casually, and rely on supported system-state backup and forest recovery.
+
+## 295. The enterprise issuing CA is compromised. What does identity recovery require?
+
+**Level:** Expert Scenario
+
+**Answer:** Isolate the CA and assume its private key and issuance authority may be misused. Preserve CA database, logs, configuration, templates, HSM evidence, and administrative endpoints. Stop issuance, publish appropriate revocation information if the key can still be trusted to do so under the incident plan, and identify certificates issued during the compromise. Depending on key exposure, revoke the CA certificate, remove trust, rebuild the CA with a new key, reissue dependent certificates, update AIA/CDP and trust stores, and coordinate relying applications. Review certificate templates, enrollment services, OCSP, NDES, and AD mappings. Password resets do not invalidate attacker-issued certificates. PKI compromise recovery must be rehearsed because revoking a widely trusted CA can cause enterprise-wide outages.
+
