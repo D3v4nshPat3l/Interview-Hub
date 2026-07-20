@@ -755,3 +755,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** SYSVOL is a replicated folder present on each domain controller in a domain. It contains the file-based portion of GPOs, sign-in and startup scripts, and other public domain files required by clients. The `SYSVOL` and `NETLOGON` shares expose relevant content. Current domains use DFS Replication for SYSVOL. The AD database and transaction logs are not stored in SYSVOL. Healthy Group Policy requires both directory replication of the GPC and DFSR replication of the GPT.
 
+## 111. What is the NETLOGON share?
+
+**Level:** Beginner
+
+**Answer:** NETLOGON is a share exposed by domain controllers that maps to the scripts portion of SYSVOL and is traditionally used for sign-in scripts and related files. Its absence on a new or existing DC often indicates incomplete SYSVOL initialization, DFSR failure, or Netlogon not advertising the DC as ready. Do not manually create the share as a permanent workaround. Investigate DFS Replication events, AD replication, the DC's SYSVOL subscription, upstream health, and promotion status.
+
+## 112. How is SYSVOL replicated?
+
+**Level:** Intermediate
+
+**Answer:** Supported current domains use Distributed File System Replication, or DFSR, to replicate SYSVOL. Older environments may still contain legacy FRS configurations, which should be migrated before introducing unsupported newer domain-controller versions. DFSR has its own service state, event logs, database, staging behavior, conflict handling, and AD configuration. AD replication must also be healthy because DFSR configuration is stored in AD. Commands such as `dfsrmig /getglobalstate`, `dfsrmig /getmigrationstate`, `dfsrdiag pollad`, and event-log review help establish state.
+
+## 113. Why can a GPO show different versions in AD and SYSVOL?
+
+**Level:** Advanced
+
+**Answer:** The directory component and file component replicate independently. An edit increments version data, but AD replication may converge while DFSR is delayed or broken, or vice versa. A client can therefore read metadata from one DC and files from another state, causing processing errors or inconsistent settings. Compare GPO version information, identify the DC used by the client, check `repadmin`, inspect DFS Replication logs and backlog, and verify the GPT path and `gpt.ini`. Avoid manually copying individual policy files between DCs because that can create unsupported divergence.
+
+## 114. What is `gpupdate`?
+
+**Level:** Beginner
+
+**Answer:** `gpupdate` triggers a policy refresh on the local computer. `/force` reapplies all settings rather than only changed GPOs, and `/boot` or `/logoff` can be used when a client-side extension requires restart or sign-out. `gpupdate` does not repair replication, correct scoping, or make an inaccessible DC healthy. Repeatedly forcing policy can obscure timing and increase load. First determine whether the GPO reached the DC being used and whether the client considers it applicable.
+
+## 115. What is `gpresult`, and how is it used?
+
+**Level:** Beginner
+
+**Answer:** `gpresult` reports Resultant Set of Policy information for a user or computer. `gpresult /r` provides a summary, while `gpresult /h report.html` creates a detailed report showing applied and denied GPOs, filtering reasons, winning settings, group membership, and processing data. Run it in the affected security context and with elevation for computer details. A report from an administrator's session may not represent the user's session. Pair it with the GroupPolicy Operational event log and GPMC modeling when diagnosing remote or future-state behavior.
+
