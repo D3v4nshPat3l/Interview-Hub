@@ -1441,3 +1441,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 *Questions 221-240 test root-cause analysis across distributed AD dependencies.*
 
+## 221. Replication fails with RPC error 1722. How do you troubleshoot it?
+
+**Level:** Advanced Scenario
+
+**Answer:** Error 1722 means the RPC server is unavailable, but the root cause may be DNS, routing, firewall, service state, endpoint mapping, dynamic RPC ports, IPsec, or the target DC itself. Confirm both DCs resolve each other's current host and GUID-based CNAME records correctly. Test TCP 135 and the configured dynamic RPC range in both directions, then check `repadmin /showrepl`, `dcdiag /test:dns`, Netlogon, RPC, and Directory Service events. Verify time and secure channel. Compare the failure with other partners to identify whether the source, destination, or path is common. Packet capture can show failed name resolution or RPC endpoint negotiation. Do not “fix” it by opening all ports permanently without validating the required flows and network policy.
+
+## 222. Replication returns error 8453, “Replication access was denied.” What are likely causes?
+
+**Level:** Advanced Scenario
+
+**Answer:** Check whether the involved DC computer accounts and NTDS Settings objects are intact, the secure channel works, and the DCs authenticate using Kerberos. Error 8453 can result from broken machine-account trust, duplicate or incorrect SPNs, time skew, DNS misresolution, damaged directory permissions, or a DC restored or cloned incorrectly. Review `repadmin /showrepl`, `dcdiag /test:checksecurityerror`, Kerberos events, `nltest /sc_verify`, and replication metadata. Confirm the servers are genuine DCs and no firewall or inspection device is forcing inappropriate authentication. Avoid granting broad replication rights to computer accounts as a workaround; normal DC replication permissions are established through protected directory objects and group membership. Repair the identity or topology fault.
+
+## 223. Replication or logon fails with “The target principal name is incorrect.” What do you investigate?
+
+**Level:** Expert Scenario
+
+**Answer:** This usually indicates Kerberos cannot validate the service identity expected for the target. Check forward and reverse DNS, duplicate hostnames or IP addresses, duplicate SPNs, stale DC records, machine-account password mismatch, and whether a snapshot or image created two systems with related identity. Use `setspn -X`, `setspn -Q`, `nltest`, and `klist`; inspect the target's `servicePrincipalName` values and replication metadata. Confirm clients are connecting by the intended FQDN and not an unsupported alias. For DCs, validate GUID CNAME records and secure channels. Do not immediately disable Kerberos or force NTLM. Correct the duplicate identity, SPN, DNS, or machine-secret condition and then retest after ticket purge where appropriate.
+
+## 224. How do you handle lingering objects detected by replication diagnostics?
+
+**Level:** Expert Scenario
+
+**Answer:** First stop treating the affected DC as a normal replication partner until scope is understood. Identify the source and destination naming context, how long the DC was offline, tombstone lifetime, strict replication consistency setting, and which replica contains the authoritative live state. Use `repadmin /removelingeringobjects` in advisory mode before removal and preserve command output. Remove lingering objects only against a verified reference DC and naming context. Investigate stale DNS, unsupported snapshot rollback, disabled replication, and monitoring gaps. A DC offline beyond tombstone lifetime is often safer to demote or rebuild than to rehabilitate. After cleanup, verify every partition, Global Catalog state, DNS application partitions, and replication convergence.
+
+## 225. Replication is healthy during the day but consistently backlogs overnight. How do site-link settings factor in?
+
+**Level:** Advanced Scenario
+
+**Answer:** Review site-link schedules, intervals, costs, bridgehead selection, WAN maintenance windows, and whether backup or batch traffic saturates the link. A schedule may permit connections only during a narrow window, while change volume exceeds available bandwidth. Examine replication queue and largest delta over time rather than one snapshot. Confirm topology generation and connection objects, then correlate network telemetry and KCC events. Consider widening the schedule, reducing interval, improving capacity, or changing topology after modeling business impact. Compression and notification behavior differ between intersite and intrasite replication. Do not force full synchronization every night as a permanent fix; that can intensify congestion and mask an undersized or incorrectly scheduled topology.
+
