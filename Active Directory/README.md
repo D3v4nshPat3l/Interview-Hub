@@ -504,3 +504,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** The client provides its IP information during DC location, and a domain controller maps that address to the most specific subnet object in the configuration partition. The associated site is returned and cached. If no subnet matches, the client may use a DC from a less optimal site and events may report unmapped addresses. `nltest /dsgetsite` shows the current result. Correct site mapping requires current IPAM data, nonoverlapping subnet definitions, and operational processes that add new networks before deployment. A site name cannot compensate for an incorrect or absent subnet object.
 
+## 71. Why is time synchronization important in AD?
+
+**Level:** Beginner
+
+**Answer:** Kerberos uses timestamps to reduce replay risk, so clients, services, and KDCs must operate within the configured clock-skew tolerance, commonly five minutes by default. Large drift can cause Kerberos errors, GPO and replication failures, certificate validation issues, and confusing application behavior. Domain members normally synchronize through the domain hierarchy. The PDC Emulator in the forest root should synchronize with a reliable external source, and other DCs and members follow the hierarchy. Virtualization time integration must not fight domain time. Use `w32tm /query /status`, `w32tm /query /source`, and event logs to diagnose the chain.
+
+## 72. What is the recommended Windows time hierarchy in a forest?
+
+**Level:** Intermediate
+
+**Answer:** The forest-root PDC Emulator is the authoritative domain time source and should synchronize with a reliable external source. PDC Emulators in child domains normally synchronize through the parent-domain hierarchy, other domain controllers synchronize with an appropriate domain source, and member computers synchronize from domain controllers. Configuration should be explicit, monitored, and resilient. Never point every domain member directly to an internet NTP service because that breaks the domain hierarchy and complicates Kerberos troubleshooting. After transferring the PDC role, verify the new holder's configuration and source.
+
+## 73. What is a computer-account secure channel?
+
+**Level:** Intermediate
+
+**Answer:** A domain-joined computer has an AD computer account and a corresponding machine password. The workstation or server and the domain use that secret to establish a secure channel for Netlogon operations. The password rotates automatically. If the local and AD copies no longer match, users may see “the trust relationship between this workstation and the primary domain failed.” Causes include stale snapshots, restored images, duplicate computer identities, long-offline systems, account resets, and replication inconsistencies. Use `Test-ComputerSecureChannel`, `nltest /sc_verify`, or `Reset-ComputerMachinePassword` in a controlled manner. Rejoining the domain is not always necessary.
+
+## 74. What happens during a domain join?
+
+**Level:** Intermediate
+
+**Answer:** The device locates a domain controller through DNS, authenticates an authorized joining identity or uses a prestaged account, creates or reuses a computer object, establishes a machine-account password, and configures local domain membership. The process requires correct DNS, time, network ports, naming, computer-account permissions, and a unique identity. Joining does not automatically place the object in the correct OU unless a prestaged object, redirection, or provisioning workflow controls placement. After join, restart and policy processing establish the managed state. Logs such as `C:\Windows\Debug\NetSetup.log` are central to troubleshooting.
+
+## 75. What is an offline domain join?
+
+**Level:** Advanced
+
+**Answer:** Offline domain join provisions domain-join metadata in advance so a computer can become domain-joined without contacting a domain controller during the initial join action. `djoin.exe` can create a provisioning blob that is applied to the target image. This is useful for imaging, remote deployment, and isolated build processes. The blob is sensitive because it contains domain-join material and must be transferred securely, scoped correctly, and deleted after use. The machine still needs domain connectivity later for normal authentication, policy, and password maintenance.
+
