@@ -881,3 +881,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** `dcdiag` runs diagnostic tests against domain controllers, including advertising, services, replication, DNS, connectivity, system logs, roles, and other health areas depending on options. `dcdiag /v`, `dcdiag /e`, and `dcdiag /test:dns` are common. Some warnings are environmental or historical, so do not treat every line as a critical failure without understanding the test. Capture output before and after remediation and correlate with `repadmin`, events, DNS, and actual symptoms.
 
+## 131. What are USNs and invocation IDs?
+
+**Level:** Advanced
+
+**Answer:** A domain controller assigns an update sequence number to each local directory change. USNs are meaningful only relative to that DC's current database instance, identified by its invocation ID. Replication partners track how far they have received changes from each source. After a supported restore or generation change, AD changes the invocation ID so old and new update sequences are not confused. This mechanism is central to detecting unsafe rollback and ensuring convergence. Never compare raw USNs across different DCs as if they were global transaction numbers.
+
+## 132. What is USN rollback?
+
+**Level:** Advanced
+
+**Answer:** USN rollback occurs when a DC database is reverted without AD being able to recognize the restore correctly. The DC may reuse update sequence numbers while partners believe those changes were already received, causing silent divergence. Modern VM-GenerationID and AD-aware backup processes reduce risk, but unsupported snapshots, storage rollback, or copied images remain dangerous. Symptoms can include replication being disabled and directory-service events. The usual response is to isolate and rebuild or perform supported recovery, not force replication from the rolled-back DC.
+
+## 133. What are lingering objects?
+
+**Level:** Advanced
+
+**Answer:** Lingering objects are objects that remain on a DC after they were deleted elsewhere and the deletion tombstone expired before the stale DC replicated it. When the stale DC returns, it may attempt to reintroduce or serve those objects. Strict replication consistency helps block inbound replication of such data. Diagnose long replication gaps, compare authoritative replicas, use `repadmin /removelingeringobjects` only with correct source and advisory checks, and rebuild a DC when confidence is low. Extending tombstone lifetime after the problem does not retroactively repair it.
+
+## 134. What is tombstone lifetime?
+
+**Level:** Advanced
+
+**Answer:** Tombstone lifetime controls how long deletion information is retained for replication and influences the maximum safe offline or backup age. Defaults vary with forest creation history and configuration; many newer forests use 180 days, while protocol defaults and older forests may show 60 days. Always query the actual `tombstoneLifetime` attribute and understand `msDS-DeletedObjectLifetime` when Recycle Bin is enabled. Backups older than the effective safe lifetime should not be assumed valid for ordinary restore. Monitoring should alert well before any DC approaches the limit without successful inbound replication.
+
+## 135. What is Active Directory Recycle Bin?
+
+**Level:** Intermediate
+
+**Answer:** Recycle Bin is a forest-wide optional feature that preserves deleted objects with their link-valued and non-link-valued attributes during the deleted-object lifetime, allowing restoration with group memberships and object identity intact. It requires an appropriate functional level and cannot be disabled after enablement. It only helps for objects deleted after it was enabled. It is not a substitute for system-state backup or forest recovery because it does not recover every corruption, compromise, GPO file, DNS issue, or deleted data outside AD objects.
+
