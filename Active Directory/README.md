@@ -1906,3 +1906,171 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Isolate the CA and assume its private key and issuance authority may be misused. Preserve CA database, logs, configuration, templates, HSM evidence, and administrative endpoints. Stop issuance, publish appropriate revocation information if the key can still be trusted to do so under the incident plan, and identify certificates issued during the compromise. Depending on key exposure, revoke the CA certificate, remove trust, rebuild the CA with a new key, reissue dependent certificates, update AIA/CDP and trust stores, and coordinate relying applications. Review certificate templates, enrollment services, OCSP, NDES, and AD mappings. Password resets do not invalidate attacker-issued certificates. PKI compromise recovery must be rehearsed because revoking a widely trusted CA can cause enterprise-wide outages.
 
+## 296. Before an audit, how do you demonstrate that Active Directory is healthy?
+
+**Level:** Advanced Scenario
+
+**Answer:** Produce evidence, not a screenshot of one green console. Show DC inventory and support status; `dcdiag` and `repadmin` results; DNS, time, SYSVOL, Global Catalog, and FSMO validation; backup success and restore-test records; privileged group and ACL recertification; GPO change control; LAPS and service-account coverage; trust and certificate-service review; vulnerability and patch posture; monitoring and alert tests; and open-risk exceptions with owners. Include trend data for replication failures, stale objects, NTLM or unsigned LDAP use, and privileged logons. Explain sampling, tool versions, collection time, and limitations. An auditor should be able to trace each control objective to technical evidence and an accountable process.
+
+## 297. The CIO asks for a 30-, 60-, and 90-day AD hardening plan. What do you propose?
+
+**Level:** Expert Scenario
+
+**Answer:** In 30 days, stabilize and discover: inventory DCs and Tier 0, fix replication and DNS, patch critical systems, verify isolated backups and emergency accounts, remove obvious stale privilege, enable key auditing, and contain critical attack paths. By 60 days, reduce credential exposure: separate admin accounts, deploy privileged workstations, expand Windows LAPS and managed service accounts, remediate dangerous GPO, ACL, delegation, trust, and AD CS findings, and pilot LDAP or SMB protections. By 90 days, enforce and institutionalize: authentication restrictions, protocol reduction, continuous attack-path monitoring, privileged-access recertification, tested forest recovery, and executive metrics. Prioritize by exploitable path and business impact, not by easiest checklist item. Track owners, deadlines, exceptions, and measured residual risk.
+
+## 298. How would you design a least-privilege operating model for AD administration?
+
+**Level:** Expert Scenario
+
+**Answer:** Separate roles for identity lifecycle, workstation support, server administration, GPO management, DNS, PKI, synchronization, backup, and forest-level operations. Delegate permissions to role groups at the narrowest stable OU or object scope, avoid direct user ACEs, and protect Tier 0 roles with separate accounts, privileged workstations, MFA where supported, and just-in-time approval. Define emergency accounts and monitored break-glass procedures. Use automation with constrained service identities and signed, reviewed code. Recertify groups and ACLs, record ownership, and test effective access. Prevent lower-tier systems from controlling higher-tier tools or credentials. Least privilege is an operating lifecycle—request, approve, provision, monitor, review, and remove—not a one-time cleanup.
+
+## 299. In an interview, how should you answer “Tell me about the hardest AD incident you handled”?
+
+**Level:** Senior Scenario
+
+**Answer:** Use a structured account: business impact, observed symptoms, your role and authority, hypotheses, evidence, technical actions, communication, result, and lessons. Explain how you separated DNS, replication, authentication, policy, and security possibilities; name the diagnostic evidence rather than claiming intuition; and state what you did not know. Describe risk-based decisions such as isolating a DC, delaying credential rotation until containment, or choosing rebuild over repair. Quantify recovery time or scope without exposing confidential details. Include prevention changes—monitoring, runbooks, architecture, or access control. Interviewers value disciplined reasoning and ownership more than a dramatic exploit story.
+
+## 300. What checklist would you use when taking ownership of an unfamiliar Active Directory environment?
+
+**Level:** Expert Scenario
+
+**Answer:** Establish forest and domain topology, functional levels, DC versions and sites, DNS, time, replication, SYSVOL, Global Catalogs, FSMO roles, trusts, AD CS, Entra Connect, AD FS, backup, virtualization, and monitoring. Inventory Tier 0 identities and systems, privileged groups, delegated ACLs, GPO ownership, service accounts, LAPS, delegation, authentication protocols, certificate templates, stale objects, and unsupported platforms. Validate recovery through an isolated restore test and identify business-critical authentication dependencies. Review change management, emergency access, admin workstations, logging, patching, and open exceptions. Produce a risk-ranked remediation plan with quick containment, architectural work, owners, and measurable outcomes. Do not begin by renaming OUs or running intrusive tools before scope, backups, and stakeholder authority are clear.
+
+---
+# Command and Event Reference
+
+## Practical Command Reference
+
+> Run diagnostic and change commands only with authorization. Capture output before changing the environment. Commands shown here are starting points; syntax and availability vary by Windows Server and RSAT version.
+
+| Goal | Common command or tool | What to examine |
+|---|---|---|
+| Identify domains and forest | `Get-ADDomain`, `Get-ADForest` | Functional levels, FSMO holders, sites, GCs, naming contexts |
+| Find FSMO role holders | `netdom query fsmo` | Expected owner, reachability, replication health |
+| Locate a DC | `nltest /dsgetdc:<domain> /force` | Selected DC, site, flags, discovery failure |
+| Identify client site | `nltest /dsgetsite` | Subnet-to-site mapping |
+| Check secure channel | `Test-ComputerSecureChannel -Verbose`, `nltest /sc_verify:<domain>` | Machine-account trust and DC contact |
+| Check DNS client state | `ipconfig /all` | Internal DNS servers, suffix, address, gateway |
+| Query AD SRV records | `Resolve-DnsName -Type SRV _ldap._tcp.dc._msdcs.<domain>` | Correct DC records, site records, TTL, stale entries |
+| Run DC diagnostics | `dcdiag /v`, targeted `/test:<name>` | Advertising, DNS, services, SYSVOL, security, replication |
+| Summarize replication | `repadmin /replsummary` | Failures, largest delta, common source or destination |
+| Inspect partner replication | `repadmin /showrepl <DC>` | Naming context, partner, last success, error code |
+| Inspect object metadata | `repadmin /showobjmeta <DC> <DN>` | Originating DC, version, time, USN |
+| View replication metadata in PowerShell | `Get-ADReplicationAttributeMetadata` | Attribute origin and convergence |
+| Force targeted replication | `repadmin /replicate <dest> <source> <NC>` | Use only after diagnosing the cause |
+| Inspect site topology | Active Directory Sites and Services, `Get-ADReplicationSite*` | Subnets, links, costs, schedules, connection objects |
+| Check time | `w32tm /query /status`, `w32tm /monitor` | Source, offset, stratum, PDC hierarchy |
+| Inspect Kerberos tickets | `klist` | TGT and service tickets, SPNs, encryption, cache |
+| Find SPNs | `setspn -Q <SPN>`, `setspn -X` | Missing or duplicate SPNs |
+| Review resultant Group Policy | `gpresult /h report.html`, `Get-GPResultantSetOfPolicy` | Applied and denied GPOs, filters, precedence |
+| Refresh Group Policy | `gpupdate /force` | Use after evidence collection, not as root-cause analysis |
+| Check SYSVOL shares | `net share`, `dcdiag /test:sysvolcheck` | `SYSVOL`, `NETLOGON`, advertising |
+| Check DFSR migration | `dfsrmig /getglobalstate`, `dfsrmig /getmigrationstate` | FRS-to-DFSR state and convergence |
+| Find stale accounts | `Search-ADAccount` plus authoritative inventory | Inactivity, ownership, exclusions, false positives |
+| Inspect password policy | `Get-ADDefaultDomainPasswordPolicy`, `Get-ADUserResultantPasswordPolicy` | Default and fine-grained resultant policy |
+| Review trusts | `Get-ADTrust -Filter *`, `nltest /domain_trusts` | Direction, type, transitivity, filtering, validation |
+| Review privileged membership | `Get-ADGroupMember -Recursive` | Nested privilege and unexpected principals |
+| Review LAPS | Windows LAPS PowerShell and event logs | Backup state, authorized readers, rotation failures |
+| Review gMSA configuration | `Get-ADServiceAccount -Properties *`, `Test-ADServiceAccount` | Retrieval hosts, SPNs, service readiness |
+| Query event logs | `Get-WinEvent -FilterHashtable @{...}` | Time-bounded, structured filtering and exported evidence |
+
+## High-Value Windows Event Reference
+
+> Event generation depends on audit policy, SACLs, product version, and log retention. Correlate events rather than treating one ID as conclusive proof.
+
+| Event ID | Typical meaning | Interview use |
+|---:|---|---|
+| 1102 | Security audit log cleared | High-severity anti-forensics indicator |
+| 4624 | Successful logon | Logon type, source, account, authentication package |
+| 4625 | Failed logon | Failure code, source, target account, spray or stale credential |
+| 4648 | Logon using explicit credentials | Run-as, remote administration, credential use |
+| 4672 | Special privileges assigned | Privileged session context; not malicious by itself |
+| 4688 | Process creation | Command line and parent process when configured |
+| 4720 / 4726 | User created / deleted | Identity lifecycle or unauthorized provisioning |
+| 4728 / 4729 | Member added to / removed from a global group | Domain Admins and other global privileged groups |
+| 4732 / 4733 | Member added to / removed from a local group | Built-in or domain-local resource privilege |
+| 4740 | Account locked out | Caller computer and lockout timeline |
+| 4756 / 4757 | Member added to / removed from a universal group | Forest-wide privilege or access changes |
+| 4768 | Kerberos TGT requested | Authentication service activity and encryption |
+| 4769 | Kerberos service ticket requested | Service access, Kerberoasting analytics, SPN errors |
+| 4771 | Kerberos preauthentication failed | Bad password, disabled account, skew, spray analysis |
+| 4776 | NTLM credential validation | NTLM source and target analysis |
+| 4662 | Operation performed on a directory object | Replication or sensitive-object access when SACLs are configured |
+| 5136 | Directory object modified | Attribute-level change details |
+| 5137 | Directory object created | New user, computer, GPO, template, or server metadata |
+| 5139 | Directory object moved | OU movement and scope changes |
+| 5141 | Directory object deleted | Deletion timeline and actor |
+
+# Source and Validation Notes
+
+This guide uses the supplied interview and training material to identify themes, but the answers were rewritten and corrected rather than copied. The supplied architecture deck includes diagrams of the forest-domain-OU hierarchy, OU-based delegation, domain trees, forests, and site topology. The supplied offensive references cover Kerberos, NTLM, GPO, ACL, AD CS, delegation, trusts, DCSync, ticket abuse, credential exposure, and recovery-relevant attack paths. Historical commands and product behavior were treated as historical unless supported by current Microsoft documentation.
+
+Several source claims required correction:
+
+- `SYSVOL` stores Group Policy templates, scripts, and other replicated public domain files; it does **not** store the AD database. The directory database is normally `%systemroot%\NTDS\ntds.dit`.
+- A Global Catalog stores a full writable copy of its own domain partition and a partial, read-only replica of objects from other domains—not a complete writable copy of every object in the forest.
+- Modern SYSVOL replication uses DFS Replication. FRS and tools such as REPLMON are legacy material.
+- Tombstone lifetime is an attribute of the forest configuration and must be checked; it is not always a universal 60-day value.
+- Microsoft Entra ID is a cloud identity platform, not a cloud-hosted domain controller or an AD DS replica.
+- Multifactor authentication for Windows and privileged administration requires a designed authentication solution; there is no single universal “enable MFA for all AD accounts” switch in on-premises AD DS.
+
+# Primary References
+
+## Primary Microsoft References
+
+## Core AD DS
+
+- [Active Directory Domain Services overview](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview)
+- [Understanding the Active Directory logical model](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/understanding-the-active-directory-logical-model)
+- [Flexible Single Master Operations roles](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-fsmo-roles)
+- [Locating Active Directory domain controllers: DC Locator](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/dc-locator)
+- [Verify that SRV DNS records have been created](https://learn.microsoft.com/en-us/troubleshoot/windows-server/networking/verify-srv-dns-records-have-been-created)
+- [Diagnose Active Directory replication failures](https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/diagnose-replication-failures)
+- [Group Policy overview](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/group-policy/group-policy-overview)
+- [Group Policy processing](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/group-policy/group-policy-processing)
+- [Migrate SYSVOL replication from FRS to DFS Replication](https://learn.microsoft.com/en-us/windows-server/storage/dfs-replication/migrate-sysvol-to-dfsr)
+- [Kerberos authentication overview](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-authentication-overview)
+- [Enable LDAP signing](https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/enable-ldap-signing-in-windows-server)
+- [Best practices for securing Active Directory](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/best-practices-for-securing-active-directory)
+
+## Microsoft Open Specifications and Standards
+
+- [[MS-ADTS] Active Directory Technical Specification](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/d2435927-0999-4c62-8c6d-13ba31a52e1a)
+- [[MS-DRSR] Directory Replication Service Remote Protocol](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/f977faaa-673e-4f66-b9bf-48c640241d47)
+- [[MS-KILE] Kerberos Protocol Extensions](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-kile/2a32282e-dd48-4ad9-a542-609804b02cc9)
+- [[MS-NRPC] Netlogon Remote Protocol](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-nrpc/ff8f970f-3e37-40f7-bd4b-af7336e4792f)
+- [RFC 4120: The Kerberos Network Authentication Service (V5)](https://www.rfc-editor.org/rfc/rfc4120)
+- [MITRE ATT&CK: Steal or Forge Kerberos Tickets](https://attack.mitre.org/techniques/T1558/)
+- [MITRE ATT&CK: DCSync](https://attack.mitre.org/techniques/T1003/006/)
+
+## Recovery and Modern Windows Server
+
+- [Enable Active Directory Recycle Bin](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/adac/active-directory-recycle-bin)
+- [Raise domain and forest functional levels](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/raise-domain-forest-functional-levels)
+- [Database 32K pages for Active Directory](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/32k-pages-optional-feature)
+- [Windows LAPS overview](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-overview)
+- [Group Managed Service Accounts overview](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/group-managed-service-accounts/group-managed-service-accounts/group-managed-service-accounts-overview)
+- [Delegated Managed Service Accounts overview](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/delegated-managed-service-accounts/delegated-managed-service-accounts-overview)
+- [Active Directory Certificate Services documentation](https://learn.microsoft.com/en-us/windows-server/identity/ad-cs/)
+
+## Hybrid Identity and Detection
+
+- [Microsoft Entra Connect Sync overview](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/how-to-connect-sync-whatis)
+- [Pass-through Authentication: how it works](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/how-to-connect-pta-how-it-works)
+- [Microsoft Defender for Identity security posture assessments](https://learn.microsoft.com/en-us/defender-for-identity/security-assessment)
+
+# Supplemental Interview and Practitioner Sources
+
+These sources were used to identify common interview themes and scenario wording. They are not treated as authoritative when they conflict with current Microsoft documentation.
+
+- [Whizlabs, *Microsoft Active Directory Interview Questions* PDF](https://www.whizlabs.com/blog/wp-content/uploads/2022/10/Microsoft-Active-Directory-Interview-Questions-PDF.pdf).
+- [Naukri Code360, *Active Directory Interview Questions*](https://www.naukri.com/code360/library/active-directory-interview-questions).
+- [GeeksforGeeks, *Active Directory Interview Questions*](https://www.geeksforgeeks.org/software-engineering/active-directory-interview-questions/).
+- [Hirist, *Top Active Directory Interview Questions and Answers*](https://www.hirist.tech/blog/top-30-active-directory-interview-questions-and-answers/).
+- User-supplied *Active Directory Doc 1* training deck.
+- User-supplied *Attacking Active Directory: 0 to 0.9 / OSCP+* reference.
+- User-supplied *Active Directory Attacks* reference.
+
+# Ethical and Operational Use
+
+Security techniques in this guide are included to help candidates explain risk, detection, incident response, and remediation. Test only in systems you own or are explicitly authorized to assess. In production, follow change control, evidence-preservation requirements, Microsoft support guidance, organizational policy, and applicable law.
