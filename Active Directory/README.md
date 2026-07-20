@@ -1816,3 +1816,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 *Questions 281-300 test judgment when availability, integrity, and organizational pressure conflict.*
 
+## 281. All domain controllers are unavailable. What is your first-hour recovery strategy?
+
+**Level:** Expert Scenario
+
+**Answer:** Declare an identity-service incident, stop uncontrolled rebuild attempts, and establish a recovery lead, secure communications, and change log. Determine whether the outage is infrastructure failure, destructive attack, encryption, directory corruption, network isolation, or DNS failure. Preserve evidence and isolate compromised networks. Identify the most recent known-good, offline system-state backups and the documented forest recovery procedure. Restore one writable DC for the forest-root domain in an isolated recovery network, including DNS, and verify database integrity and authoritative time. Recover additional domains and DCs in the documented order, then restore SYSVOL, Global Catalog, trusts, CAs, and dependent identity services. Reconnect production segments gradually after credential rotation and security validation. Do not bring random snapshots online together; competing stale DCs can deepen corruption.
+
+## 282. The forest-root domain is lost, but a child domain still has running DCs. Can the child domain operate independently?
+
+**Level:** Expert Scenario
+
+**Answer:** The child domain may continue authenticating local users for a period, but the forest is not healthy or independently supportable. Forest-wide schema and configuration partitions, root-domain roles, trusts, Enterprise Admins, DNS dependencies, Global Catalog data, and cross-domain authentication can be affected. Do not create a replacement forest root with the same name or attempt to detach the child. Follow forest recovery guidance: recover the forest-root domain first from trusted backup, restore required FSMO roles and DNS, then validate configuration and replication before reconnecting child domains. Preserve running child DCs and prevent harmful cleanup while root recovery proceeds. Business continuity may use cached and local access, but the technical objective is restoration of the original forest identity.
+
+## 283. An administrator accidentally deleted an OU containing users, groups, and computers. How do you recover it?
+
+**Level:** Expert Scenario
+
+**Answer:** Stop additional changes and determine whether Active Directory Recycle Bin is enabled. If enabled and objects remain within deleted-object lifetime, restore the OU and its descendants using AD Administrative Center or PowerShell, preserving link-valued attributes and most object state. Validate group memberships, computer secure channels, managed service dependencies, GPO links, and application references. If Recycle Bin is unavailable or incomplete, use a supported authoritative restore from system-state backup in an isolated, controlled workflow, marking the required subtree authoritative so restored objects replicate outward. Do not recreate users manually with the same names: new objects receive different SIDs and GUIDs, breaking ACLs and dependencies. Review deletion auditing and implement OU protection and delegated least privilege.
+
+## 284. One DC reports database corruption while all other DCs are healthy. What is the preferred response?
+
+**Level:** Expert Scenario
+
+**Answer:** Isolate the affected DC from replication and preserve diagnostic evidence. Verify hardware, storage, antivirus exclusions, and backup status. Because AD is multimaster and the DC is not unique, the safest action is usually forced removal or demotion followed by metadata cleanup and rebuild from trusted media, rather than low-level repair of `ntds.dit`. Transfer any FSMO roles and confirm another DNS or Global Catalog service covers the site. Use database repair only under current Microsoft guidance when no healthy replica or supported recovery alternative exists. After rebuilding, validate every naming context, SYSVOL, DNS, time, and monitoring. Investigate the underlying disk or platform fault so the replacement does not inherit it.
+
+## 285. A domain controller that was offline for eight months is powered on. What do you do?
+
+**Level:** Expert Scenario
+
+**Answer:** Immediately isolate it from production replication until tombstone lifetime, backup state, OS support, and database history are known. An excessively stale DC can contain objects whose deletions have been garbage-collected elsewhere, creating lingering objects or replication quarantine. Do not extend tombstone lifetime retroactively or force replication. Preserve any unique evidence, verify FSMO and service dependencies, then normally perform metadata cleanup and rebuild the DC from current media. Remove stale DNS and connection objects and inspect whether clients authenticated to it before isolation. The correct threshold is the forest's configured and historical tombstone lifetime, not a universal number remembered from an interview guide.
+
