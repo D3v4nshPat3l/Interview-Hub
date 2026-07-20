@@ -1066,3 +1066,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 *Questions 161-180 cover identity synchronization, federation, certificate services, managed credentials, and branch-office domain controllers.*
 
+## 161. What is Microsoft Entra Connect Sync, and where does it fit in a hybrid identity design?
+
+**Level:** Intermediate
+
+**Answer:** Microsoft Entra Connect Sync synchronizes selected identities and attributes from on-premises Active Directory Domain Services to Microsoft Entra ID. It is not a domain controller, does not copy the AD database into the cloud, and does not make Entra ID an AD DS replica. The synchronization engine reads configured directories, applies join and transformation rules in its metaverse, and exports permitted changes to connected directories. A strong design defines authoritative sources, OU and attribute scope, source anchors, writeback requirements, service-account permissions, staging-server strategy, monitoring, and recovery procedures. Treat the synchronization server as part of the privileged identity control plane because it holds credentials and permissions that can materially affect both environments. Do not install unrelated applications on it, restrict interactive access, protect its database and configuration, and monitor connector-account and synchronization-rule changes.
+
+## 162. How do Password Hash Synchronization, Pass-Through Authentication, and federation differ?
+
+**Level:** Intermediate
+
+**Answer:** Password Hash Synchronization, or PHS, synchronizes a derived hash of the on-premises password hash to Entra ID, allowing cloud authentication to continue even when on-premises authentication infrastructure is unavailable. Pass-Through Authentication, or PTA, validates cloud sign-ins through on-premises agents and therefore depends on agent and network availability for authentication. Federation redirects authentication to a federation service such as AD FS, giving the organization more control over the authentication flow but adding servers, certificates, dependencies, and operational risk. The choice should be driven by security requirements, availability objectives, regulatory constraints, legacy application needs, and operational maturity. PHS is generally the simplest and most resilient option; PTA and federation require explicit high-availability and disaster-recovery designs. Seamless SSO is a separate user-experience feature and should not be confused with the primary authentication method.
+
+## 163. What security risks should be considered with Password Hash Synchronization?
+
+**Level:** Advanced
+
+**Answer:** PHS does not send a user's plaintext password to Entra ID. The synchronization process obtains the on-premises NT hash through replication APIs, applies additional processing and salting, and synchronizes a nonreversible derivative used for cloud authentication. The principal risks are therefore around privileged synchronization infrastructure, excessive directory-replication rights, connector-account compromise, tampering with synchronization rules, and poor monitoring. Restrict replication permissions to the required connector account, use a dedicated hardened server, limit administrators, protect backups, monitor privileged changes, and maintain an emergency recovery plan. Also understand scope: excluding an account from synchronization does not automatically remove every cloud object or credential already created. Security review should cover source-anchor selection, accidental matching, privileged-account synchronization policy, password writeback, and whether cloud-only break-glass accounts are independently protected and tested.
+
+## 164. Why is an Entra Connect server often treated as a Tier 0 or control-plane system?
+
+**Level:** Advanced
+
+**Answer:** Depending on configuration, the server and its connector accounts can read sensitive directory attributes, perform directory replication operations, modify cloud identities, execute synchronization rules, and support writeback features. Compromise could therefore create or alter identities, synchronize malicious attributes, expose credential-derived material, or bridge an intrusion between on-premises AD and Entra ID. Place the server in a hardened management boundary, restrict logon rights, use dedicated administrators, apply rapid patching, monitor local and directory changes, and avoid browsing, email, or general administration from it. Maintain a tested staging server or documented rebuild procedure, but do not assume two active synchronization servers can export simultaneously. Review connector permissions after enabling or disabling features because historical privileges may remain broader than current requirements.
+
+## 165. What is AD FS, and what are its major security dependencies?
+
+**Level:** Intermediate
+
+**Answer:** Active Directory Federation Services is a Security Token Service that authenticates users and issues signed claims-based tokens to relying parties. Its trust model depends on the integrity of the federation servers, service account, token-signing and token-decrypting certificates, relying-party configuration, claims rules, web application proxies, DNS, TLS, and AD DS. A stolen token-signing key can enable forged tokens until the trust and keys are remediated, so certificate protection and rollover are critical. Harden federation servers as privileged assets, minimize local administrators, use managed service accounts where supported, monitor configuration and certificate exports, restrict administrative endpoints, and keep proxies separated from internal federation servers. Organizations migrating away from AD FS should inventory every relying party and authentication requirement rather than simply removing servers after enabling cloud authentication.
+
