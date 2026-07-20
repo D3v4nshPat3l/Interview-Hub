@@ -193,3 +193,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 *Identity attributes, security principals, naming, access control, and delegated administration.*
 
+## 21. What is the difference between a security principal and a non-security-principal object?
+
+**Level:** Beginner
+
+**Answer:** A security principal is an identity that can be authenticated or represented in an access token and assigned permissions. Users, computers, managed service accounts, and security groups are common examples. They have a SID, and ACLs can grant or deny them rights. A distribution group is an AD object but is not security-enabled and therefore is not used to authorize access. OUs, contacts, sites, and most configuration objects are also not security principals. The distinction matters because placing an object in AD does not automatically make it capable of signing in or receiving permissions. When troubleshooting access, confirm that the group is security-enabled, the expected SID is present in the user's token, and token refresh has occurred after membership changes.
+
+## 22. What is a Security Identifier?
+
+**Level:** Beginner
+
+**Answer:** A SID is the identifier Windows uses to represent a security principal in access control. A domain account SID contains the domain SID plus a relative identifier, or RID, that uniquely identifies the object within the domain. ACLs generally store SIDs rather than account names, which is why renaming a user does not remove existing permissions. Deleting and recreating a user with the same name produces a different SID, so the new object does not automatically inherit the old object's ACL access. `SIDHistory` can preserve authorization during migration, but it is sensitive and must be protected, audited, and removed when no longer required. Well-known SIDs represent built-in identities such as Local System or Authenticated Users.
+
+## 23. What is the difference between `objectGUID`, SID, and distinguished name?
+
+**Level:** Intermediate
+
+**Answer:** `objectGUID` is a globally unique identifier assigned when an AD object is created and normally remains unchanged when the object is renamed or moved within the forest. A SID identifies a security principal for authorization; not every object has one. A distinguished name, or DN, represents the object's current LDAP path, such as `CN=Alice,OU=Users,DC=corp,DC=example,DC=com`, and changes when the object is renamed or moved. Applications should not use a DN as an immutable identity key. During migrations or synchronization, engineers must understand which identifier a product anchors to, because matching on names can create duplicates or accidental joins.
+
+## 24. What is a distinguished name, relative distinguished name, and canonical name?
+
+**Level:** Beginner
+
+**Answer:** A distinguished name is the full LDAP path of an object from the object to the directory root. The relative distinguished name, or RDN, is the first component that names the object within its parent, such as `CN=Alice`. A canonical name is a more human-readable path such as `corp.example.com/Users/Alice`. LDAP tools typically use DNs for search bases and modifications, while administrative interfaces may display canonical names. Special characters in DNs must be escaped correctly. A user's sign-in name is not necessarily the same as the CN or DN, so changing the display name or moving the object does not automatically change the UPN or `sAMAccountName`.
+
+## 25. What is the difference between `sAMAccountName` and UPN?
+
+**Level:** Beginner
+
+**Answer:** `sAMAccountName` is the legacy account name used in forms such as `DOMAIN\username` and is limited by older compatibility rules. A user principal name, or UPN, has the form `user@suffix` and is the preferred user-friendly sign-in name for many modern applications. The UPN suffix does not have to match the AD domain DNS name if an alternative suffix is configured in the forest. A UPN is not an email address by definition, although organizations often align them. Duplicate or unverified suffixes can cause hybrid identity and application problems. During a domain or tenant migration, UPN planning is a key dependency because it affects user experience, synchronization matching, and cloud sign-in.
+
