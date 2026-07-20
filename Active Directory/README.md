@@ -1596,3 +1596,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Remove or disable the unauthorized principal after capturing the change details, unless doing so would destroy a controlled investigation. Isolate the source administrative host and account, collect event logs such as `4728` or related group-change events, process telemetry, PowerShell logs, and directory replication metadata to identify the originating DC and time. Determine whether the new member logged on to DCs, accessed backups or CAs, changed GPOs or ACLs, created accounts, or extracted secrets. Assume credentials used on lower-tier systems may be exposed. Rotate affected privileged credentials, remove persistence, review AdminSDHolder and delegated rights, and validate Tier 0 integrity. The incident is not resolved by deleting the group member; the attacker may have already created alternate control paths.
 
+## 246. A high-impact GPO was modified outside the change window. How do you investigate and restore it?
+
+**Level:** Expert Scenario
+
+**Answer:** Preserve the current GPC and GPT, audit events, DFSR data, administrator endpoint evidence, and change-management records. Identify what changed, who had write or link rights, the originating DC, and the affected users or computers. Compare with a signed or controlled backup and inspect scripts, scheduled tasks, security options, software deployment, and file hashes in SYSVOL. If malicious impact is ongoing, disable the relevant GPO or unlink it through an approved emergency action while keeping evidence. Restore from a known-good GPO backup or recreate it, then verify AD and SYSVOL versions and client convergence. Remove the compromised right and investigate execution on endpoints. Restrict GPO administration to hardened hosts and alert on both directory and SYSVOL changes.
+
+## 247. You find a Group Policy Preferences XML file containing `cpassword`. What does that imply?
+
+**Level:** Advanced Scenario
+
+**Answer:** Older Group Policy Preferences could store an encrypted password in SYSVOL using a publicly documented static key, making the password recoverable by any authenticated user who could read the file. Microsoft removed the ability to create new password-bearing preference items, but legacy XML may remain in current or archived SYSVOL, backups, scripts, and deployment shares. Treat every referenced credential as compromised: identify the account and privileges, rotate it, search for reuse, remove the preference item, and replace the workflow with gMSA, LAPS, a vault, or another supported mechanism. Review SYSVOL history and endpoint use to determine exposure. Deleting only the XML does not revoke a credential already copied by an attacker.
+
+## 248. An assessment finds unconstrained delegation enabled on multiple servers. How do you prioritize remediation?
+
+**Level:** Advanced Scenario
+
+**Answer:** Rank systems by who connects to them, whether they are internet-facing or lower tier, service criticality, and whether Domain Admins, DCs, or other sensitive accounts may authenticate. Mark privileged accounts as sensitive and cannot be delegated and consider Protected Users after compatibility testing. Remove unnecessary unconstrained delegation, redesign applications with constrained delegation, RBCD, service identities, or protocol transition only where justified. Disable services that can coerce authentication from privileged systems and restrict network reachability. Monitor tickets and privileged logons on delegated servers. Remediation requires application testing because delegation may support double-hop workflows. A compensating control is temporary; retaining unconstrained delegation indefinitely on an untrusted server is a Tier 0 exposure.
+
+## 249. A certificate template allows Domain Users to enroll and supply the subject alternative name. What is your response?
+
+**Level:** Expert Scenario
+
+**Answer:** Determine whether the template permits client authentication or another purpose accepted for AD authentication, whether manager approval or authorized signatures are required, and which CAs issue it. If a low-privileged requester can obtain a certificate for another identity, disable issuance or remove enrollment immediately under emergency change control. Preserve template and CA configuration, issued-certificate records, request logs, and directory events. Identify potentially abusive certificates, revoke them, publish updated revocation data, and investigate account use. Correct subject-name construction, enrollment permissions, EKUs, issuance requirements, ownership, and template ACLs. Review CA-wide flags and other templates because the same underlying delegation problem may recur. Validate how certificate mappings and revocation are enforced before declaring the risk closed.
+
+## 250. A help-desk group can read LAPS passwords for domain controllers. Why is this critical, and how do you fix it?
+
+**Level:** Expert Scenario
+
+**Answer:** Windows LAPS can manage DSRM passwords on DCs, and any local or recovery credential associated with a DC is Tier 0 material. Broad password-read rights could enable offline recovery-mode access or compromise of other managed systems. Identify the exact ACL and whether access is inherited from a parent OU, a decryption group, or a broad control right. Remove the help-desk group from DC-related read and decrypt permissions, rotate affected passwords, audit historical reads where logs exist, and review the endpoints used by authorized readers. Separate workstation support from server and DC recovery roles. Verify that the Domain Controllers OU and any nested OUs have explicit, controlled delegation and that future automation does not reapply the broad ACE.
+
