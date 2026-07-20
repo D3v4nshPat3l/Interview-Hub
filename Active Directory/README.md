@@ -1781,3 +1781,38 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Build an authoritative inventory of owner, application, hosts, logon types, SPNs, privilege, dependencies, password age, and outage tolerance. Classify workloads by support for sMSA, gMSA, dMSA, virtual accounts, or application-native identities. Pilot low-risk services, establish KDS prerequisites, create one managed identity per service boundary, grant minimal host retrieval and resource rights, migrate SPNs carefully, and test failover and restart. Use change waves with rollback and application-owner signoff. For unsupported accounts, place credentials in a vault and schedule rotation. Remove interactive logon and broad groups throughout the program. Measure reduction in static credentials and stale owners, not only the number of accounts converted.
 
+## 276. How would you deploy Windows LAPS across a large estate?
+
+**Level:** Advanced Scenario
+
+**Answer:** Inventory OS support, legacy LAPS presence, local administrator naming, AD schema, device join state, management tooling, and password-read workflows. Decide backup directory, encryption, authorized decryptors, password policy, history, post-authentication actions, and whether automatic account management is required. Extend and verify schema where necessary, delegate computer self-update and narrow read or reset rights by OU, then pilot with representative clients and support staff. Monitor operational events and ensure help-desk tooling never logs passwords unnecessarily. Migrate from legacy LAPS in controlled stages, remove old client extensions and permissions, and rotate credentials after transition. Include emergency access and offline-device procedures.
+
+## 277. How do you plan removal of NTLM without breaking the enterprise?
+
+**Level:** Expert Scenario
+
+**Answer:** Begin with telemetry: audit NTLM usage on DCs, servers, and applications, identify account, source, target, protocol, and business owner, and distinguish unavoidable system behavior from misconfiguration such as IP-based access or missing SPNs. Remediate Kerberos blockers, update applications, use DNS names, configure SPNs, replace legacy devices, and reduce local-account dependencies. Introduce deny policies in rings—lab, pilot, business units, then broad enforcement—with explicit temporary exceptions, owners, expiry, and monitoring. Protect against relay during transition with signing, channel binding, Extended Protection, segmentation, and outbound-authentication controls. Keep emergency rollback narrowly scoped. A domain-wide deny set without evidence can cause an authentication outage that is difficult to diagnose.
+
+## 278. How would you enforce LDAP signing and channel binding safely?
+
+**Level:** Expert Scenario
+
+**Answer:** Enable auditing to identify unsigned LDAP binds and channel-binding incompatibility. Map every source to an application and owner, test supported secure bind methods, deploy valid DC certificates, and update trust stores and libraries. Remediate simple binds over cleartext first. Roll out enforcement to pilot DCs or through staged policy where architecture permits, monitor rejects, and maintain a tightly governed exception process. Validate LDAPS name, chain, revocation, and load balancer behavior. Explain that signing, TLS, and channel binding solve different threats. Include rollback, but do not leave the estate indefinitely in audit mode. After enforcement, alert on policy reversal and new unsigned clients.
+
+## 279. How do you implement administrative tiering in an existing flat domain?
+
+**Level:** Expert Scenario
+
+**Answer:** Define control tiers based on what an identity or system can administer, with Tier 0 containing the identity control plane. Inventory privileged groups, delegated ACLs, local admins, sessions, service accounts, management tools, hypervisors, backups, CAs, and synchronization. Create separate named admin accounts, hardened privileged access workstations, authentication restrictions, and deny-logon boundaries. Move administration workflows gradually so operations can continue. Remove standing privilege, use just-in-time approval where available, and monitor cross-tier logons. Tiering fails when a Tier 0 admin still reads email or when a lower-tier tool can deploy code to DCs. Validate attack paths after each phase, not just group memberships.
+
+## 280. What should an AD monitoring architecture collect?
+
+**Level:** Expert Scenario
+
+**Answer:** Collect security, Directory Service, DNS Server, DFS Replication, System, Group Policy, PowerShell, AD CS, Windows LAPS, AD FS, Entra Connect, EDR, network, hypervisor, and backup telemetry. Configure advanced audit policy and SACLs for sensitive directory objects so important events are generated. Centralize logs quickly into tamper-resistant storage with consistent time, asset, account, site, and role enrichment. Build detections for privileged group and ACL changes, replication abuse, unusual Kerberos or NTLM patterns, GPO and certificate-template changes, new DC metadata, password spray, and log clearing. Monitor sensor and pipeline health as seriously as alerts. Retention should support incident timelines and legal obligations. Pair every high-severity alert with triage fields, owner, containment guidance, and test cases.
+
+---
+# Senior Engineering and Disaster-Recovery Scenarios
+
+*Questions 281-300 test judgment when availability, integrity, and organizational pressure conflict.*
+
