@@ -769,3 +769,107 @@ For a strong spoken interview answer, use four layers:
 
 ---
 
+# Acquisition, Memory, Malware, and Timeline Analysis
+
+## 176. What is the order of volatility?
+
+**Answer:** The order of volatility is the principle that highly transient evidence should generally be collected before less volatile evidence when lawful scope, safety, and operational priorities allow. Examples may progress from CPU or live network state, memory, running processes, open connections, and temporary data to disks, logs, backups, and archived records. It is a decision aid, not an inflexible script. Pulling power may preserve disk state but destroy memory; leaving a system online may preserve access to encrypted data but allow remote destruction. The responder documents the trade-off and reason for the chosen sequence.
+
+## 177. What is live response?
+
+**Answer:** Live response collects information from a running Windows system, such as memory, processes, connections, users, logged-on sessions, handles, drivers, scheduled tasks, and volatile keys. It is valuable when the disk is encrypted, malware exists only in memory, or containment decisions must be made quickly. Every live action changes the system, so responders minimize commands, use trusted tools, record exact actions and times, and capture tool hashes. Live response is not inherently untrustworthy, but its limitations and changes must be documented.
+
+## 178. What is dead-box acquisition?
+
+**Answer:** Dead-box acquisition examines a powered-off device or storage medium, commonly through a forensic workstation and write blocker. It reduces interaction with the installed operating system and supports repeatable imaging. However, shutting down can destroy memory, network, and decrypted-volume evidence, while modern encryption can make offline data inaccessible. The correct approach depends on legal authority, device state, risk of remote action, encryption, and case objectives. A dead-box image should be hashed, documented, and preserved separately from working copies.
+
+## 179. What is a forensic image?
+
+**Answer:** A forensic image is a controlled copy of digital storage intended to preserve relevant data and metadata for examination. A physical image captures addressable sectors or blocks, while a logical acquisition captures selected files or objects through the file system or application interface. Common forensic containers can store metadata, compression, segmentation, and hashes. An image is not “forensic” merely because a tool created it; defensibility comes from validated methods, chain of custody, integrity checks, documented scope, and preservation of the source.
+
+## 180. What is the difference between physical and logical acquisition?
+
+**Answer:** Physical acquisition captures the underlying storage address space, including allocated and potentially unallocated areas, subject to device behavior and access. Logical acquisition collects files, folders, records, or application data exposed by the operating system or an API. Physical acquisition can provide deleted and file-system metadata evidence but may be impossible with encryption, cloud services, modern devices, or live business systems. Logical acquisition can preserve application context and decrypted content but may omit deleted data and hidden structures. Investigators choose based on objective and document omissions.
+
+## 181. What is a write blocker?
+
+**Answer:** A write blocker is hardware or software intended to prevent writes to evidence media while allowing reads. Hardware devices sit between the evidence and examiner system; software methods depend on correct platform and configuration. A write blocker should be tested with representative media and interfaces, and its make, model, firmware, and validation status recorded. It does not prevent every possible device-side change, such as firmware behavior, internal garbage collection, or power-on effects. Therefore, “write blocked” means the acquisition path was controlled, not that no physical state changed anywhere.
+
+## 182. Why are cryptographic hashes used in forensics?
+
+**Answer:** Cryptographic hashes create fixed-length digests used to verify that two byte sequences are identical with very high confidence when a suitable algorithm is used. Investigators hash source acquisitions, images, exports, and sometimes individual files to track integrity. Hashes do not prove who created data, whether content was truthful, or whether collection was lawful. A matching hash confirms byte equality between the compared items. Modern practice typically uses SHA-256 or another approved algorithm; legacy MD5 may be retained for tool compatibility but should not be the sole integrity basis.
+
+## 183. What is chain of custody for Windows evidence?
+
+**Answer:** Chain of custody records the identity, possession, transfer, access, storage, and disposition of evidence. For Windows systems it can include asset identifiers, drive serials, system state, BitLocker status, acquisition method, image hashes, tool versions, case numbers, dates, times, and custodians. Digital hashes strengthen integrity tracking but do not replace physical and procedural documentation. A gap does not automatically invalidate evidence, but it creates questions that must be explained. Secure storage, access logs, working-copy separation, and reproducible notes support defensibility.
+
+## 184. How do you acquire memory from Windows?
+
+**Answer:** Use an authorized, tested memory-acquisition tool compatible with the target Windows build and security configuration. Run it from trusted media where practical, write output to controlled storage, record start and end times, tool hash, command line, privileges, and errors, then hash the capture. Kernel protections, virtualization, crash risk, storage limits, or malware interference can affect completeness. Memory acquisition modifies memory because the tool and driver must execute, so that impact is documented. If the system is unstable or high-risk, responders may prioritize containment or another collection method.
+
+## 185. What evidence can Windows memory contain?
+
+**Answer:** Memory can contain processes, threads, loaded modules, command lines, handles, network sockets, injected code, kernel structures, drivers, caches, clipboard data, decrypted content, and fragments of credentials or keys. It is especially valuable for fileless malware and active sessions. Memory is a time-specific and incomplete snapshot: pages may be swapped, compressed, paged out, freed, or inconsistent during acquisition. Parser results depend on correct operating-system symbols and structures. Findings should be corroborated with disk and log evidence.
+
+## 186. What are pagefile and swap-related artifacts?
+
+**Answer:** `pagefile.sys` stores memory pages moved from RAM to disk by the Windows memory manager. It can contain fragments of process memory, documents, strings, credentials, or malware code from prior activity. `swapfile.sys` supports certain application and memory-management scenarios, while `hiberfil.sys` stores state for hibernation and fast startup. These files are sensitive, large, and version-dependent. Content is fragmentary and lacks simple provenance, so strings alone should not be treated as proof. Acquisition should preserve the complete files and relevant system context.
+
+## 187. What is `hiberfil.sys`?
+
+**Answer:** `hiberfil.sys` stores a compressed representation of system memory used for hibernation and, in modified form, Fast Startup. It may preserve processes, network state, user data, and other memory artifacts from the time of hibernation or shutdown. Its structure depends on Windows version and configuration. The file can be overwritten on later boots, and the state may not correspond to the exact incident time. Analysis should identify the associated timestamp and boot context and use validated tools.
+
+## 188. What is Fast Startup, and why does it matter in forensics?
+
+**Answer:** Fast Startup performs a hybrid shutdown that logs off users but hibernates parts of the kernel session for faster boot. Therefore, a user selecting Shut down may not produce the same state transition as a traditional full shutdown. This affects boot counts, hibernation artifacts, device handling, and expectations about memory state. Restart normally performs a full boot path. Investigators should check Fast Startup configuration and hibernation evidence rather than assuming shutdown semantics from a user statement alone.
+
+## 189. What is memory compression?
+
+**Answer:** Windows can compress less-active memory pages and retain them in RAM instead of immediately paging them to disk. This improves responsiveness but complicates forensics because some content is stored in compressed form and tool support varies by Windows version. A memory image may contain the compressed store and metadata needed for reconstruction. Unsupported parsers may miss processes or data without clearly reporting the gap. Examiners should use current tools, verify version support, and state limitations.
+
+## 190. What is process injection?
+
+**Answer:** Process injection is a family of techniques that causes code or data to execute in another process. Methods include remote memory allocation and thread creation, APC injection, thread context hijacking, section mapping, process hollowing, and abuse of legitimate extension mechanisms. Injection can be used by malware, debuggers, assistive technology, security products, and application frameworks. Detection should look for anomalous cross-process access, executable private memory, mismatched image mappings, suspicious thread starts, and behavior after injection. No single API call proves malicious intent.
+
+## 191. What is process hollowing?
+
+**Answer:** Process hollowing generally starts a legitimate process in a suspended state, replaces or remaps its executable content, adjusts execution context, and resumes it so malicious code runs under the appearance of the legitimate process. Variants differ and may not literally unmap the original image. Analysts look for discrepancies between the on-disk image and memory, suspicious suspended process creation, unusual parentage, executable private regions, and thread start addresses. Hashing only the file path can miss hollowed memory.
+
+## 192. What is DLL injection?
+
+**Answer:** DLL injection causes a process to load a dynamic-link library chosen by another process or through a manipulated loading mechanism. Common approaches include remote threads, AppInit-related settings, debugging hooks, search-order hijacking, and service or COM configuration. Legitimate software also injects DLLs for monitoring and accessibility. Investigation should validate the DLL path, signer, load time, initiating process, search path, memory mapping, and behavior. A signed DLL can still be maliciously loaded or vulnerable.
+
+## 193. What is DLL search-order hijacking?
+
+**Answer:** DLL search-order hijacking occurs when an application loads a DLL by name without a safe absolute path and Windows finds an attacker-controlled DLL earlier in the search sequence. Related techniques include side-loading next to a trusted executable or placing files in writable directories. Mitigation includes secure loading APIs, application control, restricting write access, Safe DLL Search Mode, and software updates. Analysts should reconstruct the application's actual search behavior and compare loaded module paths with expected installation locations.
+
+## 194. What is a Windows persistence mechanism?
+
+**Answer:** Persistence is any method that allows code or access to survive reboot, logoff, or loss of the initial execution path. Windows examples include Run keys, startup folders, services, scheduled tasks, WMI subscriptions, logon scripts, COM hijacking, browser extensions, drivers, and account changes. Many are legitimate administration mechanisms. A persistence finding must include who or what created it, executable or script content, timing, scope, and whether it executed. Broad persistence scanners provide leads but can miss version-specific or application-based mechanisms.
+
+## 195. How do you analyze suspected malware on Windows safely?
+
+**Answer:** Preserve the original sample and related evidence, calculate hashes, record provenance, and use an isolated laboratory with controlled networking, snapshots, instrumentation, and no sensitive credentials. Begin with static triage—file type, signer, imports, strings, metadata, packer indicators—then use behavioral analysis when authorized. Monitor processes, files, Registry, services, tasks, memory, and network traffic. Avoid uploading confidential samples to public services without approval. Dynamic behavior may change based on environment, time, privileges, or command-and-control availability, so absence of behavior is not proof of safety.
+
+## 196. What is static malware analysis?
+
+**Answer:** Static analysis examines a file without executing it. Techniques include hashing, identifying format and architecture, reviewing headers, imports, exports, strings, resources, signatures, embedded content, and disassembly. It is safer than execution but can be hindered by packing, encryption, obfuscation, or runtime-generated code. Analysts should not rely on a single antivirus label or suspicious string. Static results guide dynamic tests and help create indicators, but code behavior must often be confirmed through controlled execution or reverse engineering.
+
+## 197. What is dynamic malware analysis?
+
+**Answer:** Dynamic analysis observes a sample during controlled execution. Analysts monitor process trees, API behavior, file and Registry changes, network traffic, persistence, memory, and child payloads. The environment should prevent harm to production and limit uncontrolled external communication. Malware may detect sandboxes, delay execution, require user interaction, or behave differently based on locale and privileges. Therefore, one run is not definitive. Capture system baselines, repeat with controlled changes, and preserve outputs for correlation.
+
+## 198. What is timeline analysis?
+
+**Answer:** Timeline analysis combines timestamped events from file systems, Registry, Event Logs, application databases, EDR, network devices, cloud services, and other sources into a normalized sequence. It helps reconstruct what happened before, during, and after an incident. A timeline is not simply a sorted list; analysts must account for time zones, clock drift, timestamp semantics, data-source latency, duplicate events, and uncertainty. Events should retain source, field, and confidence so another examiner can verify the interpretation.
+
+## 199. What is a super-timeline?
+
+**Answer:** A super-timeline is a combined chronological dataset built from many artifact types, often using automated parsers. It can reveal relationships that are difficult to see in separate tools, such as a download followed by execution, persistence, and network activity. Its size can be enormous, so filtering and hypothesis-driven analysis are essential. Parser output can contain duplicates, inferred times, or incorrect field labels. Preserve source references and validate high-impact entries against raw evidence.
+
+## 200. How do you handle conflicting Windows timestamps?
+
+**Answer:** First identify exactly what each timestamp represents and which system or application generated it. Check time zone, daylight-saving rules, clock synchronization, boot changes, copy or extraction behavior, and known artifact update semantics. Compare independent sources such as event records, MFT attributes, USN Journal, browser history, server logs, and cloud audit data. Do not “fix” a timestamp silently. Report the conflict, plausible explanations, and the confidence range for the event sequence. Conflicting timestamps can themselves indicate clock problems or manipulation.
+
+---
+
