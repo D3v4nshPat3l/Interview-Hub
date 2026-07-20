@@ -1001,3 +1001,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Application partitions allow applications to store directory data with a customized set of domain-controller replicas instead of replicating to every DC in a domain or forest. AD-integrated DNS uses application partitions such as `DomainDnsZones` and `ForestDnsZones`. They can contain dynamic objects but not security principals in the normal domain-account sense. Troubleshooting requires checking which DCs hold a replica, partition cross-references, DNS enlistment, and replication status. A DC can be healthy for the domain partition while missing an application partition required for DNS.
 
+## 151. How should stale domain controllers be handled?
+
+**Level:** Advanced
+
+**Answer:** Determine how long the DC has been offline compared with tombstone lifetime, whether it holds unique roles or services, and whether its database and operating system can be trusted. Do not simply power on a DC that exceeded safe replication age. Isolate it, preserve needed evidence, and normally perform metadata cleanup followed by rebuilding from a supported server version. Remove stale DNS, server, connection, and replication objects carefully. If it held FSMO roles, transfer or seize them according to recovery criteria.
+
+## 152. What is metadata cleanup?
+
+**Level:** Intermediate
+
+**Answer:** Metadata cleanup removes AD references to a permanently failed or forcibly removed domain controller, including its NTDS Settings and server objects and related connection metadata. Modern graphical tools can perform much of the cleanup, and `ntdsutil` remains available. Afterward, verify DNS records, DFSR membership, sites, replication, FSMO roles, and monitoring inventory. Metadata cleanup does not erase the failed server's disks or revoke every credential that may have existed on it; secure disposal and incident response are separate tasks.
+
+## 153. What is `ntdsutil` used for?
+
+**Level:** Intermediate
+
+**Answer:** `ntdsutil` is an advanced AD DS administration and recovery tool. Uses include metadata cleanup, FSMO seizure, authoritative restore workflows, database maintenance, snapshot management, and certain password or partition tasks. It can cause major damage when used without a validated procedure. Prefer task-specific PowerShell or graphical tools for routine work, capture backups and current state, and use Microsoft guidance appropriate to the server version. Commands copied from Windows 2000-era material may be obsolete or incomplete.
+
+## 154. What is offline defragmentation of `ntds.dit`?
+
+**Level:** Advanced
+
+**Answer:** Offline defragmentation creates a compacted copy of the AD database while AD DS is offline, potentially reclaiming disk space. Normal online garbage collection reuses free space internally but usually does not shrink the file. Offline compaction is rarely needed solely for performance and introduces downtime and recovery risk. First measure free pages, disk capacity, backup state, database integrity, and root cause of growth. In many environments, adding storage or rebuilding a DC is safer than manipulating the database.
+
+## 155. What is semantic database analysis?
+
+**Level:** Advanced
+
+**Answer:** Semantic database analysis checks internal directory data consistency beyond file-level ESE integrity. It can identify or repair certain inconsistencies under controlled recovery guidance. It is not a routine maintenance command and should not be used to “optimize” a healthy DC. Before any database repair, preserve backups, diagnose hardware and storage, compare other replicas, and consult current vendor guidance. Because AD is replicated, rebuilding a nonunique DC is often safer than repairing an uncertain database.
+
