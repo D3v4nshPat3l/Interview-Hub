@@ -1281,3 +1281,38 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Certificates can authenticate as users or computers, so a CA or template that permits a low-privileged requester to obtain a certificate representing a privileged identity can bypass password controls. Paths can arise through subject-name control, authentication-capable templates, enrollment-agent permissions, writable templates, CA management rights, relayable enrollment endpoints, weak mappings, or stolen CA keys. Treat AD CS as Tier 0, maintain an inventory of CAs and issued templates, review template and CA ACLs, require strong request identity and approval where appropriate, secure web and RPC enrollment, patch mapping vulnerabilities, and monitor issuance. Incident response may require revocation, disabling templates, CA configuration rollback, account and certificate investigation, trust-store changes, or full CA key replacement depending on what was compromised.
 
+## 196. What are the security differences among unconstrained, constrained, and resource-based constrained delegation?
+
+**Level:** Advanced
+
+**Answer:** Unconstrained delegation can place reusable user Kerberos material on the delegated server and is high risk, especially when privileged users connect. Traditional constrained delegation allows an account to delegate to specified services and is configured on the delegating account. Resource-based constrained delegation, or RBCD, is configured on the target resource through `msDS-AllowedToActOnBehalfOfOtherIdentity`, allowing the resource owner to choose which principals may delegate to it. Each model can be abused if the delegating identity, target object, or relevant ACL is compromised. Prefer eliminating unconstrained delegation, mark sensitive accounts as nondelegable, use Protected Users where compatible, restrict who can modify computer objects, monitor delegation attributes, and separate service identities. Validate actual application requirements before removing delegation because incorrect changes can break multi-tier authentication.
+
+## 197. Why are LAPS and gMSA read permissions security-sensitive?
+
+**Level:** Advanced
+
+**Answer:** Reading a LAPS password can provide local administrator access to a device. Retrieving a gMSA managed password can allow authentication as the service account from an authorized or compromised context. Therefore, permissions that appear to be “read-only directory access” may create executable privilege. Review extended rights, confidential-attribute access, encrypted LAPS decryptors, gMSA retrieval principals, nested groups, and inherited OU permissions. Minimize readers, separate operational roles, use just-in-time access, monitor retrieval and permission changes, and treat authorized reader endpoints as privileged. During incident response, determine which secrets were read, rotate them, inspect affected hosts and service access, and remove the root permission. Rotating without containing an authorized compromised reader permits immediate reacquisition.
+
+## 198. Which Windows events are especially useful for Active Directory security monitoring?
+
+**Level:** Intermediate
+
+**Answer:** Useful events include successful and failed logons (`4624`, `4625`), explicit credentials (`4648`), special privileges (`4672`), account and group changes (`4720`-series, `4732`, `4756`, and related events), account lockout (`4740`), Kerberos ticket activity (`4768`, `4769`, `4771`), NTLM credential validation (`4776`), directory-service changes (`5136`, `5137`, `5139`, `5141`), sensitive directory access such as replication (`4662` when auditing is configured), share access, process creation (`4688`), policy changes, and log clearing (`1102`). Domain Controller, DFS Replication, DNS Server, AD CS, Windows LAPS, PowerShell, and Defender logs add context. Event IDs alone are not detections; configure the correct audit subcategories and SACLs, centralize logs, normalize fields, baseline legitimate administration, and correlate identity, endpoint, network, and cloud telemetry.
+
+## 199. What is Microsoft Defender for Identity?
+
+**Level:** Intermediate
+
+**Answer:** Microsoft Defender for Identity is a cloud-based identity security service that analyzes signals from domain controllers and integrated identity infrastructure to detect suspicious identity activity, expose security posture weaknesses, and support investigation. Sensors observe relevant authentication and directory activity and enrich it with identity context. Effective deployment requires complete coverage of writable DCs and relevant AD FS or AD CS systems, sensor health monitoring, directory permissions, network and event configuration, and integration with the broader Microsoft Defender portal. Treat alerts as investigative leads rather than automatic proof. Tune known administrative systems, investigate the full attack timeline, and remediate posture findings such as risky delegation, exposed credentials, weak protocols, and excessive privilege. A sensor does not replace hardened configuration, centralized Windows auditing, or recovery readiness.
+
+## 200. What should a prioritized Active Directory hardening roadmap include?
+
+**Level:** Expert
+
+**Answer:** First establish recovery: supported DCs, healthy replication and DNS, isolated tested system-state backups, and a forest recovery runbook. Next secure Tier 0: minimize privileged membership, use separate admin identities and hardened workstations, protect DCs, CAs, synchronization, hypervisors, backups, and management tools. Reduce credential exposure with Windows LAPS, gMSA or dMSA, Protected Users where compatible, authentication policies, and removal of privileged logons from lower-tier systems. Then eliminate known attack paths: excessive ACLs, dangerous delegation, stale trusts, risky certificate templates, shared service passwords, legacy protocols, unsigned LDAP or SMB, and unmanaged GPO rights. Improve visibility with advanced auditing, Defender for Identity or equivalent analytics, time synchronization, asset ownership, and alert-response procedures. Measure progress through recurring attack-path reviews, recovery tests, protocol-usage reduction, and privileged-access recertification.
+
+---
+# L2 Operations Scenarios
+
+*Questions 201-220 test methodical administration and support under realistic operational pressure.*
+
