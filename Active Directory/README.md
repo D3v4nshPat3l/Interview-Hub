@@ -1691,3 +1691,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 *Questions 261-280 test design trade-offs, compatibility, and change planning.*
 
+## 261. A business unit asks for a new domain. How do you decide whether an OU is sufficient?
+
+**Level:** Advanced Scenario
+
+**Answer:** Start with the requirement, not the requested object. OUs provide delegation, Group Policy scope, and administrative organization within one domain. A new domain creates another domain partition, Domain Admin boundary, DNS namespace, password-policy boundary for the default domain policy, replication scope, DC set, operational overhead, and trust relationships. It is not a security boundary equivalent to a forest because forest-level administrators and shared schema or configuration remain powerful. Choose a new domain only for requirements such as distinct namespace, domain-wide policy constraints, replication considerations, or legacy autonomy that cannot be met safely through OUs and fine-grained policy. For strong isolation, evaluate a separate forest. Document lifecycle cost, application dependencies, and exit strategy.
+
+## 262. During a merger, when should two organizations retain separate forests?
+
+**Level:** Expert Scenario
+
+**Answer:** Retain separate forests when legal, regulatory, sovereignty, divestiture, operational-trust, or compromise-containment requirements demand independent security boundaries, or when one environment cannot yet meet the other's security baseline. A forest trust can enable selected access without merging the control planes, but it introduces routing, name, authentication, SID filtering, and monitoring requirements. Consolidation may simplify identity and applications but transfers forest-wide trust to shared administrators, CAs, backups, and management systems. Perform security assessment, privileged-path analysis, namespace and application inventory, and recovery planning before choosing. A temporary separate-forest model should have governance and an end-state decision; indefinite bidirectional trusts without ownership often become hidden permanent risk.
+
+## 263. How would you plan consolidation of three forests into one?
+
+**Level:** Expert Scenario
+
+**Answer:** Inventory users, groups, computers, applications, service accounts, SPNs, trusts, certificates, DNS, GPOs, file and application ACLs, UPNs, synchronization, federation, and unsupported systems. Define the target forest's security baseline, OU and delegation model, namespace, source anchor, identity matching, and privileged-access model. Establish migration waves with coexistence, SIDHistory governance where required, resource translation, profile migration, service-account testing, rollback, and business validation. Protect migration tooling and accounts as Tier 0, enable SID filtering as appropriate, and remove historical access after resources are re-ACL'd. Test every authentication path, not just user logon. Decommission source trusts, DCs, CAs, and synchronization components only after evidence shows no remaining dependency.
+
+## 264. An inherited OU structure mirrors the company org chart and causes GPO complexity. How would you redesign it?
+
+**Level:** Advanced Scenario
+
+**Answer:** Separate administrative and policy requirements from reporting lines. Model OUs around object type, management boundary, security tier, geography where operationally relevant, and stable policy needs. Use groups and authoritative HR attributes for business organization rather than moving objects every time a manager changes. Minimize depth, avoid one-off OUs, keep privileged accounts and systems in protected structures, and delegate to role groups instead of individuals. Create a GPO mapping and migration plan, use staging OUs, test resultant policy, and move objects in controlled waves. Preserve distinguished-name dependencies in scripts and applications. A good OU design is intentionally boring and stable; it reduces inheritance surprises and ACL sprawl.
+
+## 265. How do you design a forest trust for a partner with limited resource access?
+
+**Level:** Expert Scenario
+
+**Answer:** Confirm a forest trust is necessary; application federation, guest identities, or a one-way external trust may provide less exposure. If used, set the trust direction based on who needs access and prefer one-way trust. Use selective authentication so partner users must be explicitly allowed to authenticate to designated servers, apply SID filtering, control name suffix routing, restrict network paths, and place resources behind dedicated groups and servers. Establish monitoring and a review date. Do not grant partner groups directly to broad local administrator or application roles; use resource-domain groups and least privilege. Test DNS resolution, Kerberos referral, revocation, outage behavior, and trust removal. Include compromise notification and emergency-disable procedures in the partner agreement.
+
