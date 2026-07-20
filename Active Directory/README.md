@@ -474,3 +474,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** `_msdcs` contains forest- and domain-controller-locator records, including records based on DC GUIDs and records for services such as Global Catalog and PDC location. In modern forests it is commonly a separate forest-wide AD-integrated zone delegated from the forest-root namespace. Replication and DC discovery can fail when the zone is missing, not delegated correctly, or contains stale records. Validate its replication scope, name servers, delegation, secure updates, and records before recreating data manually.
 
+## 66. What are DNS forwarders, conditional forwarders, stub zones, and delegations?
+
+**Level:** Intermediate
+
+**Answer:** A forwarder sends unresolved queries to another DNS server. A conditional forwarder does so only for a specified namespace and is common in partner or multi-forest environments. A stub zone contains records needed to discover authoritative servers for another zone and updates those references from the target. A delegation tells resolvers that a child namespace is hosted by different authoritative servers. The correct choice depends on ownership, routing, security, and change frequency. In a trust scenario, successful DNS resolution is necessary but does not create the trust or authorization. Avoid bidirectional forwarding loops and undocumented dependencies on a single DNS server.
+
+## 67. What is dynamic DNS registration in a domain?
+
+**Level:** Intermediate
+
+**Answer:** Domain members and DHCP services can dynamically register and refresh host records. Domain controllers also register service-location records through Netlogon. With secure dynamic updates, AD permissions determine who may modify records. Problems arise when DHCP ownership, stale ACLs, duplicate names, multihomed systems, or scavenging configuration conflict. A secure design defines whether clients or DHCP register A and PTR records, uses dedicated DHCP credentials where appropriate, protects sensitive records, and monitors unexpected updates. Restarting a client or running `ipconfig /registerdns` is a diagnostic step, not a substitute for correcting permissions or zone configuration.
+
+## 68. What are DNS aging and scavenging?
+
+**Level:** Intermediate
+
+**Answer:** Aging timestamps dynamically registered records, and scavenging removes stale records after configured no-refresh and refresh intervals plus scavenging timing. It reduces stale DC, client, and application records but can cause outages if enabled without understanding ownership and refresh behavior. Static records are normally exempt unless timestamped. Before enabling scavenging, review DHCP lease periods, zone replication, server scavenging settings, application records, and existing timestamps. Start with reporting and controlled zones. A stale record causing authentication to the wrong server is common; indiscriminate record deletion is not the correct first response.
+
+## 69. Why should domain clients not use public DNS servers as primary resolvers?
+
+**Level:** Beginner
+
+**Answer:** Public DNS resolvers do not host or normally know the private AD service-location records required for the internal domain. A client using a public resolver may resolve internet names while failing to locate domain controllers, leading to misleading partial connectivity. Configure clients to use internal DNS that hosts or can resolve the AD namespace, then configure those internal servers to forward external queries. Adding a public resolver as a “backup” client DNS server is also unsafe because Windows may use it independently rather than only after proving the internal server is permanently unavailable.
+
+## 70. How does a client determine its AD site?
+
+**Level:** Intermediate
+
+**Answer:** The client provides its IP information during DC location, and a domain controller maps that address to the most specific subnet object in the configuration partition. The associated site is returned and cached. If no subnet matches, the client may use a DC from a less optimal site and events may report unmapped addresses. `nltest /dsgetsite` shows the current result. Correct site mapping requires current IPAM data, nonoverlapping subnet definitions, and operational processes that add new networks before deployment. A site name cannot compensate for an incorrect or absent subnet object.
+
