@@ -98,3 +98,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** An AD domain is a logical partition of a forest with its own domain naming context, DNS name, domain SID, security policies, domain-level groups, and domain controllers. All writable domain controllers in the domain hold a writable replica of that domain partition. A domain is an administrative and replication boundary for much directory data, but it is not the strongest security isolation boundary inside a forest. Enterprise Admins, forest-wide configuration, schema control, trusts, and several escalation paths mean that domains in the same forest should be treated as part of one security boundary. Domains are usually created because of namespace, replication, legal, administrative autonomy, or historical requirements - not merely because the organization has multiple departments.
 
+## 6. What is an organizational unit, and why is it used?
+
+**Level:** Beginner
+
+**Answer:** An organizational unit, or OU, is a container within a domain used primarily for delegation and Group Policy scope. Administrators can create an OU structure that separates workstations, servers, users, service accounts, and administrative responsibilities. An OU is not a security boundary: moving an object into an OU does not by itself isolate it from domain administrators or forest-level control. OUs should be designed around management requirements rather than copied blindly from the company organization chart. A useful design asks which objects require different GPOs, which teams need delegated control, and which lifecycle processes apply. Excessive nesting makes policy inheritance and delegation difficult to reason about, while placing all objects in default containers limits policy and delegation flexibility.
+
+## 7. What is a domain tree?
+
+**Level:** Beginner
+
+**Answer:** A domain tree is one or more AD domains that share a contiguous DNS namespace. For example, `corp.example.com`, `emea.corp.example.com`, and `lab.emea.corp.example.com` are in one namespace tree. Parent-child domains created within a forest receive automatic two-way transitive trusts. A tree describes namespace relationships; it does not mean the entire forest has only one domain tree. Multiple trees with different DNS roots can exist in the same forest while sharing the forest schema, configuration partition, and global catalog. Modern designs usually prefer fewer domains because additional domains create more domain controllers, DNS and replication complexity, and administrative overhead.
+
+## 8. What is an AD forest?
+
+**Level:** Beginner
+
+**Answer:** A forest is the top-level AD DS logical structure and the primary security boundary. It contains one or more domains that share a common schema, configuration partition, and global catalog. The first domain created is the forest root domain, and its DNS name also identifies the forest. Domains in the same forest are connected by automatic transitive trusts and are not considered mutually isolated against forest-level administrators or a sufficiently capable attacker. Decisions that affect the schema, domain naming, forest trusts, and certain enterprise-wide roles occur at forest scope. Creating a separate forest is justified when a genuinely separate security boundary, schema ownership model, or independent recovery authority is required, but cross-forest collaboration then needs explicit trust, synchronization, or application integration.
+
+## 9. Why is the forest considered the AD security boundary?
+
+**Level:** Intermediate
+
+**Answer:** A domain can delegate administration and contain its own domain data, but forest-level control can ultimately influence every domain in that forest. Enterprise Admins can administer domains across the forest, Schema Admins can change the schema, and the configuration partition is forest-wide. Trust relationships and Kerberos behavior also connect domains. In addition, compromise of a domain controller, privileged replication rights, or forest-level administrative path can enable escalation beyond one domain. Therefore, two business units that do not trust each other's administrators should not be placed in the same forest merely for convenience. A forest is not an absolute boundary against hypervisor, backup, PKI, identity-sync, or physical administrators; the complete control plane must also be included in the threat model.
+
+## 10. What is the difference between a logical and physical AD structure?
+
+**Level:** Beginner
+
+**Answer:** The logical structure consists of forests, trees, domains, OUs, objects, and directory partitions. It describes namespace, delegation, policy scope, and the organization of directory data. The physical structure consists mainly of domain controllers, sites, subnets, site links, replication connections, and the underlying network. A user may belong to an OU based on management needs while the user's workstation is mapped to a site based on its IP subnet. The two structures solve different problems: OUs do not control replication topology, and sites do not provide an OU-like administrative hierarchy. Confusing sites with domains or OUs is a common interview mistake.
+
