@@ -145,3 +145,107 @@ For a strong spoken interview answer, use four layers:
 
 ---
 
+# Processes, Services, Registry, Storage, and NTFS
+
+## 26. What is a process in Windows?
+
+**Answer:** A process is a container for an executing program. It includes a private virtual address space, one or more threads, an access token, open handles, loaded modules, environment variables, and accounting information. A process is not the executable file itself; the file is an image that can be mapped into one or many processes. Security analysts examine the image path, command line, parent process, token, integrity level, hashes, signer, loaded DLLs, network activity, and creation time. Parent-child relationships are useful but not conclusive because process creation can be brokered, re-parented in telemetry, or manipulated. Correlation across several data sources is stronger than trusting a single process tree.
+
+## 27. What is a thread?
+
+**Answer:** A thread is the unit scheduled for execution by Windows. Threads within the same process share the process's virtual address space and handles but have their own registers, stack, scheduling state, and thread-local storage. A process must have at least one thread to execute. Attackers may create remote threads, queue asynchronous procedure calls, or hijack existing thread contexts to execute code in another process. These behaviors can be legitimate in debuggers, security tools, and application frameworks, so detections require context. During memory analysis, suspicious thread start addresses, unbacked executable memory, and mismatches between loaded modules and execution locations can be valuable indicators.
+
+## 28. What is a process access token?
+
+**Answer:** An access token represents the security context under which a process or thread operates. It contains the user SID, group SIDs, privileges, integrity level, logon-session information, restrictions, and other security attributes. Windows compares token information with an object's security descriptor when deciding access. Primary tokens are associated with processes; impersonation tokens allow a thread to act temporarily on behalf of another security context. Attackers seek privileged tokens for impersonation or duplication, while defenders look for unusual token privileges, integrity transitions, and processes running under unexpected accounts. Possessing an administrator SID in a token does not always mean the process is elevated because UAC may provide a filtered token.
+
+## 29. What is a Windows service?
+
+**Answer:** A Windows service is a background component managed by the Service Control Manager, usually designed to start at boot or run without an interactive user. A service configuration specifies items such as the service name, executable path, start type, account, dependencies, and recovery behavior. Services may run in their own process or share a host process such as `svchost.exe`. From a security perspective, weak service executable permissions, unquoted paths, writable directories, unsafe DLL loading, and overprivileged service accounts can enable escalation. Investigators should compare service configuration with file metadata, signer information, creation events, registry entries, and expected baselines.
+
+## 30. What is the Service Control Manager?
+
+**Answer:** The Service Control Manager, implemented primarily through `services.exe`, maintains the database of installed services and coordinates service start, stop, control requests, dependencies, and status. Administrators interact with it through tools such as `services.msc`, `sc.exe`, PowerShell service cmdlets, WMI/CIM, and management platforms. The persistent configuration is represented in the registry, mainly under `HKLM\SYSTEM\CurrentControlSet\Services`. Security monitoring should detect new service installation, changes to image paths or accounts, and unexpected start-type changes. A service entry alone does not prove execution; correlate configuration with event logs, process telemetry, prefetch or memory, and file-system evidence.
+
+## 31. What is `svchost.exe`?
+
+**Answer:** `svchost.exe` is a generic host process used to run Windows services implemented as DLLs and, in some configurations, groups of related services. Multiple legitimate instances normally run with different command-line parameters, service groups, accounts, and privileges. Therefore, the process name alone is not suspicious or sufficient for validation. Analysts should inspect the executable path, signer, command line, hosted services, parent process, token, network activity, and loaded modules. Malware may imitate the name from another directory or inject into a real instance. On newer Windows versions, services may be separated into more individual host processes to improve isolation and reliability.
+
+## 32. What are common critical Windows system processes?
+
+**Answer:** Important processes include `System`, `smss.exe`, `csrss.exe`, `wininit.exe`, `services.exe`, `lsass.exe`, `winlogon.exe`, `explorer.exe`, and service-host processes. Their expected parentage, session, path, count, signer, and start time vary by component and Windows version. Interview answers should avoid rigid rules such as “there must always be exactly one instance,” because sessions and architecture can affect counts. A safer method is to compare observed properties with Microsoft documentation and a known-good system of the same build. Unexpected paths, unsigned replacements, anomalous parentage, user-writable locations, or unusual network behavior deserve investigation.
+
+## 33. What is `lsass.exe`?
+
+**Answer:** The Local Security Authority Subsystem Service enforces local security policy, supports authentication packages, creates access tokens, and handles sensitive authentication material. The legitimate executable is located in the Windows system directory and is a critical protected process on modern configurations. Credential-dumping attacks often target LSASS memory or abuse authentication mechanisms around it. Defenses include Credential Guard, LSA protection, least privilege, attack-surface reduction, protected administration, and endpoint detection. Investigators must be cautious when acquiring LSASS-related evidence because memory can contain sensitive credentials. A process named `lsass.exe` outside the expected path is highly suspicious, but path alone is not the only validation check.
+
+## 34. What is `smss.exe`?
+
+**Answer:** Session Manager Subsystem, `smss.exe`, is an early user-mode system process launched during startup. It performs tasks such as creating sessions, initializing environment subsystems, starting key processes, and handling configured session-management operations. Because it appears early in the boot chain and has important responsibilities, unexpected images or configuration related to Session Manager can be security-relevant. Analysts may review the `Session Manager` registry keys, image path, signer, parentage, and boot timeline. Exact child-process relationships vary across Windows versions, so investigators should rely on build-appropriate references rather than memorized diagrams alone.
+
+## 35. What is `csrss.exe`?
+
+**Answer:** Client Server Runtime Subsystem, `csrss.exe`, is a critical user-mode process involved in console handling, process and thread support, and other subsystem responsibilities. Multiple legitimate instances can exist because sessions are separated. The genuine binary is stored in the Windows system directory and is protected as a critical process. Malware may use similar names or place a fake copy elsewhere. Analysts should validate image path, signature, session ID, parentage, start time, loaded modules, and memory behavior. Terminating the legitimate process can crash the system, so live-response actions should be deliberate and authorized.
+
+## 36. What is `winlogon.exe`?
+
+**Answer:** `winlogon.exe` manages parts of interactive sign-in and logon-session behavior, including responding to the secure attention sequence and coordinating user-session initialization. It works with other authentication and shell components rather than independently validating every credential. A legitimate instance is associated with an interactive session and runs from the Windows system directory. Security analysts investigate unexpected children, injected code, unusual modules, credential-provider abuse, and persistence mechanisms that alter logon-related registry values. As with other system processes, normal counts and parent relationships can depend on sessions and version.
+
+## 37. What is the Windows Registry?
+
+**Answer:** The Windows Registry is a hierarchical database used by Windows and applications to store configuration and state. It is organized into keys, subkeys, values, and data types, exposed through logical root keys such as `HKEY_LOCAL_MACHINE` and `HKEY_CURRENT_USER`. The logical view is backed by hive files and can include volatile data. Security and forensic value comes from persistence settings, services, user activity, device history, application configuration, and system state. The Registry is not a single file, and a key's last-write time applies to the key rather than every individual value. Interpretation should account for transaction logs, control sets, 32/64-bit views, and user-specific hives.
+
+## 38. What are Registry hives?
+
+**Answer:** A hive is a logical group of Registry keys and values backed by one or more files loaded into memory. Common system hives include `SYSTEM`, `SOFTWARE`, `SAM`, `SECURITY`, and `DEFAULT` under the system configuration directory. User-specific data is commonly stored in `NTUSER.DAT`, while `UsrClass.dat` stores additional per-user shell and class information. Hive transaction logs can be needed to recover the most current consistent state. Investigators should acquire hives and associated logs together when possible, preserve original timestamps, and document whether the source was live, shadow-copied, or imaged.
+
+## 39. What is `CurrentControlSet`?
+
+**Answer:** `CurrentControlSet` is a runtime symbolic view of the control set Windows selected for the current boot. The underlying `SYSTEM` hive may contain multiple numbered control sets such as `ControlSet001` and `ControlSet002`. The `Select` key helps identify current, default, last-known-good, and failed control sets. During offline analysis, `CurrentControlSet` may not exist as a literal stored key, so tools resolve the selected numbered set. This matters when examining services, drivers, network configuration, time-zone data, and device state. Analysts should state which control set was interpreted and consider whether another control set reflects an earlier boot configuration.
+
+## 40. What is Registry redirection and reflection?
+
+**Answer:** On 64-bit Windows, parts of the Registry expose separate views to 32-bit and 64-bit applications. WOW64 redirection allows software of each architecture to see the appropriate view, commonly affecting areas under `HKLM\Software`. Older Windows versions used reflection for some keys to keep views synchronized, while modern behavior is more selective. Investigators and administrators must know which process architecture a tool uses because it may read a different view. PowerShell, `reg.exe`, and forensic tools can produce apparently conflicting results if architecture is ignored. Always record the path, view, and acquisition method.
+
+## 41. What is NTFS?
+
+**Answer:** NTFS is the primary Windows file system for many internal volumes. It supports metadata-rich file records, access-control lists, alternate data streams, compression, encryption, reparse points, sparse files, journaling, hard links, quotas, and large volumes. Its central metadata file is the Master File Table. Forensics benefits from MFT records, timestamps, file references, the USN Change Journal, `$LogFile`, and other metadata. NTFS journaling is designed for file-system consistency, not complete forensic history. Records can be reused, journals can wrap, timestamps can be altered, and SSD behavior can reduce deleted-data recovery. Findings should be corroborated.
+
+## 42. What is the Master File Table?
+
+**Answer:** The Master File Table, `$MFT`, contains at least one record for every file and directory on an NTFS volume, including NTFS metadata files. A record can hold attributes such as file names, timestamps, security identifiers, and either resident data or references to nonresident data runs. When a file is deleted, its record is marked available for reuse; it is not necessarily erased immediately. Forensic analysis can recover names, metadata, and sometimes content references from active or deleted records. However, reused records, multiple file-name attributes, hard links, and timestamp manipulation can complicate interpretation. The sequence number in a file reference helps detect some record reuse.
+
+## 43. What are resident and nonresident NTFS attributes?
+
+**Answer:** An NTFS attribute is resident when its content fits inside the MFT record; otherwise it is nonresident and the record stores data-run mappings to clusters elsewhere on the volume. Small files may therefore have content entirely inside the MFT. Large files, fragmented files, and many metadata streams are normally nonresident. This distinction matters in recovery because deleting a small resident file may leave its content in an unallocated MFT record, while nonresident content depends on whether clusters have been reused or trimmed. A forensic tool should report attribute type and allocation state rather than simply saying a file was “recovered.”
+
+## 44. What are NTFS timestamps?
+
+**Answer:** NTFS commonly stores timestamps in both `$STANDARD_INFORMATION` and `$FILE_NAME` attributes. These can include creation, content modification, metadata change, and access times. Their update behavior differs by operation, Windows version, application, file-system settings, copy method, archive extraction, and attacker manipulation. The familiar MACB terminology is useful but can oversimplify the actual fields. Timestamps are evidence of recorded file-system state, not direct proof that a person performed an action at that moment. Analysts should compare multiple timestamp sets, USN records, event logs, application artifacts, and external sources, while also validating time zone and clock accuracy.
+
+## 45. What is the USN Change Journal?
+
+**Answer:** The NTFS USN Change Journal records that changes occurred to files and directories on a volume and identifies reasons such as creation, deletion, rename, data extension, or close. It is efficient for indexing and replication because applications can query changes without scanning the whole volume. Forensics can use it to identify file activity even when a file is gone. The journal does not contain full prior file content, may combine reason flags, can wrap and discard old records, and can be deleted or recreated. A missing record does not prove no change occurred. Analysts should correlate journal entries with MFT records and `$LogFile`.
+
+## 46. What is NTFS `$LogFile`?
+
+**Answer:** `$LogFile` is the NTFS transaction log used to help restore file-system metadata consistency after a crash. It records redo and undo information for metadata operations, not a complete user-activity audit trail. Forensic tools can sometimes recover recent evidence of file creation, deletion, rename, or metadata changes, especially when combined with the MFT and USN Journal. Its content is circular and version-dependent, and interpretation is technically complex. An entry indicates a file-system transaction, not necessarily the intent or identity of a user. Analysts should use validated parsers and preserve raw metadata for independent review.
+
+## 47. What are alternate data streams?
+
+**Answer:** NTFS allows a file to contain multiple named data streams. The unnamed stream is what users normally treat as the file's content, while additional streams can store metadata or arbitrary data. Windows uses streams legitimately, for example the `Zone.Identifier` stream that can record download-origin information. Attackers can hide payloads or configuration in streams, but alternate streams are not inherently malicious and are not invisible to proper tools. Copying to a file system that does not support streams can remove them. Forensic collection should preserve NTFS semantics and explicitly enumerate streams rather than relying on normal directory listings.
+
+## 48. What are reparse points?
+
+**Answer:** A reparse point is NTFS metadata that allows a file-system filter or Windows component to apply special handling to a file or directory. Symbolic links, junctions, mount points, cloud placeholders, and certain application features use reparse points. They can redirect access to another path or volume, which creates security and forensic pitfalls. A recursive collection can unintentionally leave the intended directory tree, loop, or acquire remote content. Attackers may abuse reparse behavior in privilege-escalation or deletion attacks. Tools should identify the reparse tag, avoid blindly following links, and record both the link object and target context.
+
+## 49. What is Volume Shadow Copy Service?
+
+**Answer:** Volume Shadow Copy Service coordinates point-in-time snapshots through providers, writers, and requesters so applications and backup tools can capture consistent data. Shadow copies may preserve older versions of files, Registry hives, and other artifacts that have changed or been deleted from the live volume. They are highly valuable in ransomware and timeline investigations. They are not guaranteed backups: retention is limited, snapshots can be deleted, application consistency varies, and accessing them can alter the live system if done carelessly. Investigators should enumerate snapshot identifiers and times, acquire relevant data read-only where feasible, and compare snapshots with the active file system.
+
+## 50. What happens when a file is deleted in Windows?
+
+**Answer:** The outcome depends on the application, file system, storage device, and deletion method. A normal shell deletion may move the item into the Recycle Bin, creating metadata that records the original path and deletion time. A permanent deletion usually marks directory and MFT structures as available and marks clusters unallocated; content can remain until overwritten. On SSDs, TRIM and garbage collection may make recovery difficult or impossible. Cloud synchronization, backup, shadow copies, application caches, MFT records, and journals may retain evidence. Therefore, “deleted” does not mean securely erased, but neither does it guarantee recoverable content.
+
+---
+
