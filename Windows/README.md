@@ -353,3 +353,107 @@ For a strong spoken interview answer, use four layers:
 
 ---
 
+# Windows Networking, Remote Access, and Management
+
+## 76. What is the Windows networking stack?
+
+**Answer:** The Windows networking stack is the set of kernel and user-mode components that implement network interfaces, TCP/IP, sockets, filtering, name resolution, authentication, and application protocols. Applications commonly use Winsock, while the kernel handles transport, IP routing, interface drivers, and packet processing. Windows Filtering Platform allows firewalls and security products to inspect or filter traffic at defined layers. Troubleshooting should move from physical link and interface configuration to IP, routing, DNS, transport, authentication, firewall, and application behavior. A successful ping does not prove that a service, port, certificate, or application is working.
+
+## 77. What is Winsock?
+
+**Answer:** Windows Sockets, or Winsock, is the programming interface used by Windows applications for network communication. It provides socket operations for protocols such as TCP and UDP and maps application requests to the underlying networking stack. The Winsock catalog can include layered or namespace providers, and corruption or malicious modification can disrupt networking. Commands such as `netsh winsock show catalog` and, in controlled troubleshooting, `netsh winsock reset` may help, but resetting can affect installed software and should not be the first step. Forensics should preserve relevant configuration before destructive repair.
+
+## 78. What is an IP address, subnet mask, default gateway, and DNS server?
+
+**Answer:** An IP address identifies an interface in an IP network. The subnet mask or prefix length determines which addresses are considered directly reachable on the local subnet. The default gateway is the router used when no more-specific route exists. DNS servers resolve names to addresses and support service discovery. Windows can receive these settings through DHCP or static configuration. Troubleshooting should use `ipconfig /all`, route tables, DNS queries, and interface state rather than relying only on the graphical settings page. A correct IP address does not guarantee correct DNS, routing, firewall, proxy, or application configuration.
+
+## 79. How does DHCP work in Windows?
+
+**Answer:** DHCP dynamically supplies network configuration such as an IP address, prefix, default gateway, DNS servers, and lease duration. A typical IPv4 exchange uses Discover, Offer, Request, and Acknowledge messages, though renewal behavior differs after a lease is established. Windows records client configuration and can use automatic private addressing if no DHCP server responds. Enterprise DHCP can integrate with DNS and authorization controls. Rogue DHCP servers can redirect traffic or cause outages, so switch protections and monitoring are valuable. The command `ipconfig /release` and `/renew` can test lease behavior, but analysts should capture existing configuration first.
+
+## 80. What is APIPA?
+
+**Answer:** Automatic Private IP Addressing allows an IPv4 interface to self-assign an address in `169.254.0.0/16` when DHCP is configured but unavailable. It enables limited local-link communication but usually provides no default gateway or enterprise DNS. An APIPA address is therefore commonly a symptom of DHCP reachability, VLAN, wireless, switch, driver, or service problems. It is not itself proof that the network adapter is defective. Troubleshooting should check link state, DHCP client service, packet exchange, VLAN assignment, relay configuration, and server scope availability.
+
+## 81. How does Windows DNS resolution work?
+
+**Answer:** Windows name resolution can consult the local cache, hosts file, configured DNS servers, and protocol-specific mechanisms depending on the name and policy. Domain environments rely heavily on DNS SRV records for locating services such as domain controllers. Applications may also implement their own DNS behavior or encrypted DNS. Useful tools include `Resolve-DnsName`, `nslookup`, `ipconfig /displaydns`, and packet capture. A cached answer may differ from current authoritative data, and flushing the cache can destroy useful incident evidence. During response, collect the cache and relevant logs before clearing it.
+
+## 82. What is the hosts file?
+
+**Answer:** The hosts file is a local static mapping of hostnames to IP addresses, typically located under the Windows system directory. Entries can override normal DNS resolution for matching names. It is useful for testing and controlled overrides but can be abused to redirect users to malicious systems or block security services. Analysts should inspect content, file metadata, permissions, signer or process activity that changed it, and endpoint telemetry. A suspicious entry is evidence of redirection configuration, not proof that a connection succeeded or that the user saw the destination.
+
+## 83. What is NetBIOS over TCP/IP?
+
+**Answer:** NetBIOS over TCP/IP supports legacy name and session services used by older Windows networking. It can use ports 137, 138, and 139 and may participate in local name resolution when modern DNS-based methods are unavailable. Legacy broadcast and name-resolution behavior can expose information and enable spoofing or poisoning attacks. Modern environments should reduce unnecessary dependence on NetBIOS and validate application compatibility before disabling it. Analysts may encounter NetBIOS names in logs, packet captures, and authentication events, but should map them carefully to current DNS names and assets.
+
+## 84. What is LLMNR?
+
+**Answer:** Link-Local Multicast Name Resolution is a local-network fallback mechanism for resolving names when DNS does not provide an answer. It uses multicast on the local link. Attackers can respond fraudulently and induce clients to authenticate to them, potentially capturing or relaying NTLM exchanges. Organizations commonly disable LLMNR where it is not required, improve DNS reliability, reduce NTLM, and deploy protections against relay. A captured LLMNR query shows that a name-resolution attempt occurred; it does not by itself prove credentials were captured or a connection completed.
+
+## 85. What is SMB?
+
+**Answer:** Server Message Block is the Windows protocol family used for file, printer, named-pipe, and other network services. Modern Windows primarily uses SMB 2 and SMB 3 over TCP port 445. Features can include signing, encryption, multichannel, and transparent failover depending on version and configuration. SMB 1 is obsolete and should be removed unless a documented legacy requirement exists. Security reviews should assess authentication, share permissions, NTFS permissions, signing, encryption, guest access, lateral-movement exposure, and patching. Effective file access is constrained by both share and NTFS controls, with the most restrictive effective combination applying over the network.
+
+## 86. What is SMB signing?
+
+**Answer:** SMB signing adds integrity protection and peer authentication to SMB messages using session keys, helping detect tampering and reducing certain man-in-the-middle and relay attacks. It does not encrypt file content, so SMB encryption or another secure channel is needed for confidentiality. Whether signing is required, supported, or negotiated depends on client, server, version, and policy. Enabling mandatory signing can have compatibility or performance implications in some environments, but modern hardware typically reduces the cost. Analysts should verify the negotiated session properties rather than assuming policy alone reflects actual traffic.
+
+## 87. What is SMB encryption?
+
+**Answer:** SMB encryption protects SMB data in transit from eavesdropping and tampering without requiring IPsec. It is available in modern SMB versions and can be configured per share or server, depending on platform. Encryption does not correct weak permissions, compromised endpoints, or stolen credentials. It also reduces visibility for network sensors that cannot inspect endpoint-encrypted traffic, increasing the importance of host telemetry. Administrators should confirm protocol version and negotiation and should not confuse SMB encryption with BitLocker, which protects data at rest on a volume.
+
+## 88. What is a Windows file share?
+
+**Answer:** A file share exposes a local folder over SMB using a share name and share-level permissions. Access to files is also evaluated against NTFS permissions, so administrators must consider both layers. Hidden administrative shares such as `C$` and `ADMIN$` support remote administration and are restricted to appropriate administrators. Security problems often arise from broad groups, inherited NTFS rights, guest access, stale shares, or sensitive data placed in permissive folders. Auditing should include share creation and access to high-value content. A share listing does not prove that a user successfully opened a file.
+
+## 89. What is Windows Defender Firewall?
+
+**Answer:** Windows Defender Firewall is a host-based stateful firewall integrated with Windows. It applies inbound and outbound rules by profile, interface, program, service, protocol, port, address, and security condition. The Domain, Private, and Public profiles allow policy appropriate to network trust context. Disabling the firewall for troubleshooting is risky and can invalidate test results; create narrow temporary rules and log the change instead. Central management can use Group Policy, Intune, PowerShell, or security tooling. Firewall logs and WFP events provide useful evidence but may be incomplete if logging was not configured before an incident.
+
+## 90. What are Windows network profiles?
+
+**Answer:** Windows categorizes network connections into Domain, Private, or Public profiles, which affect firewall and discovery behavior. A domain profile is selected when Windows can authenticate the network to the joined domain under expected conditions; it is not merely a user-selected label. Private is intended for trusted non-domain networks, and Public applies stricter defaults for untrusted networks. Misclassification can block required services or expose unnecessary ones. Troubleshooting should determine why the profile was selected and review Network Location Awareness, DNS, domain connectivity, and policy rather than simply forcing a profile.
+
+## 91. What is Windows Filtering Platform?
+
+**Answer:** Windows Filtering Platform is a set of APIs and system services that allow Windows Firewall and security products to filter, inspect, modify, or authorize network traffic at multiple points in the stack. It provides callout and filter layers for applications, transport, network, and other paths. WFP enables more precise control than a simple port filter, but complex third-party filters can also cause performance or connectivity problems. Investigators may use WFP audit events, firewall logs, and filter configuration to understand blocking or allowed traffic. Configuration state should be captured before resetting the firewall.
+
+## 92. What is Remote Desktop Protocol?
+
+**Answer:** Remote Desktop Protocol provides graphical remote sessions to Windows systems, commonly over TCP and UDP port 3389, though gateways and custom configurations can change the path. Security depends on Network Level Authentication, strong authentication, patching, restricted exposure, MFA through an appropriate access layer, certificate validation, and least privilege. Direct Internet exposure is high risk. Logs from the Security channel, Terminal Services channels, firewalls, gateways, and identity systems should be correlated. A successful RDP logon event identifies an account and session context but does not automatically identify the human operator.
+
+## 93. What is Network Level Authentication?
+
+**Answer:** Network Level Authentication requires a user to authenticate before a full Remote Desktop session and interactive desktop are created. It reduces resource consumption and exposure of the logon interface to unauthenticated clients. NLA generally uses CredSSP and underlying Windows authentication. It improves security but does not make an Internet-exposed RDP service safe by itself. Stolen credentials, weak passwords, unpatched systems, or compromised clients remain risks. Organizations should place RDP behind VPN, Remote Desktop Gateway, Zero Trust access, or other controlled paths and monitor authentication.
+
+## 94. What is WinRM?
+
+**Answer:** Windows Remote Management is Microsoft's implementation of the WS-Management standard and is used by PowerShell remoting and administrative tools. It commonly listens on HTTP 5985 or HTTPS 5986, but the security of HTTP mode depends on the authentication and message-protection configuration rather than the absence of TLS alone. Kerberos provides strong protection in domain scenarios; HTTPS is useful across trust boundaries. Administrators should restrict listeners, allowed hosts, authentication methods, firewall scope, and endpoint permissions. Logs from WinRM and PowerShell can show remote activity if enabled and retained.
+
+## 95. What is PowerShell remoting?
+
+**Answer:** PowerShell remoting executes commands in remote PowerShell sessions, commonly using WinRM. It supports one-to-one and one-to-many administration and can use constrained endpoints or Just Enough Administration to limit capability. It is legitimate and powerful, which makes it attractive to attackers who obtain credentials. Disabling it everywhere may harm administration without eliminating alternatives. Better controls include privileged-access workstations, role-constrained endpoints, strong authentication, network restriction, script-block logging, module logging, transcription where appropriate, and centralized event collection.
+
+## 96. What is WMI?
+
+**Answer:** Windows Management Instrumentation provides a standardized management model and query interface for system information and operations. Administrators use it locally and remotely through tools, scripts, and management products. Attackers may abuse WMI for remote execution, discovery, persistence through permanent event subscriptions, or process creation. Defenders should monitor WMI activity, repository changes, consumer-filter bindings, unusual parent processes, and remote authentication. WMI use is common, so detections should consider account, source host, namespace, class, command, and timing rather than treating every query as malicious.
+
+## 97. What is RPC?
+
+**Answer:** Remote Procedure Call is an interprocess and network communication framework used by many Windows services. RPC can use the Endpoint Mapper on TCP 135 and dynamically assigned ports for specific services. Therefore, opening only port 135 rarely enables a complete RPC application. Firewalls should use service-aware rules and constrained dynamic ranges where required. RPC exposure can expand attack surface, so only necessary services should be reachable. Troubleshooting involves endpoint registration, authentication, name resolution, firewall policy, and service state. An RPC error is a transport or service symptom, not a diagnosis by itself.
+
+## 98. What is a VPN connection in Windows?
+
+**Answer:** A virtual private network creates an authenticated and usually encrypted tunnel between a Windows client and a VPN gateway. Windows supports multiple protocols and can be managed through profiles, MDM, or third-party clients. Security depends on protocol choice, certificate or credential strength, gateway configuration, split-tunneling policy, DNS behavior, routing, posture checks, and MFA. A connected status does not prove all traffic uses the tunnel. Troubleshooting should inspect routes, interface metrics, DNS suffixes, proxy settings, certificate chains, and gateway logs.
+
+## 99. What commands are useful for Windows network troubleshooting?
+
+**Answer:** Common tools include `ipconfig`, `Get-NetIPConfiguration`, `Get-NetAdapter`, `Get-NetRoute`, `route print`, `Resolve-DnsName`, `nslookup`, `Test-NetConnection`, `ping`, `tracert`, `pathping`, `arp`, `Get-NetTCPConnection`, `netstat`, `netsh`, and packet capture tools. The correct sequence matters: establish interface and address state, then routing, DNS, port reachability, TLS or authentication, and application behavior. Running many commands without a hypothesis creates noise. During an incident, preserve outputs with timestamps and avoid commands that clear caches or reset stacks until volatile evidence is captured.
+
+## 100. How would you troubleshoot a Windows host that can reach IP addresses but not websites by name?
+
+**Answer:** First confirm the symptom with `Resolve-DnsName` or `nslookup` rather than only a browser. Review `ipconfig /all` for DNS servers and suffixes, test reachability to those servers, and query a known name directly against the configured resolver. Inspect the DNS client cache, hosts file, VPN and proxy settings, firewall rules, and whether the problem affects one application or the whole system. Check time if DNS security or domain services are involved. Capture relevant evidence before flushing caches. If direct DNS queries succeed but the browser fails, investigate proxy, TLS, endpoint security, and application configuration.
+
+---
+
