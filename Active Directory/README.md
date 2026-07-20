@@ -695,3 +695,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 *Policy architecture, processing, replication, security filtering, and troubleshooting.*
 
+## 101. What is a Group Policy Object?
+
+**Level:** Beginner
+
+**Answer:** A Group Policy Object, or GPO, is a collection of computer and user configuration settings that can be linked to sites, domains, and OUs. Each domain GPO has two coordinated components: the Group Policy Container in AD, which stores metadata and version information, and the Group Policy Template in SYSVOL, which stores files such as registry policy data, scripts, and administrative template settings. Because these components replicate through different mechanisms, a GPO can become inconsistent if AD replication or SYSVOL DFSR replication fails. GPOs are applied based on scope, link order, inheritance, security filtering, WMI filters, and client-side extension behavior.
+
+## 102. What is the difference between a GPO link and a GPO?
+
+**Level:** Beginner
+
+**Answer:** A GPO is the policy object itself; a link associates that GPO with a site, domain, or OU. One GPO can have multiple links, and deleting a link does not necessarily delete the GPO. Conversely, deleting the GPO affects every link that references it. Each link has properties such as enabled state, enforced state, and link order. Troubleshooting must identify both the GPO's content and the particular link path through which it should apply. A common mistake is editing a GPO because its name appears relevant without checking whether the affected user or computer is actually within a linked scope.
+
+## 103. Explain LSDOU Group Policy processing order.
+
+**Level:** Beginner
+
+**Answer:** The standard processing order is Local, Site, Domain, and then OU, with nested OUs processed from parent to child. Later applicable settings generally win when the same policy setting is configured more than once, subject to exceptions such as enforcement, blocked inheritance, security filtering, loopback processing, and client-side extension rules. Link order also matters within the same container. LSDOU is a starting model, not the complete evaluation algorithm. A correct troubleshooting answer uses Resultant Set of Policy or `gpresult` rather than relying only on visual inspection of GPMC.
+
+## 104. What are Enforced and Block Inheritance?
+
+**Level:** Intermediate
+
+**Answer:** Block Inheritance on a domain or OU prevents ordinary GPO links from parent containers from applying below that point. Enforced, historically called No Override, causes a GPO link to continue applying through blocked inheritance and prevents lower-level GPOs from overriding its configured settings. The Local GPO is not controlled through domain link enforcement. Overusing Enforced and Block Inheritance produces policy designs that are difficult to troubleshoot and delegate. Security baselines should be intentionally layered, documented, and tested rather than relying on widespread enforcement to compensate for poor OU design.
+
+## 105. What is security filtering in Group Policy?
+
+**Level:** Intermediate
+
+**Answer:** Security filtering uses the GPO's ACL to determine which users or computers have both Read and Apply Group Policy permissions. By default, Authenticated Users commonly provides broad read and apply scope. Removing it without preserving appropriate read permissions can create unexpected failures, especially for computer-side processing of user policies. Use dedicated security groups, understand whether the target is a user or computer, and validate the effective ACL. Security filtering does not change the linked container; it narrows which objects within the scope apply the GPO.
+
