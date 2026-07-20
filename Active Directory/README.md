@@ -911,3 +911,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Recycle Bin is a forest-wide optional feature that preserves deleted objects with their link-valued and non-link-valued attributes during the deleted-object lifetime, allowing restoration with group memberships and object identity intact. It requires an appropriate functional level and cannot be disabled after enablement. It only helps for objects deleted after it was enabled. It is not a substitute for system-state backup or forest recovery because it does not recover every corruption, compromise, GPO file, DNS issue, or deleted data outside AD objects.
 
+## 136. What is authoritative versus non-authoritative restore?
+
+**Level:** Advanced
+
+**Answer:** In a non-authoritative restore, a DC is restored from backup and then receives newer replicated changes from partners, making it current. In an authoritative restore, selected objects or a subtree are marked with higher version metadata so the restored data replicates outward and overrides existing replicas. Modern object deletion recovery should normally use Recycle Bin when available. Authoritative restore is a controlled disaster-recovery procedure requiring DSRM, supported backup, healthy replication design, and careful handling of linked attributes. Forest-wide compromise may require forest recovery rather than object-level authoritative restore.
+
+## 137. What is system-state backup for a domain controller?
+
+**Level:** Intermediate
+
+**Answer:** System state includes the components required to recover the server's directory role, such as AD DS data and logs, registry, boot files, SYSVOL, and other role-dependent state. Use an AD-aware supported backup product and test restoration. Protect backup credentials and repositories as Tier 0 assets because they can contain domain secrets. Backup age must remain within safe directory lifetimes, and at least one recoverable DC per domain should be protected according to the forest recovery plan. A hypervisor snapshot alone is not a backup strategy.
+
+## 138. What is an Active Directory forest recovery plan?
+
+**Level:** Advanced
+
+**Answer:** A forest recovery plan defines how to restore a trusted forest after catastrophic corruption or compromise. It identifies the first writable DC to recover in the forest root, DNS and time dependencies, backup selection, isolation network, role handling, password and key resets, recovery of additional domains, validation gates, and reintroduction of member systems. It includes clean administrative credentials, offline documentation, backup integrity tests, communication ownership, and business priorities. The plan must be rehearsed because forest recovery is procedural and sequencing errors can reintroduce compromised or inconsistent state.
+
+## 139. What is a trust relationship?
+
+**Level:** Beginner
+
+**Answer:** A trust allows authentication from one domain or forest to be accepted for potential access to resources in another. The trusting side owns the resources and accepts identities from the trusted side. Trust direction is opposite the direction of permitted authentication flow: if Domain A trusts Domain B, users from B can potentially access authorized resources in A. A trust does not grant access by itself; resource ACLs and policies still decide authorization. Trusts can be one-way or two-way, transitive or nontransitive, and have types such as parent-child, tree-root, external, forest, shortcut, or realm.
+
+## 140. What is trust transitivity?
+
+**Level:** Intermediate
+
+**Answer:** A transitive trust can extend authentication relationships through connected trusted domains according to trust type and forest rules. Parent-child and tree-root trusts within a forest are two-way and transitive. External trusts are normally nontransitive. Forest trusts are transitive between the forest root namespaces within configured constraints, but they do not merge the forests into one security boundary. Selective authentication, SID filtering, name suffix routing, and resource ACLs still shape access. Never infer effective access from a diagram alone; validate direction, transitivity, and authorization.
+
