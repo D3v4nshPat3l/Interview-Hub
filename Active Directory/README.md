@@ -349,3 +349,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** A Global Catalog server is a domain controller that holds a writable full copy of its own domain partition and a read-only partial attribute set for objects in every other domain in the forest. It supports forest-wide searches without referrals and helps evaluate universal group membership during sign-in. The attributes included in the partial attribute set are defined by the schema and selected for common search use. GC queries normally use ports 3268 or 3269. Not every DC must be a GC, although modern environments frequently make all writable DCs GCs unless a specific design constraint exists. GC availability is especially important in multi-domain forests.
 
+## 46. What happens if a Global Catalog is unavailable?
+
+**Level:** Intermediate
+
+**Answer:** Impact depends on forest design, site placement, cached information, and the authenticating account. Forest-wide searches may fail or require referrals. Universal group membership evaluation can affect interactive sign-in in multi-domain environments, although universal group membership caching and specific exceptions may reduce impact. Exchange and other directory-dependent applications may also rely on GC availability. Troubleshoot DNS SRV registration for GC records, client site mapping, network reachability, GC service health, and replication. Do not assume that a server responding on LDAP 389 is also providing Global Catalog service.
+
+## 47. What are FSMO roles, and why do they exist?
+
+**Level:** Beginner
+
+**Answer:** Flexible Single Master Operations roles assign specific operations to one domain controller at a time to avoid conflicts or coordinate tasks that are unsafe or inefficient under pure multi-master behavior. The forest-wide roles are Schema Master and Domain Naming Master. Each domain has a RID Master, PDC Emulator, and Infrastructure Master. The directory can continue functioning for some time when a role holder is offline, but the affected operation eventually fails or operational risk increases. Administrators should know the role function, current holder, dependencies, transfer procedure, seizure criteria, and post-seizure handling.
+
+## 48. What does the Schema Master do?
+
+**Level:** Beginner
+
+**Answer:** The Schema Master is the only domain controller that accepts updates to the forest schema. Schema reads are available from other DCs, and changes then replicate forest-wide. The role is usually lightly loaded and can remain offline temporarily unless an application installation or planned schema change requires it. Before a schema update, validate forest health, back up appropriate domain controllers, review the vendor's LDIF or installation behavior, test in a representative environment, and control membership in Schema Admins. Seizing the role is rare and should follow confirmed permanent loss of the previous holder.
+
+## 49. What does the Domain Naming Master do?
+
+**Level:** Beginner
+
+**Answer:** The Domain Naming Master coordinates adding and removing domains and certain application partitions in the forest. It helps ensure namespace changes remain consistent. Routine authentication does not depend on constant availability of this role, but forest-structure operations do. The role should be reachable and replication-healthy before adding or removing a domain. Administrators should not confuse it with DNS administration; it controls AD forest naming operations, not ordinary creation of DNS host records.
+
+## 50. What does the RID Master do?
+
+**Level:** Intermediate
+
+**Answer:** The RID Master allocates pools of relative identifiers to domain controllers. When a DC creates a security principal, it combines the domain SID with a RID from its local pool to form a unique SID. This allows DCs to create accounts without contacting the RID Master for every object. If the role is unavailable, account creation continues until local pools are exhausted. Monitor RID pool health and investigate unexpectedly high consumption, which may indicate automation errors or abuse. Never attempt to reuse deleted SIDs; uniqueness is central to Windows authorization.
+
