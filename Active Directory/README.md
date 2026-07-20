@@ -851,3 +851,33 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** A site link represents available network connectivity between two or more AD sites for replication. It has a transport, cost, schedule, and replication interval. Lower cost is preferred when multiple routes exist. A site link is not a router configuration and does not create network reachability; the underlying network must already support the traffic. Model actual connectivity, avoid placing every site in the default site link, and ensure schedules overlap if transitive paths are expected.
 
+## 126. What is site-link bridging?
+
+**Level:** Advanced
+
+**Answer:** Site-link bridging treats site links as transitive so the KCC can construct replication paths through combined links. “Bridge all site links” is enabled by default for a fully routed IP network. If the network is not fully routed, leaving automatic bridging enabled can cause the KCC to create impossible paths. In that case, disable automatic bridging and create explicit site-link bridges that represent real routing. The design must account for schedules, costs, firewalls, and whether an intermediate site hosts a replica of the partition.
+
+## 127. What is a bridgehead server?
+
+**Level:** Intermediate
+
+**Answer:** A bridgehead server is a domain controller selected to send or receive intersite replication for a partition and transport. The KCC normally selects bridgeheads dynamically. Administrators can configure preferred bridgeheads, but doing so restricts automatic choices and may create a single point of failure if the selected systems are unavailable or do not host needed partitions. Prefer automatic selection unless a validated network, firewall, or capacity requirement justifies control.
+
+## 128. What does `repadmin /replsummary` show?
+
+**Level:** Beginner
+
+**Answer:** `repadmin /replsummary` summarizes inbound and outbound replication status, including failure counts, largest replication deltas, and error percentages. It is a rapid forest or domain health view, not a complete diagnosis. Follow failures with `repadmin /showrepl`, `/showconn`, `/showobjmeta`, DNS checks, event logs, and network tests. A zero-failure summary at one moment does not prove SYSVOL, DNS application partitions, or application behavior is healthy.
+
+## 129. What does `repadmin /showrepl` show?
+
+**Level:** Intermediate
+
+**Answer:** `repadmin /showrepl` reports inbound replication partners for each naming context, the last attempt, last success, consecutive failures, and status codes. It helps identify whether failure is limited to one partition, one source, one destination, or a broad dependency. Use `/csv` for larger analysis and compare timestamps to expected schedules. Interpret errors in context: access denied, RPC unavailable, target principal name incorrect, lingering objects, and DNS failures require different remediation.
+
+## 130. What is `dcdiag`?
+
+**Level:** Beginner
+
+**Answer:** `dcdiag` runs diagnostic tests against domain controllers, including advertising, services, replication, DNS, connectivity, system logs, roles, and other health areas depending on options. `dcdiag /v`, `dcdiag /e`, and `dcdiag /test:dns` are common. Some warnings are environmental or historical, so do not treat every line as a critical failure without understanding the test. Capture output before and after remediation and correlate with `repadmin`, events, DNS, and actual symptoms.
+
