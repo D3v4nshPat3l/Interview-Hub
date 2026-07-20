@@ -1656,3 +1656,38 @@ The diagrams in the supplied administration PDF were used to preserve the correc
 
 **Answer:** Scope both on-premises AD and Entra ID. Isolate the server, preserve its database, configuration, logs, memory, connector details, and endpoint telemetry. Disable or rotate connector credentials and service accounts through a coordinated procedure, review synchronization-rule and filtering changes, inspect privileged role assignments and cloud object changes, and determine whether replication-derived password data or writeback capabilities were exposed. Deploy a clean staging or replacement server from documented configuration rather than trusting an in-place cleanup. Revoke affected tokens and rotate credentials based on evidence and privilege. Review hybrid application registrations, password writeback, device writeback, and federation dependencies. Recovery is complete only when both directories and the synchronization trust are verified.
 
+## 256. You suspect an AD FS token-signing certificate was stolen. What is the correct response?
+
+**Level:** Expert Scenario
+
+**Answer:** Treat the federation trust as compromised because forged tokens may be accepted without the attacker's continued access to AD FS. Isolate federation infrastructure, preserve evidence, and determine which signing and decrypting keys, service credentials, and configuration data were exposed. Generate new token-signing and, if necessary, token-decrypting certificates through a controlled emergency rollover, update relying-party trust where automatic metadata cannot be trusted, and revoke sessions or refresh tokens according to each service. Search relying parties for anomalous claims, issuer use, and access. Rebuild compromised servers and rotate service credentials. Merely restarting AD FS or resetting a user's password does not invalidate a stolen signing key.
+
+## 257. Security event logs were cleared on a domain controller. How do you proceed?
+
+**Level:** Advanced Scenario
+
+**Answer:** Treat event `1102` or an unexplained log gap on a DC as a high-severity anti-forensics indicator. Isolate the source of administrative activity while preserving the DC's availability if possible. Collect forwarded SIEM copies, Defender telemetry, PowerShell and process logs, Directory Service and DFSR logs, network records, other DC events, replication metadata, backup logs, and hypervisor or EDR evidence. Identify who had the right to clear logs and how they authenticated. Compare sensitive objects, groups, ACLs, GPOs, and certificates against baselines. Do not rely on the local Security log to reconstruct the entire incident. Improve immutable central logging, restricted log-clear rights, health alerts, and retention after containment.
+
+## 258. An attacker created many machine accounts using the default machine account quota. What do you investigate?
+
+**Level:** Advanced Scenario
+
+**Answer:** By default, ordinary domain users may be able to join a limited number of computers through `ms-DS-MachineAccountQuota`, although actual behavior also depends on permissions and provisioning. Identify the creator through object attributes, audit events, and replication metadata; list created accounts, SPNs, delegation attributes, key credentials, group memberships, and subsequent authentication. Disable malicious objects, contain the creator and source host, and remove any RBCD, certificate, or DNS persistence. Set the quota to zero if business processes do not require user-driven joins and delegate computer creation to controlled provisioning groups and OUs. Reducing the quota is preventive but does not remove explicitly delegated create-child rights, so review OU ACLs as well.
+
+## 259. A privileged SID appears in a user's SIDHistory. How do you validate whether it is migration data or persistence?
+
+**Level:** Expert Scenario
+
+**Answer:** Compare the SID with source-domain records, migration project documentation, approved tools, dates, and resource-remediation plans. Inspect replication metadata and directory audit events to identify when and where the value originated. Determine whether the source SID represents a privileged group and whether trusts, SID filtering, or resource ACLs make it effective. Review the user's logons and access since insertion. If unauthorized, disable the account, remove the value under incident control, contain the actor and source system, and search for similar SIDHistory changes. If legitimate but no longer required, migrate resource ACLs to current SIDs and remove historical values through a planned cleanup. Do not delete all SIDHistory indiscriminately during an active migration.
+
+## 260. After a privileged AD compromise, how do you restore confidence rather than merely restore service?
+
+**Level:** Expert Scenario
+
+**Answer:** Establish a trusted recovery team, clean administrative devices, isolated communications, known-good backups, and a documented forest recovery sequence. Contain attacker access and preserve evidence. Rebuild or recover Tier 0 systems from trusted media, verify schema, configuration, domain partitions, GPOs, DNS, trusts, AD CS, Entra Connect, federation, hypervisors, and backup infrastructure. Remove persistence and rotate credentials in a dependency-aware order, including privileged users, service accounts, machine accounts, trust secrets, certificates, and `krbtgt` where warranted. Reestablish monitoring before reconnecting recovered systems. Validate replication, authentication, application access, and business ownership. Confidence comes from reconstructing a trusted control plane and explaining remaining uncertainty, not from seeing green replication status alone.
+
+---
+# Architecture, Migration, and Hybrid Scenarios
+
+*Questions 261-280 test design trade-offs, compatibility, and change planning.*
+
